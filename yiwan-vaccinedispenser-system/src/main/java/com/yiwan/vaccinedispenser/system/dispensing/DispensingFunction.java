@@ -675,8 +675,6 @@ public class DispensingFunction {
         cabinetCService.sendDrug(cabinetCSendDrugRequest);
     }
 
-
-
     //挡片控制
     public void  moveBlock(CabinetConstants.CabinetCSendDrugBlockStatus status){
         CabinetCSendDrugRequest cabinetCSendDrugRequest = new CabinetCSendDrugRequest();
@@ -713,13 +711,26 @@ public class DispensingFunction {
 
     //根据层 走距离
     public void goToBelt(Integer beltNum,boolean goZero){
+
+        List<SysConfig> sysConfigList = sysConfigService.getSendDrugConfigData();
         Integer distance = null;
         if(goZero){
-            distance=0;
+            for(SysConfig sysConfig: sysConfigList) {
+                switch (beltNum) {
+                    case 1,2,3,4 -> {
+                        if ("CABINET_C_1".equals(sysConfig.getConfigType())) {
+                            distance = Integer.parseInt(sysConfig.getConfigValue());
+                        }
+                    }
+
+                    case 5,6 ->{
+                        if ("CABINET_C_2".equals(sysConfig.getConfigType())) {
+                            distance = Integer.parseInt(sysConfig.getConfigValue());
+                        }
+                    }
+                }
+            }
         }else {
-
-
-            List<SysConfig> sysConfigList = sysConfigService.getSendDrugConfigData();
             //获取需要走的distance
             for(SysConfig sysConfig: sysConfigList) {
                 switch (beltNum) {
