@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.yiwan.vaccinedispenser.system.sys.dao.SysRoleMenuDao">
+
+    <delete id="deleteByRoleId">
+        delete from sys_role_menu where role_id = #{roleId}
+    </delete>
+
+    <select id="selectMenuByUserId" resultType="com.yiwan.vaccinedispenser.system.sys.data.response.MenuStructData">
+        SELECT
+            DISTINCT
+            sm.id,
+            su.user_name userName,
+            sm.menu_name menuName,
+            sm.menu_order menuOrder,
+            sm.menu_url menuUrl,
+            sm.menu_icon menuIcon,
+            sm.parent_menu_id parentMenuId
+        FROM
+            sys_user su,
+            sys_user_role sru,
+            sys_role sr,
+            sys_role_menu srm,
+            sys_menu sm
+        WHERE
+            su.id = sru.sys_user_id
+          AND sru.role_id = sr.id
+          AND sr.id = srm.role_id
+          AND srm.menu_id = sm.id
+          AND su.id = #{userId} and sm.status = 0
+        ORDER BY (sm.menu_order+0)
+    </select>
+
+    <select id="selectMenuByRoleId"  resultType="com.yiwan.vaccinedispenser.system.sys.data.response.MenuStructData">
+        SELECT
+            DISTINCT
+            sm.id,
+            sm.menu_name menuName,
+            sm.menu_order menuOrder,
+            sm.menu_url menuUrl,
+            sm.parent_menu_id parentMenuId
+        FROM
+            sys_role sr,
+            sys_role_menu srm,
+            sys_menu sm
+        WHERE  sr.id = srm.role_id
+          AND srm.menu_id = sm.id
+          AND sr.id = #{roleId} and sm.status = 0
+        ORDER BY (sm.menu_order+0)
+    </select>
+
+
+</mapper>

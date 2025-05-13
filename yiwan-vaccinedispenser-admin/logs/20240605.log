@@ -1,0 +1,269 @@
+2024-06-05 11:09:35.891  INFO 21384 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on ZH with PID 21384 (started by 78671 in D:\work\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2024-06-05 11:09:35.893  INFO 21384 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "dev"
+2024-06-05 11:09:37.043  INFO 21384 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2024-06-05 11:09:37.046  INFO 21384 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2024-06-05 11:09:37.104  INFO 21384 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 41 ms. Found 0 Redis repository interfaces.
+2024-06-05 11:09:39.361  INFO 21384 --- [main] c.y.v.system.com.ComService              : 连接串口：COM3成功!
+2024-06-05 11:09:39.580  INFO 21384 --- [main] c.y.v.system.com.ComService              : 连接串口：COM5成功!
+2024-06-05 11:09:39.795  INFO 21384 --- [main] c.y.v.system.com.ComService              : 连接串口：COM4成功!
+2024-06-05 11:09:40.307  INFO 21384 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-06-05 11:09:40.518  INFO 21384 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-06-05 11:09:40.563  INFO 21384 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2024-06-05 11:09:40.602  INFO 21384 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2024-06-05 11:09:43.059  INFO 21384 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2024-06-05 11:09:43.090  INFO 21384 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 8.112 seconds (JVM running for 9.756)
+2024-06-05 11:09:43.862  INFO 21384 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-06-05 11:09:43.912  INFO 21384 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2024-06-05 11:11:13.659  INFO 19336 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on ZH with PID 19336 (started by 78671 in D:\work\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2024-06-05 11:11:13.660  INFO 19336 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "dev"
+2024-06-05 11:11:14.641  INFO 19336 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2024-06-05 11:11:14.650  INFO 19336 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2024-06-05 11:11:14.692  INFO 19336 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 31 ms. Found 0 Redis repository interfaces.
+2024-06-05 11:11:16.454  INFO 19336 --- [main] c.y.v.system.com.ComService              : 连接串口：COM3成功!
+2024-06-05 11:11:16.662  INFO 19336 --- [main] c.y.v.system.com.ComService              : 连接串口：COM5成功!
+2024-06-05 11:11:16.878  INFO 19336 --- [main] c.y.v.system.com.ComService              : 连接串口：COM4成功!
+2024-06-05 11:11:17.330  INFO 19336 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-06-05 11:11:17.502  INFO 19336 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-06-05 11:11:17.544  INFO 19336 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2024-06-05 11:11:17.576  INFO 19336 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2024-06-05 11:11:19.422  INFO 19336 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2024-06-05 11:11:19.447  INFO 19336 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 6.338 seconds (JVM running for 7.462)
+2024-06-05 11:11:20.564  INFO 19336 --- [main] c.y.v.system.zyc.ZcyRequestBuilder       : {"body":"{\"success\":true,\"result\":{\"batchNo\":\"T006128\",\"expiredAt\":1906473600000,\"price\":129800,\"productNo\":\"82352000201\",\"supervisedCode\":\"81894740913152939155\",\"tag\":null},\"code\":null,\"message\":null}","headers":{"X-Frame-Options":"SAMEORIGIN","Strict-Transport-Security":"max-age=31536000; includeSubDomains","Content-Security-Policy":"default-src 'self' *.zcycdn.com *.aliyuncs.com gw.alipayobjects.com res.wx.qq.com *.zcygov.cn *.alicdn.com *.cloud-inner.zj.gov.cn www.gjtool.cn 'unsafe-inline' data:","Connection":"keep-alive","Content-Length":"192","Date":"Wed, 05 Jun 2024 03:11:20 GMT","Content-Type":"application/json;charset=UTF-8"},"httpStatus":200}
+2024-06-05 11:11:20.618  INFO 19336 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-06-05 11:11:20.663  INFO 19336 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2024-06-05 11:11:41.992  INFO 16140 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on ZH with PID 16140 (started by 78671 in D:\work\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2024-06-05 11:11:42.008  INFO 16140 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "dev"
+2024-06-05 11:11:43.002  INFO 16140 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2024-06-05 11:11:43.004  INFO 16140 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2024-06-05 11:11:43.062  INFO 16140 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 38 ms. Found 0 Redis repository interfaces.
+2024-06-05 11:11:44.788  INFO 16140 --- [main] c.y.v.system.com.ComService              : 连接串口：COM3成功!
+2024-06-05 11:11:45.007  INFO 16140 --- [main] c.y.v.system.com.ComService              : 连接串口：COM5成功!
+2024-06-05 11:11:45.222  INFO 16140 --- [main] c.y.v.system.com.ComService              : 连接串口：COM4成功!
+2024-06-05 11:11:45.777  INFO 16140 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-06-05 11:11:45.976  INFO 16140 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-06-05 11:11:46.018  INFO 16140 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2024-06-05 11:11:46.053  INFO 16140 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2024-06-05 11:11:48.491  INFO 16140 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2024-06-05 11:11:48.540  INFO 16140 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 7.232 seconds (JVM running for 8.293)
+2024-06-05 11:11:50.358  INFO 16140 --- [main] c.y.v.system.zyc.ZcyRequestBuilder       : {"body":"{\"success\":true,\"result\":{\"batchNo\":\"T006128\",\"expiredAt\":1906473600000,\"price\":1298000,\"productNo\":\"82352000201\",\"supervisedCode\":\"81894740913153064523\",\"tag\":null},\"code\":null,\"message\":null}","headers":{"X-Frame-Options":"SAMEORIGIN","Strict-Transport-Security":"max-age=31536000; includeSubDomains","Content-Security-Policy":"default-src 'self' *.zcycdn.com *.aliyuncs.com gw.alipayobjects.com res.wx.qq.com *.zcygov.cn *.alicdn.com *.cloud-inner.zj.gov.cn www.gjtool.cn 'unsafe-inline' data:","Connection":"keep-alive","Content-Length":"193","Date":"Wed, 05 Jun 2024 03:11:49 GMT","Content-Type":"application/json;charset=UTF-8"},"httpStatus":200}
+2024-06-05 11:11:50.438  INFO 16140 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-06-05 11:11:50.486  INFO 16140 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2024-06-05 11:13:55.173  INFO 10800 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on ZH with PID 10800 (started by 78671 in D:\work\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2024-06-05 11:13:55.174  INFO 10800 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "dev"
+2024-06-05 11:13:55.920  INFO 10800 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2024-06-05 11:13:55.922  INFO 10800 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2024-06-05 11:13:55.961  INFO 10800 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 26 ms. Found 0 Redis repository interfaces.
+2024-06-05 11:13:57.814  INFO 10800 --- [main] c.y.v.system.com.ComService              : 连接串口：COM3成功!
+2024-06-05 11:13:58.034  INFO 10800 --- [main] c.y.v.system.com.ComService              : 连接串口：COM5成功!
+2024-06-05 11:13:58.237  INFO 10800 --- [main] c.y.v.system.com.ComService              : 连接串口：COM4成功!
+2024-06-05 11:13:58.677  INFO 10800 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-06-05 11:13:58.812  INFO 10800 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-06-05 11:13:58.841  INFO 10800 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2024-06-05 11:13:58.871  INFO 10800 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2024-06-05 11:14:00.702  INFO 10800 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2024-06-05 11:14:00.732  INFO 10800 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 6.006 seconds (JVM running for 6.928)
+2024-06-05 11:14:01.751  INFO 10800 --- [main] c.y.v.system.zyc.ZcyRequestBuilder       : {"body":"{\"success\":true,\"result\":{\"batchNo\":\"T006128\",\"expiredAt\":1906473600000,\"price\":1298000,\"productNo\":\"82352000201\",\"supervisedCode\":\"81894740913153064523\",\"tag\":null},\"code\":null,\"message\":null}","headers":{"X-Frame-Options":"SAMEORIGIN","Strict-Transport-Security":"max-age=31536000; includeSubDomains","Content-Security-Policy":"default-src 'self' *.zcycdn.com *.aliyuncs.com gw.alipayobjects.com res.wx.qq.com *.zcygov.cn *.alicdn.com *.cloud-inner.zj.gov.cn www.gjtool.cn 'unsafe-inline' data:","Connection":"keep-alive","Content-Length":"193","Date":"Wed, 05 Jun 2024 03:14:01 GMT","Content-Type":"application/json;charset=UTF-8"},"httpStatus":200}
+2024-06-05 11:14:01.803  INFO 10800 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-06-05 11:14:01.844  INFO 10800 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2024-06-05 11:22:16.540  INFO 12428 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on ZH with PID 12428 (started by 78671 in D:\work\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2024-06-05 11:22:16.541  INFO 12428 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "dev"
+2024-06-05 11:22:17.412  INFO 12428 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2024-06-05 11:22:17.415  INFO 12428 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2024-06-05 11:22:17.462  INFO 12428 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 33 ms. Found 0 Redis repository interfaces.
+2024-06-05 11:22:19.165  INFO 12428 --- [main] c.y.v.system.com.ComService              : 连接串口：COM3成功!
+2024-06-05 11:22:19.372  INFO 12428 --- [main] c.y.v.system.com.ComService              : 连接串口：COM5成功!
+2024-06-05 11:22:19.577  INFO 12428 --- [main] c.y.v.system.com.ComService              : 连接串口：COM4成功!
+2024-06-05 11:22:19.825  INFO 12428 --- [nioEventLoopGroup-6-1] c.y.v.system.camera.CameraClient         : 当前客户端：侧方扫码相机 服务端连接成功...
+2024-06-05 11:22:19.825  INFO 12428 --- [nioEventLoopGroup-5-1] c.y.v.system.camera.CameraClient         : 当前客户端：下方扫码相机 服务端连接成功...
+2024-06-05 11:22:19.825  INFO 12428 --- [nioEventLoopGroup-4-1] c.y.v.system.camera.CameraClient         : 当前客户端：上方扫码相机 服务端连接成功...
+2024-06-05 11:22:20.011  INFO 12428 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-06-05 11:22:20.175  INFO 12428 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-06-05 11:22:20.217  INFO 12428 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2024-06-05 11:22:20.248  INFO 12428 --- [nioEventLoopGroup-7-1] c.y.v.system.netty.NettyClient           : 当前客户端：A 服务端连接成功...
+2024-06-05 11:22:20.249  INFO 12428 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2024-06-05 11:22:20.249  INFO 12428 --- [nioEventLoopGroup-7-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：A 连接服务器成功
+2024-06-05 11:22:20.274  INFO 12428 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClient           : 当前客户端：B 服务端连接成功...
+2024-06-05 11:22:20.274  INFO 12428 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：B 连接服务器成功
+2024-06-05 11:22:22.045  INFO 12428 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2024-06-05 11:22:22.080  INFO 12428 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 6.039 seconds (JVM running for 7.063)
+2024-06-05 11:22:23.105  INFO 12428 --- [main] c.y.v.system.zyc.ZcyRequestBuilder       : {"body":"{\"success\":true,\"result\":{\"batchNo\":\"T006128\",\"expiredAt\":1906473600000,\"price\":1298000,\"productNo\":\"82352000201\",\"supervisedCode\":\"81894740913153064523\",\"tag\":null},\"code\":null,\"message\":null}","headers":{"X-Frame-Options":"SAMEORIGIN","Strict-Transport-Security":"max-age=31536000; includeSubDomains","Content-Security-Policy":"default-src 'self' *.zcycdn.com *.aliyuncs.com gw.alipayobjects.com res.wx.qq.com *.zcygov.cn *.alicdn.com *.cloud-inner.zj.gov.cn www.gjtool.cn 'unsafe-inline' data:","Connection":"keep-alive","Content-Length":"193","Date":"Wed, 05 Jun 2024 03:22:22 GMT","Content-Type":"application/json;charset=UTF-8"},"httpStatus":200}
+2024-06-05 11:22:23.140  INFO 12428 --- [main] YuandiInjectiondispenserApplicationTests : {"batchNo":"T006128","deleted":0,"expiredAt":1906473600000,"isReturn":false,"price":"1298000","productNo":"82352000201","supervisedCode":"81894740913153064523"}
+2024-06-05 11:22:23.162  INFO 12428 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-06-05 11:22:23.195  INFO 12428 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2024-06-05 15:39:21.286  INFO 22052 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on ZH with PID 22052 (started by 78671 in D:\work\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2024-06-05 15:39:21.288  INFO 22052 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "dev"
+2024-06-05 15:39:22.238  INFO 22052 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2024-06-05 15:39:22.240  INFO 22052 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2024-06-05 15:39:22.283  INFO 22052 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 30 ms. Found 0 Redis repository interfaces.
+2024-06-05 15:39:24.010  INFO 22052 --- [main] c.y.v.system.com.ComService              : 连接串口：COM3成功!
+2024-06-05 15:39:24.217  INFO 22052 --- [main] c.y.v.system.com.ComService              : 连接串口：COM5成功!
+2024-06-05 15:39:24.421  INFO 22052 --- [main] c.y.v.system.com.ComService              : 连接串口：COM4成功!
+2024-06-05 15:39:24.690  INFO 22052 --- [nioEventLoopGroup-6-1] c.y.v.system.camera.CameraClient         : 当前客户端：侧方扫码相机 服务端连接成功...
+2024-06-05 15:39:24.690  INFO 22052 --- [nioEventLoopGroup-5-1] c.y.v.system.camera.CameraClient         : 当前客户端：下方扫码相机 服务端连接成功...
+2024-06-05 15:39:24.690  INFO 22052 --- [nioEventLoopGroup-4-1] c.y.v.system.camera.CameraClient         : 当前客户端：上方扫码相机 服务端连接成功...
+2024-06-05 15:39:24.868  INFO 22052 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-06-05 15:39:25.034  INFO 22052 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-06-05 15:39:25.067  INFO 22052 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2024-06-05 15:39:25.095  INFO 22052 --- [nioEventLoopGroup-7-1] c.y.v.system.netty.NettyClient           : 当前客户端：A 服务端连接成功...
+2024-06-05 15:39:25.096  INFO 22052 --- [nioEventLoopGroup-7-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：A 连接服务器成功
+2024-06-05 15:39:25.097  INFO 22052 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2024-06-05 15:39:25.124  INFO 22052 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClient           : 当前客户端：B 服务端连接成功...
+2024-06-05 15:39:25.125  INFO 22052 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：B 连接服务器成功
+2024-06-05 15:39:26.842  INFO 22052 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2024-06-05 15:39:26.866  INFO 22052 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 6.01 seconds (JVM running for 7.055)
+2024-06-05 15:39:27.443  INFO 22052 --- [main] YuandiInjectiondispenserApplicationTests : [{"createBy":"admin","createTime":"2024-06-04 09:03:55","deleted":0,"id":6,"length":55,"name":"60","ranges":10,"updateBy":"admin","updateTime":"2024-06-04 09:03:55"}]
+2024-06-05 15:39:27.467  INFO 22052 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-06-05 15:39:27.509  INFO 22052 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2024-06-05 15:41:56.137  INFO 17916 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on ZH with PID 17916 (started by 78671 in D:\work\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2024-06-05 15:41:56.138  INFO 17916 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "dev"
+2024-06-05 15:41:56.892  INFO 17916 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2024-06-05 15:41:56.895  INFO 17916 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2024-06-05 15:41:56.943  INFO 17916 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 29 ms. Found 0 Redis repository interfaces.
+2024-06-05 15:41:58.655  INFO 17916 --- [main] c.y.v.system.com.ComService              : 连接串口：COM3成功!
+2024-06-05 15:41:58.860  INFO 17916 --- [main] c.y.v.system.com.ComService              : 连接串口：COM5成功!
+2024-06-05 15:41:59.064  INFO 17916 --- [main] c.y.v.system.com.ComService              : 连接串口：COM4成功!
+2024-06-05 15:41:59.349  INFO 17916 --- [nioEventLoopGroup-6-1] c.y.v.system.camera.CameraClient         : 当前客户端：侧方扫码相机 服务端连接成功...
+2024-06-05 15:41:59.349  INFO 17916 --- [nioEventLoopGroup-5-1] c.y.v.system.camera.CameraClient         : 当前客户端：下方扫码相机 服务端连接成功...
+2024-06-05 15:41:59.349  INFO 17916 --- [nioEventLoopGroup-4-1] c.y.v.system.camera.CameraClient         : 当前客户端：上方扫码相机 服务端连接成功...
+2024-06-05 15:41:59.583  INFO 17916 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-06-05 15:41:59.750  INFO 17916 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-06-05 15:41:59.788  INFO 17916 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2024-06-05 15:41:59.821  INFO 17916 --- [nioEventLoopGroup-7-1] c.y.v.system.netty.NettyClient           : 当前客户端：A 服务端连接成功...
+2024-06-05 15:41:59.821  INFO 17916 --- [nioEventLoopGroup-7-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：A 连接服务器成功
+2024-06-05 15:41:59.821  INFO 17916 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2024-06-05 15:41:59.847  INFO 17916 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClient           : 当前客户端：B 服务端连接成功...
+2024-06-05 15:41:59.848  INFO 17916 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：B 连接服务器成功
+2024-06-05 15:42:02.061  INFO 17916 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2024-06-05 15:42:02.093  INFO 17916 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 6.359 seconds (JVM running for 7.359)
+2024-06-05 15:42:02.715  INFO 17916 --- [main] YuandiInjectiondispenserApplicationTests : [{"createBy":"admin","createTime":"2024-06-04 09:03:55","deleted":0,"id":6,"length":55,"name":"60","ranges":10,"updateBy":"admin","updateTime":"2024-06-04 09:03:55"}]
+2024-06-05 15:42:02.740  INFO 17916 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-06-05 15:42:02.789  INFO 17916 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2024-06-05 15:46:37.888  INFO 11856 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on ZH with PID 11856 (started by 78671 in D:\work\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2024-06-05 15:46:37.890  INFO 11856 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "dev"
+2024-06-05 15:46:38.797  INFO 11856 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2024-06-05 15:46:38.800  INFO 11856 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2024-06-05 15:46:38.844  INFO 11856 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 32 ms. Found 0 Redis repository interfaces.
+2024-06-05 15:46:40.674  INFO 11856 --- [main] c.y.v.system.com.ComService              : 连接串口：COM3成功!
+2024-06-05 15:46:40.879  INFO 11856 --- [main] c.y.v.system.com.ComService              : 连接串口：COM5成功!
+2024-06-05 15:46:41.097  INFO 11856 --- [main] c.y.v.system.com.ComService              : 连接串口：COM4成功!
+2024-06-05 15:46:41.363  INFO 11856 --- [nioEventLoopGroup-6-1] c.y.v.system.camera.CameraClient         : 当前客户端：侧方扫码相机 服务端连接成功...
+2024-06-05 15:46:41.363  INFO 11856 --- [nioEventLoopGroup-5-1] c.y.v.system.camera.CameraClient         : 当前客户端：下方扫码相机 服务端连接成功...
+2024-06-05 15:46:41.363  INFO 11856 --- [nioEventLoopGroup-4-1] c.y.v.system.camera.CameraClient         : 当前客户端：上方扫码相机 服务端连接成功...
+2024-06-05 15:46:41.535  INFO 11856 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-06-05 15:46:41.681  INFO 11856 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-06-05 15:46:41.724  INFO 11856 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2024-06-05 15:46:41.753  INFO 11856 --- [nioEventLoopGroup-7-1] c.y.v.system.netty.NettyClient           : 当前客户端：A 服务端连接成功...
+2024-06-05 15:46:41.753  INFO 11856 --- [nioEventLoopGroup-7-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：A 连接服务器成功
+2024-06-05 15:46:41.753  INFO 11856 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2024-06-05 15:46:41.771  INFO 11856 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClient           : 当前客户端：B 服务端连接成功...
+2024-06-05 15:46:41.772  INFO 11856 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：B 连接服务器成功
+2024-06-05 15:46:43.634  INFO 11856 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2024-06-05 15:46:43.656  INFO 11856 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 6.316 seconds (JVM running for 7.425)
+2024-06-05 15:46:44.237  INFO 11856 --- [main] c.y.v.system.zyc.ZcyRequestBuilder       : 扫码扫到的一维码：81894740913153064523
+2024-06-05 15:46:44.278  INFO 11856 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-06-05 15:46:44.315  INFO 11856 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2024-06-05 15:48:53.806  INFO 21992 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on ZH with PID 21992 (started by 78671 in D:\work\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2024-06-05 15:48:53.807  INFO 21992 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "dev"
+2024-06-05 15:48:54.714  INFO 21992 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2024-06-05 15:48:54.716  INFO 21992 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2024-06-05 15:48:54.778  INFO 21992 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 40 ms. Found 0 Redis repository interfaces.
+2024-06-05 15:48:56.593  INFO 21992 --- [main] c.y.v.system.com.ComService              : 连接串口：COM3成功!
+2024-06-05 15:48:56.802  INFO 21992 --- [main] c.y.v.system.com.ComService              : 连接串口：COM5成功!
+2024-06-05 15:48:57.019  INFO 21992 --- [main] c.y.v.system.com.ComService              : 连接串口：COM4成功!
+2024-06-05 15:48:57.441  INFO 21992 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-06-05 15:48:57.598  INFO 21992 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-06-05 15:48:57.635  INFO 21992 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2024-06-05 15:48:57.669  INFO 21992 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2024-06-05 15:48:59.516  INFO 21992 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2024-06-05 15:48:59.540  INFO 21992 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 6.213 seconds (JVM running for 7.219)
+2024-06-05 15:49:00.102  INFO 21992 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-06-05 15:49:00.137  INFO 21992 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2024-06-05 15:49:29.673  INFO 21452 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on ZH with PID 21452 (started by 78671 in D:\work\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2024-06-05 15:49:29.675  INFO 21452 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "dev"
+2024-06-05 15:49:30.510  INFO 21452 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2024-06-05 15:49:30.512  INFO 21452 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2024-06-05 15:49:30.558  INFO 21452 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 27 ms. Found 0 Redis repository interfaces.
+2024-06-05 15:49:32.315  INFO 21452 --- [main] c.y.v.system.com.ComService              : 连接串口：COM3成功!
+2024-06-05 15:49:32.524  INFO 21452 --- [main] c.y.v.system.com.ComService              : 连接串口：COM5成功!
+2024-06-05 15:49:32.741  INFO 21452 --- [main] c.y.v.system.com.ComService              : 连接串口：COM4成功!
+2024-06-05 15:49:33.169  INFO 21452 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-06-05 15:49:33.338  INFO 21452 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-06-05 15:49:33.373  INFO 21452 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2024-06-05 15:49:33.403  INFO 21452 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2024-06-05 15:49:35.476  INFO 21452 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2024-06-05 15:49:35.499  INFO 21452 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 6.33 seconds (JVM running for 7.369)
+2024-06-05 15:49:36.058  INFO 21452 --- [main] c.y.v.s.dispensing.SendDrugFunction      : [6]
+2024-06-05 15:49:36.121  INFO 21452 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-06-05 15:49:36.155  INFO 21452 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2024-06-05 15:51:00.218  INFO 19676 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on ZH with PID 19676 (started by 78671 in D:\work\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2024-06-05 15:51:00.219  INFO 19676 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "dev"
+2024-06-05 15:51:01.123  INFO 19676 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2024-06-05 15:51:01.126  INFO 19676 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2024-06-05 15:51:01.164  INFO 19676 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 26 ms. Found 0 Redis repository interfaces.
+2024-06-05 15:51:03.066  INFO 19676 --- [main] c.y.v.system.com.ComService              : 连接串口：COM3成功!
+2024-06-05 15:51:03.287  INFO 19676 --- [main] c.y.v.system.com.ComService              : 连接串口：COM5成功!
+2024-06-05 15:51:03.502  INFO 19676 --- [main] c.y.v.system.com.ComService              : 连接串口：COM4成功!
+2024-06-05 15:51:03.986  INFO 19676 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-06-05 15:51:04.154  INFO 19676 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-06-05 15:51:04.184  INFO 19676 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2024-06-05 15:51:04.215  INFO 19676 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2024-06-05 15:51:06.272  INFO 19676 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2024-06-05 15:51:06.291  INFO 19676 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 6.659 seconds (JVM running for 7.688)
+2024-06-05 15:51:06.909  INFO 19676 --- [main] c.y.v.s.dispensing.SendDrugFunction      : [6]
+2024-06-05 15:51:06.985  INFO 19676 --- [main] YuandiInjectiondispenserApplicationTests : {"autoX":5720,"autoZ":11780,"deleted":0,"expiredAt":1717573866839,"machineId":9,"machineNo":"A1009","productNo":"123","vaccineNum":1,"vaccineUseNum":1}
+2024-06-05 15:51:07.011  INFO 19676 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-06-05 15:51:07.045  INFO 19676 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2024-06-05 15:58:39.803  INFO 6672 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on ZH with PID 6672 (started by 78671 in D:\work\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2024-06-05 15:58:39.804  INFO 6672 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "dev"
+2024-06-05 15:58:40.633  INFO 6672 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2024-06-05 15:58:40.635  INFO 6672 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2024-06-05 15:58:40.678  INFO 6672 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 31 ms. Found 0 Redis repository interfaces.
+2024-06-05 15:58:42.418  INFO 6672 --- [main] c.y.v.system.com.ComService              : 连接串口：COM3成功!
+2024-06-05 15:58:42.624  INFO 6672 --- [main] c.y.v.system.com.ComService              : 连接串口：COM5成功!
+2024-06-05 15:58:42.829  INFO 6672 --- [main] c.y.v.system.com.ComService              : 连接串口：COM4成功!
+2024-06-05 15:58:43.266  INFO 6672 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-06-05 15:58:43.431  INFO 6672 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-06-05 15:58:43.467  INFO 6672 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2024-06-05 15:58:43.498  INFO 6672 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2024-06-05 15:58:45.446  INFO 6672 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2024-06-05 15:58:45.468  INFO 6672 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 6.096 seconds (JVM running for 7.054)
+2024-06-05 15:58:45.986  INFO 6672 --- [main] c.y.v.s.dispensing.SendDrugFunction      : []
+2024-06-05 15:58:45.986  INFO 6672 --- [main] YuandiInjectiondispenserApplicationTests : null
+2024-06-05 15:58:46.016  INFO 6672 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-06-05 15:58:46.065  INFO 6672 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2024-06-05 16:00:45.903  INFO 20748 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on ZH with PID 20748 (started by 78671 in D:\work\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2024-06-05 16:00:45.905  INFO 20748 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "dev"
+2024-06-05 16:00:46.718  INFO 20748 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2024-06-05 16:00:46.720  INFO 20748 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2024-06-05 16:00:46.763  INFO 20748 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 25 ms. Found 0 Redis repository interfaces.
+2024-06-05 16:00:48.522  INFO 20748 --- [main] c.y.v.system.com.ComService              : 连接串口：COM3成功!
+2024-06-05 16:00:48.727  INFO 20748 --- [main] c.y.v.system.com.ComService              : 连接串口：COM5成功!
+2024-06-05 16:00:48.930  INFO 20748 --- [main] c.y.v.system.com.ComService              : 连接串口：COM4成功!
+2024-06-05 16:00:49.364  INFO 20748 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-06-05 16:00:49.524  INFO 20748 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-06-05 16:00:49.588  INFO 20748 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2024-06-05 16:00:49.617  INFO 20748 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2024-06-05 16:00:51.540  INFO 20748 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2024-06-05 16:00:51.572  INFO 20748 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 6.164 seconds (JVM running for 7.132)
+2024-06-05 16:00:52.143  INFO 20748 --- [main] c.y.v.s.dispensing.SendDrugFunction      : []
+2024-06-05 16:00:52.143  INFO 20748 --- [main] YuandiInjectiondispenserApplicationTests : null
+2024-06-05 16:00:52.169  INFO 20748 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-06-05 16:00:52.207  INFO 20748 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2024-06-05 16:03:39.127  INFO 12796 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on ZH with PID 12796 (started by 78671 in D:\work\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2024-06-05 16:03:39.128  INFO 12796 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "dev"
+2024-06-05 16:03:39.979  INFO 12796 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2024-06-05 16:03:39.983  INFO 12796 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2024-06-05 16:03:40.032  INFO 12796 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 35 ms. Found 0 Redis repository interfaces.
+2024-06-05 16:03:41.832  INFO 12796 --- [main] c.y.v.system.com.ComService              : 连接串口：COM3成功!
+2024-06-05 16:03:42.050  INFO 12796 --- [main] c.y.v.system.com.ComService              : 连接串口：COM5成功!
+2024-06-05 16:03:42.265  INFO 12796 --- [main] c.y.v.system.com.ComService              : 连接串口：COM4成功!
+2024-06-05 16:03:42.710  INFO 12796 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-06-05 16:03:42.874  INFO 12796 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-06-05 16:03:42.940  INFO 12796 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2024-06-05 16:03:42.972  INFO 12796 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2024-06-05 16:03:44.874  INFO 12796 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2024-06-05 16:03:44.894  INFO 12796 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 6.256 seconds (JVM running for 7.256)
+2024-06-05 16:03:45.434  INFO 12796 --- [main] c.y.v.s.dispensing.SendDrugFunction      : [3,6]
+2024-06-05 16:03:45.538  INFO 12796 --- [main] YuandiInjectiondispenserApplicationTests : {"autoX":5720,"autoZ":11780,"deleted":0,"expiredAt":1717574625365,"machineId":9,"machineNo":"A1009","productNo":"123","vaccineNum":1,"vaccineUseNum":1}
+2024-06-05 16:03:45.564  INFO 12796 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-06-05 16:03:45.605  INFO 12796 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.

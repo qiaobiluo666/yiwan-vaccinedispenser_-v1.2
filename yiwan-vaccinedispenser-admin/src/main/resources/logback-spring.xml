@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<configuration>
+
+    <springProfile name="dev">
+        <logger name="com.yiwan.vaccinedispenser.system.sys.dao" level="WARN"/>
+        <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+        <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <fileNamePattern>./logs/%d{yyyyMMdd}.log</fileNamePattern>
+                <maxHistory>30</maxHistory>
+            </rollingPolicy>
+
+            <encoder>
+                <Pattern>${FILE_LOG_PATTERN}</Pattern>
+            </encoder>
+
+        </appender>
+
+        <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            </encoder>
+        </appender>
+
+        <root level="info">
+            <appender-ref ref="console"/>
+            <appender-ref ref="file"/>
+        </root>
+
+    </springProfile>
+
+    <springProfile name="test">
+        <logger name="com.yiwan.vaccinedispenser.system.sys.dao" level="WARN"/>
+        <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+        <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <fileNamePattern>./logs/%d{yyyyMMdd}.log</fileNamePattern>
+                <maxHistory>30</maxHistory>
+            </rollingPolicy>
+
+            <encoder>
+                <Pattern>${FILE_LOG_PATTERN}</Pattern>
+            </encoder>
+
+        </appender>
+
+        <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            </encoder>
+        </appender>
+
+        <root level="info">
+            <appender-ref ref="console"/>
+            <appender-ref ref="file"/>
+        </root>
+
+    </springProfile>
+
+</configuration>

@@ -1,0 +1,78 @@
+2024-07-12 14:57:59.324  INFO 18424 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on ZH with PID 18424 (started by 78671 in D:\work\ÒßÃç·¢Ò©»ú\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2024-07-12 14:57:59.325  INFO 18424 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "dev"
+2024-07-12 14:58:00.600  INFO 18424 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2024-07-12 14:58:00.776  INFO 18424 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2024-07-12 14:58:00.863  INFO 18424 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 32 ms. Found 0 Redis repository interfaces.
+2024-07-12 14:58:06.234  INFO 18424 --- [main] c.y.v.system.com.ComService              : Á¬½Ó´®¿Ú£ºCOM10Ê§°Ü£¡
+2024-07-12 14:58:06.448  INFO 18424 --- [main] c.y.v.system.com.ComService              : Á¬½Ó´®¿Ú£ºCOM9Ê§°Ü£¡
+2024-07-12 14:58:06.660  INFO 18424 --- [main] c.y.v.system.com.ComService              : Á¬½Ó´®¿Ú£ºCOM4Ê§°Ü£¡
+2024-07-12 14:58:07.233  INFO 18424 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-07-12 14:58:07.412  INFO 18424 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-07-12 14:58:07.447  INFO 18424 --- [main] c.y.v.system.netty.NettyClient           : µ±Ç°¿Í»§¶Ë£ºA, ½øÐÐ³õÊ¼»¯
+2024-07-12 14:58:07.485  INFO 18424 --- [main] c.y.v.system.netty.NettyClient           : µ±Ç°¿Í»§¶Ë£ºB, ½øÐÐ³õÊ¼»¯
+2024-07-12 14:58:07.512  INFO 18424 --- [main] c.y.v.system.netty.NettyClient           : µ±Ç°¿Í»§¶Ë£ºC, ½øÐÐ³õÊ¼»¯
+2024-07-12 14:58:09.313  INFO 18424 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2024-07-12 14:58:09.335  INFO 18424 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 10.448 seconds (JVM running for 11.321)
+2024-07-12 14:58:09.971  INFO 18424 --- [main] YuandiInjectiondispenserApplicationTests : 1000
+2024-07-12 14:58:10.089  INFO 18424 --- [main] YuandiInjectiondispenserApplicationTests : {"code":0,"data":[{"date":"2023-08","sum":0},{"date":"2023-09","sum":0},{"date":"2023-10","sum":0},{"date":"2023-11","sum":0},{"date":"2023-12","sum":0},{"date":"2024-01","sum":0},{"date":"2024-02","sum":0},{"date":"2024-03","sum":0},{"date":"2024-04","sum":0},{"date":"2024-05","sum":0},{"date":"2024-06","sum":0},{"date":"2024-07","sum":0}]}
+2024-07-12 14:58:10.113  INFO 18424 --- [main] c.y.v.s.dispensing.SendDrugFunction      : [3,6]
+2024-07-12 14:58:10.139  INFO 18424 --- [main] c.y.v.s.s.s.v.i.VacMachineServiceImpl    : ÀÏ²ÖÎ»
+2024-07-12 14:58:10.154  INFO 18424 --- [main] YuandiInjectiondispenserApplicationTests : {"autoX":860,"autoZ":4160,"deleted":0,"expiredAt":1719936000000,"machineId":122,"machineNo":"A0402","productName":"²âÊÔÒßÃç","productNo":"123","vaccineId":122,"vaccineNum":3,"vaccineUseNum":3}
+2024-07-12 14:58:10.225  INFO 18424 --- [main] YuandiInjectiondispenserApplicationTests : {"LastTuesday":0,"LastThursday":0,"Monday":0,"LastMonday":0,"Saturday":0,"LastSaturday":2,"Thursday":0,"LastFriday":0,"Friday":0,"Sunday":0,"Wednesday":0,"LastWednesday":0,"LastSunday":1,"Tuesday":0}
+2024-07-12 14:58:10.239  INFO 18424 --- [main] c.y.v.s.s.s.n.impl.CabinetBServiceImpl   : 0x0B B¹ñ¹ñ-0x02 -¾àÀë´«¸ÐÆ÷¿ØÖÆ£ºA5 5A 09 00 01 00 0B 02 01 03 00 FE 89 55
+2024-07-12 14:58:12.265  INFO 18424 --- [main] YuandiInjectiondispenserApplicationTests : 4905
+2024-07-12 14:58:12.272  INFO 18424 --- [main] c.y.v.s.s.s.n.impl.CabinetAServiceImpl   : 0x0A A¹ñ¹ñ-0x01-µôÒ©£ºA5 5A 0E 00 02 00 0A 01 01 01 00 C0 00 00 00 00 61 68 55
+2024-07-12 14:58:12.347  INFO 18424 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-07-12 14:58:12.395  INFO 18424 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2024-07-12 14:59:33.385  INFO 3780 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on ZH with PID 3780 (started by 78671 in D:\work\ÒßÃç·¢Ò©»ú\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2024-07-12 14:59:33.386  INFO 3780 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "dev"
+2024-07-12 14:59:34.180  INFO 3780 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2024-07-12 14:59:34.183  INFO 3780 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2024-07-12 14:59:34.218  INFO 3780 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 19 ms. Found 0 Redis repository interfaces.
+2024-07-12 14:59:35.847  INFO 3780 --- [main] c.y.v.system.com.ComService              : Á¬½Ó´®¿Ú£ºCOM10Ê§°Ü£¡
+2024-07-12 14:59:36.061  INFO 3780 --- [main] c.y.v.system.com.ComService              : Á¬½Ó´®¿Ú£ºCOM9Ê§°Ü£¡
+2024-07-12 14:59:36.272  INFO 3780 --- [main] c.y.v.system.com.ComService              : Á¬½Ó´®¿Ú£ºCOM4Ê§°Ü£¡
+2024-07-12 14:59:36.781  INFO 3780 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-07-12 14:59:36.940  INFO 3780 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-07-12 14:59:36.976  INFO 3780 --- [main] c.y.v.system.netty.NettyClient           : µ±Ç°¿Í»§¶Ë£ºA, ½øÐÐ³õÊ¼»¯
+2024-07-12 14:59:37.014  INFO 3780 --- [main] c.y.v.system.netty.NettyClient           : µ±Ç°¿Í»§¶Ë£ºB, ½øÐÐ³õÊ¼»¯
+2024-07-12 14:59:37.042  INFO 3780 --- [main] c.y.v.system.netty.NettyClient           : µ±Ç°¿Í»§¶Ë£ºC, ½øÐÐ³õÊ¼»¯
+2024-07-12 14:59:38.663  INFO 3780 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2024-07-12 14:59:38.688  INFO 3780 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 5.73 seconds (JVM running for 6.476)
+2024-07-12 14:59:39.197  INFO 3780 --- [main] YuandiInjectiondispenserApplicationTests : 1000
+2024-07-12 14:59:39.304  INFO 3780 --- [main] YuandiInjectiondispenserApplicationTests : {"code":0,"data":[{"date":"2023-08","sum":0},{"date":"2023-09","sum":0},{"date":"2023-10","sum":0},{"date":"2023-11","sum":0},{"date":"2023-12","sum":0},{"date":"2024-01","sum":0},{"date":"2024-02","sum":0},{"date":"2024-03","sum":0},{"date":"2024-04","sum":0},{"date":"2024-05","sum":0},{"date":"2024-06","sum":0},{"date":"2024-07","sum":0}]}
+2024-07-12 14:59:39.326  INFO 3780 --- [main] c.y.v.s.dispensing.SendDrugFunction      : [3,6]
+2024-07-12 14:59:39.351  INFO 3780 --- [main] c.y.v.s.s.s.v.i.VacMachineServiceImpl    : ÀÏ²ÖÎ»
+2024-07-12 14:59:39.365  INFO 3780 --- [main] YuandiInjectiondispenserApplicationTests : {"autoX":860,"autoZ":4160,"deleted":0,"expiredAt":1719936000000,"machineId":122,"machineNo":"A0402","productName":"²âÊÔÒßÃç","productNo":"123","vaccineId":122,"vaccineNum":3,"vaccineUseNum":3}
+2024-07-12 14:59:39.435  INFO 3780 --- [main] YuandiInjectiondispenserApplicationTests : {"LastTuesday":0,"LastThursday":0,"Monday":0,"LastMonday":0,"Saturday":0,"LastSaturday":2,"Thursday":0,"LastFriday":0,"Friday":0,"Sunday":0,"Wednesday":0,"LastWednesday":0,"LastSunday":1,"Tuesday":0}
+2024-07-12 14:59:39.453  INFO 3780 --- [main] c.y.v.s.s.s.n.impl.CabinetBServiceImpl   : 0x0B B¹ñ¹ñ-0x02 -¾àÀë´«¸ÐÆ÷¿ØÖÆ£ºA5 5A 09 00 01 00 0B 02 01 03 00 FE 89 55
+2024-07-12 14:59:41.466  INFO 3780 --- [main] YuandiInjectiondispenserApplicationTests : 4905
+2024-07-12 14:59:41.472  INFO 3780 --- [main] c.y.v.s.s.s.n.impl.CabinetAServiceImpl   : 0x0A A¹ñ¹ñ-0x01-µôÒ©£ºA5 5A 0E 00 02 00 0A 01 01 01 00 C0 00 00 00 00 61 68 55
+2024-07-12 14:59:41.527  INFO 3780 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-07-12 14:59:41.562  INFO 3780 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2024-07-12 15:01:08.835  INFO 5388 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on ZH with PID 5388 (started by 78671 in D:\work\ÒßÃç·¢Ò©»ú\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2024-07-12 15:01:08.837  INFO 5388 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "dev"
+2024-07-12 15:01:10.076  INFO 5388 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2024-07-12 15:01:10.079  INFO 5388 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2024-07-12 15:01:10.121  INFO 5388 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 24 ms. Found 0 Redis repository interfaces.
+2024-07-12 15:01:12.619  INFO 5388 --- [main] c.y.v.system.com.ComService              : Á¬½Ó´®¿Ú£ºCOM10Ê§°Ü£¡
+2024-07-12 15:01:12.836  INFO 5388 --- [main] c.y.v.system.com.ComService              : Á¬½Ó´®¿Ú£ºCOM9Ê§°Ü£¡
+2024-07-12 15:01:13.050  INFO 5388 --- [main] c.y.v.system.com.ComService              : Á¬½Ó´®¿Ú£ºCOM4Ê§°Ü£¡
+2024-07-12 15:01:13.738  INFO 5388 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-07-12 15:01:13.918  INFO 5388 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-07-12 15:01:13.952  INFO 5388 --- [main] c.y.v.system.netty.NettyClient           : µ±Ç°¿Í»§¶Ë£ºA, ½øÐÐ³õÊ¼»¯
+2024-07-12 15:01:13.985  INFO 5388 --- [main] c.y.v.system.netty.NettyClient           : µ±Ç°¿Í»§¶Ë£ºB, ½øÐÐ³õÊ¼»¯
+2024-07-12 15:01:14.018  INFO 5388 --- [main] c.y.v.system.netty.NettyClient           : µ±Ç°¿Í»§¶Ë£ºC, ½øÐÐ³õÊ¼»¯
+2024-07-12 15:01:16.038  INFO 5388 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2024-07-12 15:01:16.067  INFO 5388 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 7.787 seconds (JVM running for 8.755)
+2024-07-12 15:01:16.783  INFO 5388 --- [main] YuandiInjectiondispenserApplicationTests : 1000
+2024-07-12 15:01:16.925  INFO 5388 --- [main] YuandiInjectiondispenserApplicationTests : {"code":0,"data":[{"date":"2023-08","sum":0},{"date":"2023-09","sum":0},{"date":"2023-10","sum":0},{"date":"2023-11","sum":0},{"date":"2023-12","sum":0},{"date":"2024-01","sum":0},{"date":"2024-02","sum":0},{"date":"2024-03","sum":0},{"date":"2024-04","sum":0},{"date":"2024-05","sum":0},{"date":"2024-06","sum":0},{"date":"2024-07","sum":0}]}
+2024-07-12 15:01:16.954  INFO 5388 --- [main] c.y.v.s.dispensing.SendDrugFunction      : [3,6]
+2024-07-12 15:01:16.982  INFO 5388 --- [main] c.y.v.s.s.s.v.i.VacMachineServiceImpl    : ÀÏ²ÖÎ»
+2024-07-12 15:01:17.000  INFO 5388 --- [main] YuandiInjectiondispenserApplicationTests : {"autoX":860,"autoZ":4160,"deleted":0,"expiredAt":1719936000000,"machineId":122,"machineNo":"A0402","productName":"²âÊÔÒßÃç","productNo":"123","vaccineId":122,"vaccineNum":3,"vaccineUseNum":3}
+2024-07-12 15:01:17.062  INFO 5388 --- [main] YuandiInjectiondispenserApplicationTests : {"LastTuesday":0,"LastThursday":0,"Monday":0,"LastMonday":0,"Saturday":0,"LastSaturday":2,"Thursday":0,"LastFriday":0,"Friday":0,"Sunday":0,"Wednesday":0,"LastWednesday":0,"LastSunday":1,"Tuesday":0}
+2024-07-12 15:01:17.078  INFO 5388 --- [main] c.y.v.s.s.s.n.impl.CabinetBServiceImpl   : 0x0B B¹ñ¹ñ-0x02 -¾àÀë´«¸ÐÆ÷¿ØÖÆ£ºA5 5A 09 00 01 00 0B 02 01 03 00 FE 89 55
+2024-07-12 15:01:19.090  INFO 5388 --- [main] YuandiInjectiondispenserApplicationTests : 4905
+2024-07-12 15:01:19.097  INFO 5388 --- [main] c.y.v.s.s.s.n.impl.CabinetAServiceImpl   : 0x0A A¹ñ¹ñ-0x01-µôÒ©£ºA5 5A 0E 00 02 00 0A 01 01 01 00 C0 00 00 00 00 61 68 55
+2024-07-12 15:01:19.183  INFO 5388 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-07-12 15:01:19.625  INFO 5388 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.

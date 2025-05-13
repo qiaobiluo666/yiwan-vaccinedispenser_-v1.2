@@ -1,0 +1,40 @@
+2024-11-12 14:19:28.365  INFO 23996 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on ZH with PID 23996 (started by 78671 in D:\work\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2024-11-12 14:19:28.368  INFO 23996 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "dev"
+2024-11-12 14:19:29.740  INFO 23996 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2024-11-12 14:19:29.745  INFO 23996 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2024-11-12 14:19:29.830  INFO 23996 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 63 ms. Found 0 Redis repository interfaces.
+2024-11-12 14:19:32.812  INFO 23996 --- [main] c.y.v.system.com.ComService              : 连接串口：COM10失败！
+2024-11-12 14:19:33.028  INFO 23996 --- [main] c.y.v.system.com.ComService              : 连接串口：COM9失败！
+2024-11-12 14:19:33.230  INFO 23996 --- [main] c.y.v.system.com.ComService              : 连接串口：COM4失败！
+2024-11-12 14:19:33.694  INFO 23996 --- [nioEventLoopGroup-5-1] c.y.v.system.camera.CameraClient         : 当前客户端：下方扫码相机 服务端连接成功...
+2024-11-12 14:19:33.694  INFO 23996 --- [nioEventLoopGroup-4-1] c.y.v.system.camera.CameraClient         : 当前客户端：上方扫码相机 服务端连接成功...
+2024-11-12 14:19:33.694  INFO 23996 --- [nioEventLoopGroup-6-1] c.y.v.system.camera.CameraClient         : 当前客户端：侧方扫码相机 服务端连接成功...
+2024-11-12 14:19:34.359  INFO 23996 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-11-12 14:19:34.662  INFO 23996 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-11-12 14:19:34.721  INFO 23996 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2024-11-12 14:19:34.767  INFO 23996 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClient           : 当前客户端：A 服务端连接成功...
+2024-11-12 14:19:34.769  INFO 23996 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2024-11-12 14:19:34.770  INFO 23996 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：A 连接服务器成功
+2024-11-12 14:19:34.815  INFO 23996 --- [nioEventLoopGroup-9-1] c.y.v.system.netty.NettyClient           : 当前客户端：B 服务端连接成功...
+2024-11-12 14:19:34.818  INFO 23996 --- [nioEventLoopGroup-9-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：B 连接服务器成功
+2024-11-12 14:19:34.819  INFO 23996 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：C, 进行初始化
+2024-11-12 14:19:34.875  INFO 23996 --- [nioEventLoopGroup-10-1] c.y.v.system.netty.NettyClient           : 当前客户端：C 服务端连接成功...
+2024-11-12 14:19:34.879  INFO 23996 --- [nioEventLoopGroup-10-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：C 连接服务器成功
+2024-11-12 14:19:37.281  INFO 23996 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2024-11-12 14:19:37.332  INFO 23996 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 9.886 seconds (JVM running for 11.952)
+2024-11-12 14:19:38.177  INFO 23996 --- [main] c.y.v.s.s.s.n.impl.CabinetAServiceImpl   : 0x0A A柜柜-0x01-掉药：A5 5A 0C 00 01 00 0A 01 01 04 00 03 14 00 BE 6C 55
+2024-11-12 14:19:38.191  INFO 23996 --- [main] c.y.v.s.s.s.n.impl.CabinetAServiceImpl   : 0x0A A柜柜-0x01-掉药：A5 5A 0C 00 02 00 0A 01 02 04 00 02 14 00 1F 90 55
+2024-11-12 14:19:38.192  INFO 23996 --- [main] c.y.v.s.s.s.n.impl.CabinetAServiceImpl   : 0x0A A柜柜-0x01-掉药：A5 5A 0C 00 03 00 0A 01 03 04 00 03 14 00 1E 44 55
+2024-11-12 14:19:38.192  INFO 23996 --- [main] c.y.v.s.s.s.n.impl.CabinetAServiceImpl   : 0x0A A柜柜-0x01-掉药：A5 5A 0C 00 04 00 0A 01 04 04 00 02 14 00 FF E9 55
+2024-11-12 14:19:38.234 ERROR 23996 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：A 发生了异常处理
+2024-11-12 14:19:38.235  WARN 23996 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClientHandler    : 重新连接
+2024-11-12 14:19:38.235  INFO 23996 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-11-12 14:19:38.236  INFO 23996 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：A 断开了连接
+2024-11-12 14:19:38.240  INFO 23996 --- [nioEventLoopGroup-8-2] c.y.v.system.netty.NettyClient           : 当前客户端：A 服务端连接成功...
+2024-11-12 14:19:38.241  INFO 23996 --- [nioEventLoopGroup-8-2] c.y.v.system.netty.NettyClientHandler    : 当前的client：A 连接服务器成功
+2024-11-12 14:19:38.272 ERROR 23996 --- [nioEventLoopGroup-8-2] c.y.v.system.netty.NettyClientHandler    : 当前的client：A 发生了异常处理
+2024-11-12 14:19:38.272  WARN 23996 --- [nioEventLoopGroup-8-2] c.y.v.system.netty.NettyClientHandler    : 重新连接
+2024-11-12 14:19:38.273  INFO 23996 --- [nioEventLoopGroup-8-2] c.y.v.system.netty.NettyClientHandler    : 当前的client：A 断开了连接
+2024-11-12 14:19:38.279  INFO 23996 --- [nioEventLoopGroup-8-3] c.y.v.system.netty.NettyClient           : 当前客户端：A 服务端连接成功...
+2024-11-12 14:19:38.280  INFO 23996 --- [nioEventLoopGroup-8-3] c.y.v.system.netty.NettyClientHandler    : 当前的client：A 连接服务器成功
+2024-11-12 14:19:38.292  INFO 23996 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.

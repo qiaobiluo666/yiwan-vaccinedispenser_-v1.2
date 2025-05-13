@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="yiwan-vaccinedispenser-admin" />
+        <module name="yuandi-injectiondispenser-core" />
+        <module name="yiwan-vaccinedispenser-system" />
+        <module name="yiwan-vaccinedispenser-core" />
+        <module name="yuandi-injectiondispenser-system" />
+        <module name="yuandi-injectiondispenser-admin" />
+      </profile>
+    </annotationProcessing>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="yiwan-vaccinedispenser" options="" />
+      <module name="yiwan-vaccinedispenser-admin" options="-parameters" />
+      <module name="yiwan-vaccinedispenser-core" options="-parameters" />
+      <module name="yiwan-vaccinedispenser-system" options="-parameters" />
+      <module name="yuandi-injectiondispenser" options="-parameters" />
+      <module name="yuandi-injectiondispenser-admin" options="-parameters" />
+      <module name="yuandi-injectiondispenser-core" options="-parameters" />
+      <module name="yuandi-injectiondispenser-system" options="-parameters" />
+    </option>
+  </component>
+</project>

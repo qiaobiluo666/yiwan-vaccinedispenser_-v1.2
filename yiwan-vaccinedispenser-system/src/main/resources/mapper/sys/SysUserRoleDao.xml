@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.yiwan.vaccinedispenser.system.sys.dao.SysUserRoleDao">
+
+	<delete id="deleteRoleByUserId">
+		delete from sys_user_role where sys_user_id = #{uesrId}
+	</delete>
+
+	<select id="getRoleName" resultType="java.lang.String">
+		SELECT
+			t1.role_name
+		FROM
+			sys_role t1
+				LEFT JOIN sys_user_role t2 ON t1.id = t2.role_id
+		WHERE
+			t2.sys_user_id = #{userId}
+	</select>
+
+</mapper>

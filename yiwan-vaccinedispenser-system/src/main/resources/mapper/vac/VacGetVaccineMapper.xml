@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.yiwan.vaccinedispenser.system.sys.dao.VacGetVaccineMapper">
+
+
+
+
+    <select id="findProductNo" resultType="com.yiwan.vaccinedispenser.system.domain.model.vac.VacGetVaccine">
+        SELECT
+        vm.product_no,
+        vm.product_name,
+        vw.workbench_no,
+        vw.workbench_name,
+        vw.workbench_num,
+        SUM(vm.vaccine_use_num) AS totalVaccineUseNum
+        FROM
+        vac_machine vm
+        JOIN
+        vac_workbench vw
+        ON
+        vw.workbench_no = #{workbenchNo}
+        WHERE
+        vm.product_no IN
+        <foreach item="item" index="index" collection="productNo" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        AND vw.deleted = "0"
+        GROUP BY
+            vm.product_no, vm.product_name, vw.workbench_no, vw.workbench_name, vw.workbench_num
+        ORDER BY
+        totalVaccineUseNum DESC
+    </select>
+
+
+
+
+
+</mapper>

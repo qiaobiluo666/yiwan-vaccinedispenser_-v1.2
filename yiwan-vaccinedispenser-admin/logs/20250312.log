@@ -1,0 +1,1276 @@
+2025-03-12 14:51:04.546  INFO 23268 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on 施林浩 with PID 23268 (started by 78671 in D:\work\yiwan\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2025-03-12 14:51:04.547  INFO 23268 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "test"
+2025-03-12 14:51:05.271  INFO 23268 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2025-03-12 14:51:05.274  INFO 23268 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-03-12 14:51:05.326  INFO 23268 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 36 ms. Found 0 Redis repository interfaces.
+2025-03-12 14:51:07.621  INFO 23268 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-03-12 14:51:07.774  INFO 23268 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-03-12 14:51:07.800  INFO 23268 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2025-03-12 14:51:07.844  INFO 23268 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2025-03-12 14:51:07.886  INFO 23268 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：C, 进行初始化
+2025-03-12 14:51:10.098  INFO 23268 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2025-03-12 14:51:10.127  INFO 23268 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 5.936 seconds (JVM running for 6.707)
+2025-03-12 14:51:10.138 ERROR 23268 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : 未知异常：
+
+java.nio.file.NoSuchFileException: .\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:192)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getSendVaccineRequest(ZcyRequestBuilder.java:103)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccineSendMsg(ZcyFunction.java:108)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccineSendMsg(VacTimer.java:92)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 14:51:10.141  INFO 23268 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : true
+2025-03-12 14:51:10.143 ERROR 23268 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : 未知异常：
+
+java.nio.file.NoSuchFileException: .\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:192)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getVaccineListRequest(ZcyRequestBuilder.java:57)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccine(ZcyFunction.java:57)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccine(VacTimer.java:50)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 14:51:10.796  INFO 23268 --- [main] c.y.v.s.s.s.v.i.VacMachineServiceImpl    : 自动上药 同效期仓位：A0101
+2025-03-12 14:51:10.896  INFO 23268 --- [main] YuandiInjectiondispenserApplicationTests : {"autoX":210,"autoZ":750,"deleted":0,"expiredAt":1756656000000,"ledNum":5,"lineNum":1,"machineId":631,"machineNo":"A0101","productName":"进-轮毒五价-L-默沙东-1/2ml/支-液其他口1","productNo":"79524002604","vaccineId":2619,"vaccineNum":4,"vaccineUseNum":4}
+2025-03-12 14:51:10.925  INFO 23268 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-03-12 14:51:11.531  INFO 23268 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-03-12 14:51:58.014  INFO 28608 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on 施林浩 with PID 28608 (started by 78671 in D:\work\yiwan\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2025-03-12 14:51:58.015  INFO 28608 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "test"
+2025-03-12 14:51:58.696  INFO 28608 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2025-03-12 14:51:58.699  INFO 28608 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-03-12 14:51:58.752  INFO 28608 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 38 ms. Found 0 Redis repository interfaces.
+2025-03-12 14:52:01.105  INFO 28608 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-03-12 14:52:01.242  INFO 28608 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-03-12 14:52:01.271  INFO 28608 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2025-03-12 14:52:01.314  INFO 28608 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2025-03-12 14:52:01.357  INFO 28608 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：C, 进行初始化
+2025-03-12 14:52:03.294  INFO 28608 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2025-03-12 14:52:03.319  INFO 28608 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 5.682 seconds (JVM running for 6.435)
+2025-03-12 14:52:03.328  INFO 28608 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : true
+2025-03-12 14:52:03.333 ERROR 28608 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : 未知异常：
+
+java.nio.file.NoSuchFileException: .\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:192)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getVaccineListRequest(ZcyRequestBuilder.java:57)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccine(ZcyFunction.java:57)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccine(VacTimer.java:50)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 14:52:03.338 ERROR 28608 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : 未知异常：
+
+java.nio.file.NoSuchFileException: .\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:192)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getSendVaccineRequest(ZcyRequestBuilder.java:103)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccineSendMsg(ZcyFunction.java:108)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccineSendMsg(VacTimer.java:92)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 14:52:03.924  INFO 28608 --- [main] c.y.v.s.s.s.v.i.VacMachineServiceImpl    : 自动上药 新仓位：A0209
+2025-03-12 14:52:04.029  INFO 28608 --- [main] YuandiInjectiondispenserApplicationTests : {"autoX":4830,"autoZ":1950,"deleted":0,"expiredAt":1756656000000,"ledNum":73,"lineNum":2,"machineId":666,"machineNo":"A0209","productName":"进-轮毒五价-L-默沙东-1/2ml/支-液其他口1","productNo":"79524002604","vaccineId":2619,"vaccineNum":1,"vaccineUseNum":1}
+2025-03-12 14:52:04.047  INFO 28608 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-03-12 14:52:04.984  INFO 28608 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-03-12 14:54:48.087  INFO 49068 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on 施林浩 with PID 49068 (started by 78671 in D:\work\yiwan\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2025-03-12 14:54:48.089  INFO 49068 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "test"
+2025-03-12 14:54:48.791  INFO 49068 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2025-03-12 14:54:48.794  INFO 49068 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-03-12 14:54:48.834  INFO 49068 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 24 ms. Found 0 Redis repository interfaces.
+2025-03-12 14:54:51.306  INFO 49068 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-03-12 14:54:51.530  INFO 49068 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-03-12 14:54:51.568  INFO 49068 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2025-03-12 14:54:51.611  INFO 49068 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2025-03-12 14:54:51.651  INFO 49068 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：C, 进行初始化
+2025-03-12 14:54:53.805  INFO 49068 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2025-03-12 14:54:53.825  INFO 49068 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 6.1 seconds (JVM running for 6.765)
+2025-03-12 14:54:53.832 ERROR 49068 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : 未知异常：
+
+java.nio.file.NoSuchFileException: .\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:192)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getSendVaccineRequest(ZcyRequestBuilder.java:103)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccineSendMsg(ZcyFunction.java:108)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccineSendMsg(VacTimer.java:92)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 14:54:53.836  INFO 49068 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : true
+2025-03-12 14:54:53.836 ERROR 49068 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : 未知异常：
+
+java.nio.file.NoSuchFileException: .\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:192)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getVaccineListRequest(ZcyRequestBuilder.java:57)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccine(ZcyFunction.java:57)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccine(VacTimer.java:50)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 14:54:54.397  INFO 49068 --- [main] c.y.v.s.s.s.v.i.VacMachineServiceImpl    : 自动上药 同效期仓位：A0101
+2025-03-12 14:54:54.491  INFO 49068 --- [main] YuandiInjectiondispenserApplicationTests : {"autoX":210,"autoZ":750,"deleted":0,"expiredAt":1756656000000,"ledNum":5,"lineNum":1,"machineId":631,"machineNo":"A0101","productName":"进-轮毒五价-L-默沙东-1/2ml/支-液其他口1","productNo":"79524002604","vaccineId":2619,"vaccineNum":6,"vaccineUseNum":6}
+2025-03-12 14:54:54.493  INFO 49068 --- [main] c.y.v.s.dispensing.SendDrugFunction      : 新增上药记录
+2025-03-12 14:54:54.603  INFO 49068 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-03-12 14:54:55.301  INFO 49068 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-03-12 14:55:43.656  INFO 6164 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on 施林浩 with PID 6164 (started by 78671 in D:\work\yiwan\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2025-03-12 14:55:43.657  INFO 6164 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "test"
+2025-03-12 14:55:44.348  INFO 6164 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2025-03-12 14:55:44.350  INFO 6164 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-03-12 14:55:44.393  INFO 6164 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 32 ms. Found 0 Redis repository interfaces.
+2025-03-12 14:55:46.649  INFO 6164 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-03-12 14:55:46.831  INFO 6164 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-03-12 14:55:46.865  INFO 6164 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2025-03-12 14:55:46.908  INFO 6164 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2025-03-12 14:55:46.944  INFO 6164 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：C, 进行初始化
+2025-03-12 14:55:48.916  INFO 6164 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2025-03-12 14:55:48.931  INFO 6164 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 5.604 seconds (JVM running for 6.303)
+2025-03-12 14:55:48.938  INFO 6164 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : true
+2025-03-12 14:55:48.941 ERROR 6164 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : 未知异常：
+
+java.nio.file.NoSuchFileException: .\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:192)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getVaccineListRequest(ZcyRequestBuilder.java:57)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccine(ZcyFunction.java:57)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccine(VacTimer.java:50)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 14:55:48.946 ERROR 6164 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : 未知异常：
+
+java.nio.file.NoSuchFileException: .\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:192)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getSendVaccineRequest(ZcyRequestBuilder.java:103)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccineSendMsg(ZcyFunction.java:108)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccineSendMsg(VacTimer.java:92)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 14:55:49.466  INFO 6164 --- [main] c.y.v.s.s.s.v.i.VacMachineServiceImpl    : 自动上药 同效期仓位：A0101
+2025-03-12 14:55:49.558  INFO 6164 --- [main] YuandiInjectiondispenserApplicationTests : {"autoX":210,"autoZ":750,"deleted":0,"expiredAt":1756656000000,"ledNum":5,"lineNum":1,"machineId":631,"machineNo":"A0101","productName":"进-轮毒五价-L-默沙东-1/2ml/支-液其他口1","productNo":"79524002604","supervisedCode":"测试电子监管码","vaccineId":2619,"vaccineNum":6,"vaccineUseNum":6}
+2025-03-12 14:55:49.558  INFO 6164 --- [main] c.y.v.s.dispensing.SendDrugFunction      : 新增上药记录
+2025-03-12 14:55:49.598  INFO 6164 --- [main] c.y.v.s.s.s.v.i.VacMachineServiceImpl    : {"autoX":210,"autoZ":750,"boxNo":"A0101","boxSpecId":15,"boxSpecName":"80(8 70)","createBy":"admin","createTime":"2024-06-19 10:05:20","deleted":0,"expiredAt":1756656000000,"id":631,"ledNum":5,"lineNum":1,"positionNum":30,"productName":"进-轮毒五价-L-默沙东-1/2ml/支-液其他口1","productNo":"79524002604","status":1,"updateBy":"admin","updateTime":"2025-03-12 14:54:08","vaccineId":2619,"vaccineNum":5,"vaccineUseNum":5}
+2025-03-12 14:55:49.602  INFO 6164 --- [main] c.y.v.s.s.s.v.i.VacMachineServiceImpl    : {"autoX":210,"autoZ":750,"boxNo":"A0101","boxSpecId":15,"boxSpecName":"80(8 70)","deleted":0,"expiredAt":1756656000000,"id":631,"ledNum":5,"lineNum":1,"positionNum":30,"productName":"进-轮毒五价-L-默沙东-1/2ml/支-液其他口1","productNo":"79524002604","status":1,"vaccineId":2619,"vaccineNum":6,"vaccineUseNum":6}
+2025-03-12 14:55:49.644  INFO 6164 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-03-12 14:55:50.572  INFO 6164 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-03-12 14:56:17.788  INFO 46044 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on 施林浩 with PID 46044 (started by 78671 in D:\work\yiwan\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2025-03-12 14:56:17.790  INFO 46044 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "test"
+2025-03-12 14:56:18.465  INFO 46044 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2025-03-12 14:56:18.468  INFO 46044 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-03-12 14:56:18.521  INFO 46044 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 36 ms. Found 0 Redis repository interfaces.
+2025-03-12 14:56:20.737  INFO 46044 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-03-12 14:56:20.892  INFO 46044 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-03-12 14:56:20.923  INFO 46044 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2025-03-12 14:56:20.968  INFO 46044 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2025-03-12 14:56:21.008  INFO 46044 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：C, 进行初始化
+2025-03-12 14:56:22.965  INFO 46044 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2025-03-12 14:56:22.984  INFO 46044 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 5.544 seconds (JVM running for 6.234)
+2025-03-12 14:56:22.989  INFO 46044 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : true
+2025-03-12 14:56:22.994 ERROR 46044 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : 未知异常：
+
+java.nio.file.NoSuchFileException: .\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:192)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getVaccineListRequest(ZcyRequestBuilder.java:57)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccine(ZcyFunction.java:57)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccine(VacTimer.java:50)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 14:56:22.998 ERROR 46044 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : 未知异常：
+
+java.nio.file.NoSuchFileException: .\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:192)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getSendVaccineRequest(ZcyRequestBuilder.java:103)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccineSendMsg(ZcyFunction.java:108)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccineSendMsg(VacTimer.java:92)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 14:56:23.528  INFO 46044 --- [main] c.y.v.s.s.s.v.i.VacMachineServiceImpl    : 自动上药 同效期仓位：A0101
+2025-03-12 14:56:23.631  INFO 46044 --- [main] YuandiInjectiondispenserApplicationTests : {"autoX":210,"autoZ":750,"deleted":0,"expiredAt":1756656000000,"ledNum":5,"lineNum":1,"machineId":631,"machineNo":"A0101","productName":"进-轮毒五价-L-默沙东-1/2ml/支-液其他口1","productNo":"79524002604","supervisedCode":"测试电子监管码","vaccineId":2619,"vaccineNum":7,"vaccineUseNum":7}
+2025-03-12 14:56:23.631  INFO 46044 --- [main] c.y.v.s.dispensing.SendDrugFunction      : 新增上药记录
+2025-03-12 14:56:23.661  INFO 46044 --- [main] c.y.v.s.s.s.v.i.VacMachineServiceImpl    : {"autoX":210,"autoZ":750,"boxNo":"A0101","boxSpecId":15,"boxSpecName":"80(8 70)","createBy":"admin","createTime":"2024-06-19 10:05:20","deleted":0,"expiredAt":1756656000000,"id":631,"ledNum":5,"lineNum":1,"positionNum":30,"productName":"进-轮毒五价-L-默沙东-1/2ml/支-液其他口1","productNo":"79524002604","status":1,"updateBy":"admin","updateTime":"2025-03-12 14:55:49","vaccineId":2619,"vaccineNum":6,"vaccineUseNum":6}
+2025-03-12 14:56:23.665  INFO 46044 --- [main] c.y.v.s.s.s.v.i.VacMachineServiceImpl    : {"autoX":210,"autoZ":750,"boxNo":"A0101","boxSpecId":15,"boxSpecName":"80(8 70)","deleted":0,"expiredAt":1756656000000,"id":631,"ledNum":5,"lineNum":1,"positionNum":30,"productName":"进-轮毒五价-L-默沙东-1/2ml/支-液其他口1","productNo":"79524002604","status":1,"vaccineId":2619,"vaccineNum":7,"vaccineUseNum":7}
+2025-03-12 14:56:23.697  INFO 46044 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-03-12 14:56:24.613  INFO 46044 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-03-12 14:57:02.400  INFO 41692 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on 施林浩 with PID 41692 (started by 78671 in D:\work\yiwan\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2025-03-12 14:57:02.401  INFO 41692 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "test"
+2025-03-12 14:57:03.096  INFO 41692 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2025-03-12 14:57:03.098  INFO 41692 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-03-12 14:57:03.146  INFO 41692 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 35 ms. Found 0 Redis repository interfaces.
+2025-03-12 14:57:05.372  INFO 41692 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-03-12 14:57:05.548  INFO 41692 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-03-12 14:57:05.581  INFO 41692 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2025-03-12 14:57:05.624  INFO 41692 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2025-03-12 14:57:05.669  INFO 41692 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：C, 进行初始化
+2025-03-12 14:57:07.801  INFO 41692 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2025-03-12 14:57:07.821  INFO 41692 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 5.776 seconds (JVM running for 6.46)
+2025-03-12 14:57:07.833 ERROR 41692 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : 未知异常：
+
+java.nio.file.NoSuchFileException: .\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:192)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getSendVaccineRequest(ZcyRequestBuilder.java:103)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccineSendMsg(ZcyFunction.java:108)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccineSendMsg(VacTimer.java:92)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 14:57:07.836  INFO 41692 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : true
+2025-03-12 14:57:07.837 ERROR 41692 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : 未知异常：
+
+java.nio.file.NoSuchFileException: .\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:192)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getVaccineListRequest(ZcyRequestBuilder.java:57)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccine(ZcyFunction.java:57)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccine(VacTimer.java:50)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 14:57:08.488  INFO 41692 --- [main] c.y.v.s.s.s.v.i.VacMachineServiceImpl    : 自动上药 新仓位：A0209
+2025-03-12 14:57:08.597  INFO 41692 --- [main] YuandiInjectiondispenserApplicationTests : {"autoX":4830,"autoZ":1950,"deleted":0,"expiredAt":1756656000000,"ledNum":73,"lineNum":2,"machineId":666,"machineNo":"A0209","productName":"进-轮毒五价-L-默沙东-1/2ml/支-液其他口1","productNo":"79524002604","supervisedCode":"测试电子监管码","vaccineId":2619,"vaccineNum":1,"vaccineUseNum":1}
+2025-03-12 14:57:08.597  INFO 41692 --- [main] c.y.v.s.dispensing.SendDrugFunction      : 新增上药记录
+2025-03-12 14:57:08.641  INFO 41692 --- [main] c.y.v.s.s.s.v.i.VacMachineServiceImpl    : {"autoX":4830,"autoZ":1950,"boxNo":"A0209","boxSpecId":15,"boxSpecName":"80(8 70)","createBy":"admin","createTime":"2024-06-19 10:05:20","deleted":0,"id":666,"ledNum":73,"lineNum":2,"positionNum":21,"status":1,"updateBy":"admin","updateTime":"2025-02-27 17:28:54"}
+2025-03-12 14:57:08.646  INFO 41692 --- [main] c.y.v.s.s.s.v.i.VacMachineServiceImpl    : {"autoX":4830,"autoZ":1950,"boxNo":"A0209","boxSpecId":15,"boxSpecName":"80(8 70)","deleted":0,"expiredAt":1756656000000,"id":666,"ledNum":73,"lineNum":2,"positionNum":21,"productName":"进-轮毒五价-L-默沙东-1/2ml/支-液其他口1","productNo":"79524002604","status":1,"vaccineId":2619,"vaccineNum":1,"vaccineUseNum":1}
+2025-03-12 14:57:08.693  INFO 41692 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-03-12 14:57:09.298  INFO 41692 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-03-12 14:59:03.298  INFO 42632 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on 施林浩 with PID 42632 (started by 78671 in D:\work\yiwan\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2025-03-12 14:59:03.299  INFO 42632 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "test"
+2025-03-12 14:59:03.900  INFO 42632 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2025-03-12 14:59:03.904  INFO 42632 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-03-12 14:59:03.943  INFO 42632 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 29 ms. Found 0 Redis repository interfaces.
+2025-03-12 14:59:06.270  INFO 42632 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-03-12 14:59:06.443  INFO 42632 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-03-12 14:59:06.478  INFO 42632 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2025-03-12 14:59:06.526  INFO 42632 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2025-03-12 14:59:06.566  INFO 42632 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：C, 进行初始化
+2025-03-12 14:59:08.658  INFO 42632 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2025-03-12 14:59:08.681  INFO 42632 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 5.741 seconds (JVM running for 6.417)
+2025-03-12 14:59:08.692 ERROR 42632 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : 未知异常：
+
+java.nio.file.NoSuchFileException: .\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:192)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getSendVaccineRequest(ZcyRequestBuilder.java:103)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccineSendMsg(ZcyFunction.java:108)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccineSendMsg(VacTimer.java:92)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 14:59:08.696  INFO 42632 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : true
+2025-03-12 14:59:08.697 ERROR 42632 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : 未知异常：
+
+java.nio.file.NoSuchFileException: .\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:192)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getVaccineListRequest(ZcyRequestBuilder.java:57)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccine(ZcyFunction.java:57)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccine(VacTimer.java:50)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 14:59:09.296  INFO 42632 --- [main] c.y.v.s.s.s.v.i.VacMachineServiceImpl    : 自动上药 同效期仓位：A0209
+2025-03-12 14:59:09.389  INFO 42632 --- [main] YuandiInjectiondispenserApplicationTests : {"autoX":4830,"autoZ":1950,"deleted":0,"expiredAt":1756656000000,"ledNum":73,"lineNum":2,"machineId":666,"machineNo":"A0209","productName":"进-轮毒五价-L-默沙东-1/2ml/支-液其他口1","productNo":"79524002604","supervisedCode":"测试电子监管码","vaccineId":2619,"vaccineNum":2,"vaccineUseNum":2}
+2025-03-12 14:59:09.389  INFO 42632 --- [main] c.y.v.s.dispensing.SendDrugFunction      : 新增上药记录
+2025-03-12 14:59:09.433  INFO 42632 --- [main] c.y.v.s.s.s.v.i.VacMachineServiceImpl    : {"autoX":4830,"autoZ":1950,"boxNo":"A0209","boxSpecId":15,"boxSpecName":"80(8 70)","createBy":"admin","createTime":"2024-06-19 10:05:20","deleted":0,"expiredAt":1756656000000,"id":666,"ledNum":73,"lineNum":2,"positionNum":21,"productName":"进-轮毒五价-L-默沙东-1/2ml/支-液其他口1","productNo":"79524002604","status":1,"updateBy":"admin","updateTime":"2025-03-12 14:57:08","vaccineId":2619,"vaccineNum":1,"vaccineUseNum":1}
+2025-03-12 14:59:09.438  INFO 42632 --- [main] c.y.v.s.s.s.v.i.VacMachineServiceImpl    : {"autoX":4830,"autoZ":1950,"boxNo":"A0209","boxSpecId":15,"boxSpecName":"80(8 70)","deleted":0,"expiredAt":1756656000000,"id":666,"ledNum":73,"lineNum":2,"positionNum":21,"productName":"进-轮毒五价-L-默沙东-1/2ml/支-液其他口1","productNo":"79524002604","status":1,"vaccineId":2619,"vaccineNum":2,"vaccineUseNum":2}
+2025-03-12 14:59:09.480  INFO 42632 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-03-12 14:59:10.197  INFO 42632 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-03-12 14:59:29.362  INFO 29224 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on 施林浩 with PID 29224 (started by 78671 in D:\work\yiwan\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2025-03-12 14:59:29.363  INFO 29224 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "test"
+2025-03-12 14:59:30.052  INFO 29224 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2025-03-12 14:59:30.055  INFO 29224 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-03-12 14:59:30.095  INFO 29224 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 28 ms. Found 0 Redis repository interfaces.
+2025-03-12 14:59:32.424  INFO 29224 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-03-12 14:59:32.544  INFO 29224 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-03-12 14:59:32.574  INFO 29224 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2025-03-12 14:59:32.624  INFO 29224 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2025-03-12 14:59:32.701  INFO 29224 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：C, 进行初始化
+2025-03-12 14:59:34.747  INFO 29224 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2025-03-12 14:59:34.763  INFO 29224 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 5.725 seconds (JVM running for 6.394)
+2025-03-12 14:59:34.775 ERROR 29224 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : 未知异常：
+
+java.nio.file.NoSuchFileException: .\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:192)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getSendVaccineRequest(ZcyRequestBuilder.java:103)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccineSendMsg(ZcyFunction.java:108)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccineSendMsg(VacTimer.java:92)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 14:59:34.778  INFO 29224 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : true
+2025-03-12 14:59:34.779 ERROR 29224 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : 未知异常：
+
+java.nio.file.NoSuchFileException: .\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:192)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getVaccineListRequest(ZcyRequestBuilder.java:57)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccine(ZcyFunction.java:57)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccine(VacTimer.java:50)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 14:59:35.364  INFO 29224 --- [main] c.y.v.s.s.s.v.i.VacMachineServiceImpl    : 不是同效期 老仓位
+2025-03-12 14:59:35.500  INFO 29224 --- [main] YuandiInjectiondispenserApplicationTests : {"autoX":2480,"autoZ":750,"deleted":0,"expiredAt":1756656000000,"ledNum":37,"lineNum":1,"machineId":635,"machineNo":"A0105","productName":"进-轮毒五价-L-默沙东-1/2ml/支-液其他口1","productNo":"79524002604","supervisedCode":"测试电子监管码","vaccineId":2619,"vaccineNum":6,"vaccineUseNum":6}
+2025-03-12 14:59:35.500  INFO 29224 --- [main] c.y.v.s.dispensing.SendDrugFunction      : 新增上药记录
+2025-03-12 14:59:35.540  INFO 29224 --- [main] c.y.v.s.s.s.v.i.VacMachineServiceImpl    : {"autoX":2480,"autoZ":750,"boxNo":"A0105","boxSpecId":15,"boxSpecName":"80(8 70)","createBy":"admin","createTime":"2024-06-19 10:05:20","deleted":0,"expiredAt":1761840000000,"id":635,"ledNum":37,"lineNum":1,"positionNum":25,"productName":"进-轮毒五价-L-默沙东-1/2ml/支-液其他口1","productNo":"79524002604","status":1,"updateBy":"admin","updateTime":"2025-03-12 14:41:55","vaccineId":2619,"vaccineNum":5,"vaccineUseNum":5}
+2025-03-12 14:59:35.544  INFO 29224 --- [main] c.y.v.s.s.s.v.i.VacMachineServiceImpl    : {"autoX":2480,"autoZ":750,"boxNo":"A0105","boxSpecId":15,"boxSpecName":"80(8 70)","deleted":0,"expiredAt":1756656000000,"id":635,"ledNum":37,"lineNum":1,"positionNum":25,"productName":"进-轮毒五价-L-默沙东-1/2ml/支-液其他口1","productNo":"79524002604","status":1,"vaccineId":2619,"vaccineNum":6,"vaccineUseNum":6}
+2025-03-12 14:59:35.577  INFO 29224 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-03-12 14:59:36.310  INFO 29224 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-03-12 15:06:46.365  INFO 13012 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on 施林浩 with PID 13012 (started by 78671 in D:\work\yiwan\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2025-03-12 15:06:46.366  INFO 13012 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "test"
+2025-03-12 15:06:47.091  INFO 13012 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2025-03-12 15:06:47.094  INFO 13012 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-03-12 15:06:47.137  INFO 13012 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 29 ms. Found 0 Redis repository interfaces.
+2025-03-12 15:06:49.560  INFO 13012 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-03-12 15:06:49.730  INFO 13012 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-03-12 15:06:49.761  INFO 13012 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2025-03-12 15:06:49.806  INFO 13012 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2025-03-12 15:06:49.844  INFO 13012 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：C, 进行初始化
+2025-03-12 15:06:51.971  INFO 13012 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2025-03-12 15:06:51.990  INFO 13012 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 6.029 seconds (JVM running for 6.87)
+2025-03-12 15:06:52.002 ERROR 13012 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : 未知异常：
+
+java.nio.file.NoSuchFileException: .\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:192)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getSendVaccineRequest(ZcyRequestBuilder.java:103)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccineSendMsg(ZcyFunction.java:108)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccineSendMsg(VacTimer.java:92)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 15:06:52.006  INFO 13012 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : true
+2025-03-12 15:06:52.006 ERROR 13012 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : 未知异常：
+
+java.nio.file.NoSuchFileException: .\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:192)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getVaccineListRequest(ZcyRequestBuilder.java:57)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccine(ZcyFunction.java:57)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccine(VacTimer.java:50)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 15:06:52.603  INFO 13012 --- [main] c.y.v.s.s.s.v.i.VacMachineServiceImpl    : 多人份新仓位
+2025-03-12 15:06:52.699  INFO 13012 --- [main] YuandiInjectiondispenserApplicationTests : {"autoX":200,"autoZ":3150,"deleted":0,"expiredAt":1756656000000,"ledNum":7,"lineNum":3,"machineId":685,"machineNo":"A0301","productName":"进-轮毒五价-L-默沙东-1/2ml/支-液其他口1","productNo":"79524002604","supervisedCode":"测试电子监管码","vaccineId":2619,"vaccineNum":1,"vaccineUseNum":1}
+2025-03-12 15:06:52.700  INFO 13012 --- [main] c.y.v.s.dispensing.SendDrugFunction      : 新增上药记录
+2025-03-12 15:06:52.748  INFO 13012 --- [main] c.y.v.s.s.s.v.i.VacMachineServiceImpl    : {"autoX":200,"autoZ":3150,"boxNo":"A0301","boxSpecId":15,"boxSpecName":"80(8 70)","createBy":"admin","createTime":"2024-06-19 10:05:20","deleted":0,"id":685,"ledNum":7,"lineNum":3,"positionNum":30,"status":1,"updateBy":"admin","updateTime":"2025-03-12 15:00:29"}
+2025-03-12 15:06:52.752  INFO 13012 --- [main] c.y.v.s.s.s.v.i.VacMachineServiceImpl    : {"autoX":200,"autoZ":3150,"boxNo":"A0301","boxSpecId":15,"boxSpecName":"80(8 70)","deleted":0,"expiredAt":1756656000000,"id":685,"ledNum":7,"lineNum":3,"positionNum":30,"productName":"进-轮毒五价-L-默沙东-1/2ml/支-液其他口1","productNo":"79524002604","status":2,"vaccineId":2619,"vaccineNum":1,"vaccineUseNum":1}
+2025-03-12 15:06:52.787  INFO 13012 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-03-12 15:06:53.503  INFO 13012 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-03-12 15:59:05.070  INFO 53720 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on 施林浩 with PID 53720 (started by 78671 in D:\work\yiwan\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2025-03-12 15:59:05.071  INFO 53720 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "test"
+2025-03-12 15:59:05.842  INFO 53720 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2025-03-12 15:59:05.845  INFO 53720 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-03-12 15:59:05.888  INFO 53720 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 31 ms. Found 0 Redis repository interfaces.
+2025-03-12 15:59:08.406  INFO 53720 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-03-12 15:59:08.573  INFO 53720 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-03-12 15:59:08.600  INFO 53720 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2025-03-12 15:59:08.640  INFO 53720 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2025-03-12 15:59:08.691  INFO 53720 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：C, 进行初始化
+2025-03-12 15:59:11.064  INFO 53720 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2025-03-12 15:59:11.086  INFO 53720 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 6.377 seconds (JVM running for 7.065)
+2025-03-12 15:59:11.093  INFO 53720 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : true
+2025-03-12 15:59:11.096 ERROR 53720 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : 未知异常：
+
+java.nio.file.NoSuchFileException: .\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:192)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getVaccineListRequest(ZcyRequestBuilder.java:57)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccine(ZcyFunction.java:57)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccine(VacTimer.java:50)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 15:59:11.102 ERROR 53720 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : 未知异常：
+
+java.nio.file.NoSuchFileException: .\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:192)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getSendVaccineRequest(ZcyRequestBuilder.java:103)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccineSendMsg(ZcyFunction.java:108)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccineSendMsg(VacTimer.java:92)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 15:59:11.665  INFO 53720 --- [main] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 01 00 0C 01 04 01 00 5A 6C 55
+2025-03-12 15:59:12.025  INFO 53720 --- [main] c.y.v.s.dispensing.DispensingFunction    : 添加发药处方：{"beltNum":2,"boxNo":"A0301","lineNum":3,"machineId":685,"positionNum":30,"productName":"进-轮毒五价-L-默沙东-1/2ml/支-液其他口1","productNo":"79524002604","requestNo":"requestNo","taskId":"811cfa5e-3289-4139-9d3c-99db2539b38f","uuid":"f57fafff-022c-4151-b24d-de4314cafebe","workbenchNo":"69","workbenchNum":1}
+2025-03-12 15:59:12.045 ERROR 53720 --- [Dispensing-2] c.y.v.s.d.DispensingThreadManager        : 掉药任务被中断
+
+java.lang.InterruptedException: null
+	at java.base/java.util.concurrent.locks.AbstractQueuedSynchronizer.tryAcquireSharedNanos(AbstractQueuedSynchronizer.java:1081)
+	at java.base/java.util.concurrent.CountDownLatch.await(CountDownLatch.java:276)
+	at com.yiwan.vaccinedispenser.system.dispensing.DispensingThreadManager.lambda$moveBelt$5(DispensingThreadManager.java:190)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 15:59:12.046  INFO 53720 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-03-12 15:59:12.047 ERROR 53720 --- [Dispensing-3] c.y.v.s.dispensing.DispensingFunction    : 传送小皮带上有药 有异常
+2025-03-12 15:59:12.416  INFO 53720 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-03-12 15:59:26.744  INFO 1932 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on 施林浩 with PID 1932 (started by 78671 in D:\work\yiwan\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2025-03-12 15:59:26.745  INFO 1932 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "test"
+2025-03-12 15:59:27.351  INFO 1932 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2025-03-12 15:59:27.353  INFO 1932 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-03-12 15:59:27.391  INFO 1932 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 26 ms. Found 0 Redis repository interfaces.
+2025-03-12 15:59:29.747  INFO 1932 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-03-12 15:59:29.958  INFO 1932 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-03-12 15:59:29.987  INFO 1932 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2025-03-12 15:59:30.025  INFO 1932 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2025-03-12 15:59:30.076  INFO 1932 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：C, 进行初始化
+2025-03-12 15:59:32.179  INFO 1932 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2025-03-12 15:59:32.206  INFO 1932 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 5.795 seconds (JVM running for 6.445)
+2025-03-12 15:59:32.210  INFO 1932 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : true
+2025-03-12 15:59:32.212 ERROR 1932 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : 未知异常：
+
+java.nio.file.NoSuchFileException: .\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:192)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getVaccineListRequest(ZcyRequestBuilder.java:57)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccine(ZcyFunction.java:57)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccine(VacTimer.java:50)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 15:59:32.218 ERROR 1932 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : 未知异常：
+
+java.nio.file.NoSuchFileException: .\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:192)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getSendVaccineRequest(ZcyRequestBuilder.java:103)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccineSendMsg(ZcyFunction.java:108)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccineSendMsg(VacTimer.java:92)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 15:59:32.738  INFO 1932 --- [main] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 01 00 0C 01 04 01 00 5A 6C 55
+2025-03-12 15:59:33.181  INFO 1932 --- [main] c.y.v.s.dispensing.DispensingFunction    : 添加发药处方：{"beltNum":1,"boxNo":"A0101","lineNum":1,"machineId":631,"positionNum":30,"productName":"进-轮毒五价-L-默沙东-1/2ml/支-液其他口1","productNo":"79524002604","requestNo":"requestNo","taskId":"9e028f89-dba5-460d-a51c-e1edd71212e7","uuid":"c974eecc-b9f5-4101-825b-57c880786b34","workbenchNo":"69","workbenchNum":1}
+2025-03-12 15:59:33.210 ERROR 1932 --- [Dispensing-2] c.y.v.s.d.DispensingThreadManager        : 掉药任务被中断
+
+java.lang.InterruptedException: null
+	at java.base/java.util.concurrent.locks.AbstractQueuedSynchronizer.tryAcquireSharedNanos(AbstractQueuedSynchronizer.java:1081)
+	at java.base/java.util.concurrent.CountDownLatch.await(CountDownLatch.java:276)
+	at com.yiwan.vaccinedispenser.system.dispensing.DispensingThreadManager.lambda$moveBelt$5(DispensingThreadManager.java:190)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 15:59:33.211  INFO 1932 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-03-12 15:59:33.212 ERROR 1932 --- [Dispensing-3] c.y.v.s.dispensing.DispensingFunction    : 传送小皮带上有药 有异常
+2025-03-12 15:59:33.741  INFO 1932 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-03-12 16:04:27.922  INFO 47756 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on 施林浩 with PID 47756 (started by 78671 in D:\work\yiwan\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2025-03-12 16:04:27.924  INFO 47756 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "test"
+2025-03-12 16:04:28.623  INFO 47756 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2025-03-12 16:04:28.625  INFO 47756 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-03-12 16:04:28.673  INFO 47756 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 36 ms. Found 0 Redis repository interfaces.
+2025-03-12 16:04:31.051  INFO 47756 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-03-12 16:04:31.168  INFO 47756 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-03-12 16:04:31.204  INFO 47756 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2025-03-12 16:04:31.246  INFO 47756 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2025-03-12 16:04:31.290  INFO 47756 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：C, 进行初始化
+2025-03-12 16:04:33.162  INFO 47756 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2025-03-12 16:04:33.183  INFO 47756 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 5.588 seconds (JVM running for 6.215)
+2025-03-12 16:04:33.204 ERROR 47756 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : 未知异常：
+
+java.nio.file.NoSuchFileException: .\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:192)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getSendVaccineRequest(ZcyRequestBuilder.java:103)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccineSendMsg(ZcyFunction.java:108)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccineSendMsg(VacTimer.java:92)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 16:04:33.210  INFO 47756 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : true
+2025-03-12 16:04:33.210 ERROR 47756 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : 未知异常：
+
+java.nio.file.NoSuchFileException: .\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:192)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getVaccineListRequest(ZcyRequestBuilder.java:57)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccine(ZcyFunction.java:57)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccine(VacTimer.java:50)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 16:04:33.759  INFO 47756 --- [main] c.y.v.s.dispensing.DispensingFunction    : 开始减库存==================
+2025-03-12 16:04:33.847  INFO 47756 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-03-12 16:04:34.901  INFO 47756 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-03-12 16:08:10.576  INFO 3768 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on 施林浩 with PID 3768 (started by 78671 in D:\work\yiwan\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2025-03-12 16:08:10.577  INFO 3768 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "test"
+2025-03-12 16:08:11.261  INFO 3768 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2025-03-12 16:08:11.263  INFO 3768 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-03-12 16:08:11.302  INFO 3768 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 27 ms. Found 0 Redis repository interfaces.
+2025-03-12 16:08:13.578  INFO 3768 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-03-12 16:08:13.719  INFO 3768 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-03-12 16:08:13.746  INFO 3768 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2025-03-12 16:08:13.799  INFO 3768 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2025-03-12 16:08:13.840  INFO 3768 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：C, 进行初始化
+2025-03-12 16:08:16.041  INFO 3768 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2025-03-12 16:08:16.059  INFO 3768 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 5.828 seconds (JVM running for 6.55)
+2025-03-12 16:08:16.068 ERROR 3768 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : 未知异常：
+
+java.nio.file.NoSuchFileException: .\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:192)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getSendVaccineRequest(ZcyRequestBuilder.java:103)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccineSendMsg(ZcyFunction.java:108)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccineSendMsg(VacTimer.java:92)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 16:08:16.072  INFO 3768 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : true
+2025-03-12 16:08:16.072 ERROR 3768 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : 未知异常：
+
+java.nio.file.NoSuchFileException: .\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:192)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getVaccineListRequest(ZcyRequestBuilder.java:57)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccine(ZcyFunction.java:57)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccine(VacTimer.java:50)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 16:08:16.623  INFO 3768 --- [main] c.y.v.s.dispensing.DispensingFunction    : 开始减库存==================
+2025-03-12 16:08:16.705  INFO 3768 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-03-12 16:08:17.490  INFO 3768 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-03-12 16:08:58.081  INFO 35768 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on 施林浩 with PID 35768 (started by 78671 in D:\work\yiwan\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2025-03-12 16:08:58.082  INFO 35768 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "test"
+2025-03-12 16:08:58.731  INFO 35768 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2025-03-12 16:08:58.735  INFO 35768 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-03-12 16:08:58.781  INFO 35768 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 29 ms. Found 0 Redis repository interfaces.
+2025-03-12 16:09:01.259  INFO 35768 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-03-12 16:09:01.406  INFO 35768 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-03-12 16:09:01.441  INFO 35768 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2025-03-12 16:09:01.491  INFO 35768 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2025-03-12 16:09:01.545  INFO 35768 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：C, 进行初始化
+2025-03-12 16:09:03.660  INFO 35768 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2025-03-12 16:09:03.682  INFO 35768 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 5.961 seconds (JVM running for 6.731)
+2025-03-12 16:09:03.691 ERROR 35768 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : 未知异常：
+
+java.nio.file.NoSuchFileException: .\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:192)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getSendVaccineRequest(ZcyRequestBuilder.java:103)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccineSendMsg(ZcyFunction.java:108)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccineSendMsg(VacTimer.java:92)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 16:09:03.695  INFO 35768 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : true
+2025-03-12 16:09:03.696 ERROR 35768 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : 未知异常：
+
+java.nio.file.NoSuchFileException: .\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:192)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getVaccineListRequest(ZcyRequestBuilder.java:57)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccine(ZcyFunction.java:57)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccine(VacTimer.java:50)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 16:09:04.286  INFO 35768 --- [main] c.y.v.s.dispensing.DispensingFunction    : 开始减库存==================
+2025-03-12 16:09:04.365  INFO 35768 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-03-12 16:09:05.225  INFO 35768 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-03-12 16:09:39.007  INFO 35164 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on 施林浩 with PID 35164 (started by 78671 in D:\work\yiwan\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2025-03-12 16:09:39.008  INFO 35164 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "test"
+2025-03-12 16:09:39.714  INFO 35164 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2025-03-12 16:09:39.716  INFO 35164 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-03-12 16:09:39.759  INFO 35164 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 30 ms. Found 0 Redis repository interfaces.
+2025-03-12 16:09:42.220  INFO 35164 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-03-12 16:09:42.442  INFO 35164 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-03-12 16:09:42.473  INFO 35164 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2025-03-12 16:09:42.515  INFO 35164 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2025-03-12 16:09:42.555  INFO 35164 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：C, 进行初始化
+2025-03-12 16:09:44.646  INFO 35164 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2025-03-12 16:09:44.669  INFO 35164 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 6.021 seconds (JVM running for 6.763)
+2025-03-12 16:09:44.674  INFO 35164 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : true
+2025-03-12 16:09:44.678 ERROR 35164 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : 未知异常：
+
+java.nio.file.NoSuchFileException: .\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:192)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getVaccineListRequest(ZcyRequestBuilder.java:57)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccine(ZcyFunction.java:57)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccine(VacTimer.java:50)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 16:09:44.686 ERROR 35164 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : 未知异常：
+
+java.nio.file.NoSuchFileException: .\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:192)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getSendVaccineRequest(ZcyRequestBuilder.java:103)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccineSendMsg(ZcyFunction.java:108)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccineSendMsg(VacTimer.java:92)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 16:09:45.222  INFO 35164 --- [main] c.y.v.s.dispensing.DispensingFunction    : 开始减库存==================
+2025-03-12 16:09:45.301  INFO 35164 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-03-12 16:09:46.204  INFO 35164 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-03-12 16:12:24.078  INFO 10388 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on 施林浩 with PID 10388 (started by 78671 in D:\work\yiwan\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2025-03-12 16:12:24.079  INFO 10388 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "test"
+2025-03-12 16:12:24.754  INFO 10388 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2025-03-12 16:12:24.756  INFO 10388 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-03-12 16:12:24.809  INFO 10388 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 35 ms. Found 0 Redis repository interfaces.
+2025-03-12 16:12:27.249  INFO 10388 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-03-12 16:12:27.360  INFO 10388 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-03-12 16:12:27.391  INFO 10388 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2025-03-12 16:12:27.438  INFO 10388 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2025-03-12 16:12:27.479  INFO 10388 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：C, 进行初始化
+2025-03-12 16:12:29.645  INFO 10388 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2025-03-12 16:12:29.663  INFO 10388 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 5.956 seconds (JVM running for 6.729)
+2025-03-12 16:12:29.672 ERROR 10388 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : 未知异常：
+
+java.nio.file.NoSuchFileException: .\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:192)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getSendVaccineRequest(ZcyRequestBuilder.java:103)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccineSendMsg(ZcyFunction.java:108)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccineSendMsg(VacTimer.java:92)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 16:12:29.677  INFO 10388 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : true
+2025-03-12 16:12:29.677 ERROR 10388 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : 未知异常：
+
+java.nio.file.NoSuchFileException: .\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:192)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getVaccineListRequest(ZcyRequestBuilder.java:57)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccine(ZcyFunction.java:57)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccine(VacTimer.java:50)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 16:12:30.300  INFO 10388 --- [main] c.y.v.s.dispensing.DispensingFunction    : 开始减库存==================
+2025-03-12 16:12:30.394  INFO 10388 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-03-12 16:12:31.142  INFO 10388 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-03-12 16:12:43.791  INFO 22220 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on 施林浩 with PID 22220 (started by 78671 in D:\work\yiwan\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2025-03-12 16:12:43.792  INFO 22220 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "test"
+2025-03-12 16:12:44.545  INFO 22220 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2025-03-12 16:12:44.547  INFO 22220 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-03-12 16:12:44.603  INFO 22220 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 40 ms. Found 0 Redis repository interfaces.
+2025-03-12 16:12:46.926  INFO 22220 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-03-12 16:12:47.109  INFO 22220 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-03-12 16:12:47.138  INFO 22220 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2025-03-12 16:12:47.189  INFO 22220 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2025-03-12 16:12:47.232  INFO 22220 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：C, 进行初始化
+2025-03-12 16:12:49.547  INFO 22220 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2025-03-12 16:12:49.571  INFO 22220 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 6.142 seconds (JVM running for 6.908)
+2025-03-12 16:12:49.581 ERROR 22220 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : 未知异常：
+
+java.nio.file.NoSuchFileException: .\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:192)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getSendVaccineRequest(ZcyRequestBuilder.java:103)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccineSendMsg(ZcyFunction.java:108)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccineSendMsg(VacTimer.java:92)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 16:12:49.585  INFO 22220 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : true
+2025-03-12 16:12:49.586 ERROR 22220 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : 未知异常：
+
+java.nio.file.NoSuchFileException: .\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:192)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getVaccineListRequest(ZcyRequestBuilder.java:57)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccine(ZcyFunction.java:57)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccine(VacTimer.java:50)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2025-03-12 16:12:50.169  INFO 22220 --- [main] c.y.v.s.dispensing.DispensingFunction    : 开始减库存==================
+2025-03-12 16:12:50.250  INFO 22220 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-03-12 16:12:50.859  INFO 22220 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.

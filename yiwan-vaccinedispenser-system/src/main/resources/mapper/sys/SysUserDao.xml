@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.yiwan.vaccinedispenser.system.sys.dao.SysUserDao">
+
+    <!-- 获取用户列表 -->
+    <select id="getList" resultType="com.yiwan.vaccinedispenser.system.domain.model.system.SysUser">
+        SELECT su.*
+        FROM sys_user su
+        WHERE su.deleted = false and su.types = 0
+        <if test="username != null and username != ''">
+            AND (su.user_name like concat('%',#{username},'%') or su.real_name like concat('%',#{username},'%'))
+        </if>
+        <if test="status != null">
+            AND su.status = #{status}
+        </if>
+        order by su.create_time DESC
+        <if test="start != null and size != null">
+            limit #{start},#{size}
+        </if>
+    </select>
+
+    <select id="getCnt" resultType="java.lang.Integer">
+        SELECT count(*)
+        FROM sys_user su
+        WHERE su.deleted = false and su.types = 0
+        <if test="username != null and username != ''">
+            AND (su.user_name like concat('%',#{username},'%') or su.real_name like concat('%',#{username},'%'))
+        </if>
+        <if test="status != null">
+            AND su.status = #{status}
+        </if>
+    </select>
+
+</mapper>

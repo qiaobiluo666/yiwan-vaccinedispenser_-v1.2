@@ -1,0 +1,277 @@
+2025-05-12 11:21:18.086  INFO 6192 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on 施林浩 with PID 6192 (started by 78671 in D:\work\yiwan\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2025-05-12 11:21:18.088  INFO 6192 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "test"
+2025-05-12 11:21:18.921  INFO 6192 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2025-05-12 11:21:18.923  INFO 6192 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-05-12 11:21:19.027  INFO 6192 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 78 ms. Found 0 Redis repository interfaces.
+2025-05-12 11:21:22.604  INFO 6192 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-05-12 11:21:22.750  INFO 6192 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-05-12 11:21:22.781  INFO 6192 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2025-05-12 11:21:22.848  INFO 6192 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2025-05-12 11:21:22.948  INFO 6192 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：C, 进行初始化
+2025-05-12 11:21:23.657  INFO 6192 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.d.DispensingThreadManager        : 查询是否关闭
+2025-05-12 11:21:23.664  INFO 6192 --- [main] c.y.v.system.dispensing.TaskService      : 任务1：07:50:00
+2025-05-12 11:21:23.671  INFO 6192 --- [main] c.y.v.system.dispensing.TaskService      : 任务2：11:00:00
+2025-05-12 11:21:23.675  INFO 6192 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 01 00 0C 01 03 00 03 AA 3C 55
+2025-05-12 11:21:24.405  INFO 6192 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 02 00 0C 01 03 00 03 99 3C 55
+2025-05-12 11:21:25.123  INFO 6192 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 03 00 0C 01 03 00 03 89 FC 55
+2025-05-12 11:21:25.389  INFO 6192 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2025-05-12 11:21:25.424  INFO 6192 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : false
+2025-05-12 11:21:25.427  INFO 6192 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 7.748 seconds (JVM running for 8.686)
+2025-05-12 11:21:25.428  INFO 6192 --- [scheduling-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 04 00 0C 01 03 00 03 FF 3C 55
+2025-05-12 11:21:25.830  INFO 6192 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 05 00 0C 01 03 00 03 EF FC 55
+2025-05-12 11:21:26.241  INFO 6192 --- [main] c.y.v.s.dispensing.DispensingFunction    : 抬升走到距离：0
+2025-05-12 11:21:26.244  INFO 6192 --- [main] c.y.v.s.s.s.n.impl.CabinetAServiceImpl   : 0x0A A柜柜-0x03 伺服：A5 5A 0D 00 06 00 0A 03 01 09 00 00 00 00 00 36 80 55
+2025-05-12 11:21:26.546  INFO 6192 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 07 00 0C 01 03 00 03 CC 3C 55
+2025-05-12 11:21:27.273  INFO 6192 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 08 00 0C 01 03 00 03 33 3C 55
+2025-05-12 11:21:27.992  INFO 6192 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 09 00 0C 01 03 00 03 23 FC 55
+2025-05-12 11:21:28.708  INFO 6192 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 0A 00 0C 01 03 00 03 10 FC 55
+2025-05-12 11:21:29.423  INFO 6192 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 0B 00 0C 01 03 00 03 00 3C 55
+2025-05-12 11:21:30.141  INFO 6192 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 0C 00 0C 01 03 00 03 76 FC 55
+2025-05-12 11:21:30.857  INFO 6192 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 0D 00 0C 01 03 00 03 66 3C 55
+2025-05-12 11:21:31.572  INFO 6192 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 0E 00 0C 01 03 00 03 55 3C 55
+2025-05-12 11:21:32.290  INFO 6192 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 0F 00 0C 01 03 00 03 45 FC 55
+2025-05-12 11:21:33.004  INFO 6192 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 10 00 0C 01 03 00 03 AB 3D 55
+2025-05-12 11:21:33.719  INFO 6192 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 11 00 0C 01 03 00 03 BB FD 55
+2025-05-12 11:21:34.434  INFO 6192 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 12 00 0C 01 03 00 03 88 FD 55
+2025-05-12 11:21:35.151  INFO 6192 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 13 00 0C 01 03 00 03 98 3D 55
+2025-05-12 11:21:35.865  INFO 6192 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 14 00 0C 01 03 00 03 EE FD 55
+2025-05-12 11:21:36.434  INFO 6192 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-05-12 11:21:36.458  INFO 6192 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-05-12 11:21:36.584  INFO 6192 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 15 00 0C 01 03 00 03 FE 3D 55
+2025-05-12 11:21:45.282  INFO 7740 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on 施林浩 with PID 7740 (started by 78671 in D:\work\yiwan\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2025-05-12 11:21:45.284  INFO 7740 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "test"
+2025-05-12 11:21:46.055  INFO 7740 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2025-05-12 11:21:46.058  INFO 7740 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-05-12 11:21:46.115  INFO 7740 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 45 ms. Found 0 Redis repository interfaces.
+2025-05-12 11:21:48.900  INFO 7740 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-05-12 11:21:49.054  INFO 7740 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-05-12 11:21:49.082  INFO 7740 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2025-05-12 11:21:49.135  INFO 7740 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2025-05-12 11:21:49.197  INFO 7740 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：C, 进行初始化
+2025-05-12 11:21:50.120  INFO 7740 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.d.DispensingThreadManager        : 查询是否关闭
+2025-05-12 11:21:50.123  INFO 7740 --- [main] c.y.v.system.dispensing.TaskService      : 任务1：07:50:00
+2025-05-12 11:21:50.128  INFO 7740 --- [main] c.y.v.system.dispensing.TaskService      : 任务2：11:00:00
+2025-05-12 11:21:50.153  INFO 7740 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 01 00 0C 01 03 00 03 AA 3C 55
+2025-05-12 11:21:50.878  INFO 7740 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 02 00 0C 01 03 00 03 99 3C 55
+2025-05-12 11:21:51.595  INFO 7740 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 03 00 0C 01 03 00 03 89 FC 55
+2025-05-12 11:21:52.113  INFO 7740 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2025-05-12 11:21:52.151  INFO 7740 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : false
+2025-05-12 11:21:52.156  INFO 7740 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 7.2 seconds (JVM running for 7.991)
+2025-05-12 11:21:52.157  INFO 7740 --- [scheduling-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 04 00 0C 01 03 00 03 FF 3C 55
+2025-05-12 11:21:52.312  INFO 7740 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 05 00 0C 01 03 00 03 EF FC 55
+2025-05-12 11:21:52.986  INFO 7740 --- [main] c.y.v.s.dispensing.DispensingFunction    : 抬升走到距离：0
+2025-05-12 11:21:52.988  INFO 7740 --- [main] c.y.v.s.s.s.n.impl.CabinetAServiceImpl   : 0x0A A柜柜-0x03 伺服：A5 5A 0D 00 06 00 0A 03 01 09 00 00 00 00 00 36 80 55
+2025-05-12 11:21:53.017  INFO 7740 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 07 00 0C 01 03 00 03 CC 3C 55
+2025-05-12 11:21:53.733  INFO 7740 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 08 00 0C 01 03 00 03 33 3C 55
+2025-05-12 11:21:54.450  INFO 7740 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 09 00 0C 01 03 00 03 23 FC 55
+2025-05-12 11:21:55.350  INFO 7740 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 0A 00 0C 01 03 00 03 10 FC 55
+2025-05-12 11:21:56.071  INFO 7740 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 0B 00 0C 01 03 00 03 00 3C 55
+2025-05-12 11:21:56.795  INFO 7740 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 0C 00 0C 01 03 00 03 76 FC 55
+2025-05-12 11:21:57.518  INFO 7740 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 0D 00 0C 01 03 00 03 66 3C 55
+2025-05-12 11:21:58.231  INFO 7740 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 0E 00 0C 01 03 00 03 55 3C 55
+2025-05-12 11:21:58.943  INFO 7740 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 0F 00 0C 01 03 00 03 45 FC 55
+2025-05-12 11:21:59.653  INFO 7740 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 10 00 0C 01 03 00 03 AB 3D 55
+2025-05-12 11:22:00.375  INFO 7740 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 11 00 0C 01 03 00 03 BB FD 55
+2025-05-12 11:22:01.088  INFO 7740 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 12 00 0C 01 03 00 03 88 FD 55
+2025-05-12 11:22:01.799  INFO 7740 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 13 00 0C 01 03 00 03 98 3D 55
+2025-05-12 11:22:02.515  INFO 7740 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 14 00 0C 01 03 00 03 EE FD 55
+2025-05-12 11:22:03.150  INFO 7740 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-05-12 11:22:03.170  INFO 7740 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-05-12 11:22:03.237  INFO 7740 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 15 00 0C 01 03 00 03 FE 3D 55
+2025-05-12 11:22:12.146  INFO 23712 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on 施林浩 with PID 23712 (started by 78671 in D:\work\yiwan\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2025-05-12 11:22:12.147  INFO 23712 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "test"
+2025-05-12 11:22:12.863  INFO 23712 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2025-05-12 11:22:12.865  INFO 23712 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-05-12 11:22:12.921  INFO 23712 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 38 ms. Found 0 Redis repository interfaces.
+2025-05-12 11:22:15.861  INFO 23712 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-05-12 11:22:16.075  INFO 23712 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-05-12 11:22:16.104  INFO 23712 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2025-05-12 11:22:16.151  INFO 23712 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2025-05-12 11:22:16.270  INFO 23712 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：C, 进行初始化
+2025-05-12 11:22:17.185  INFO 23712 --- [main] c.y.v.system.dispensing.TaskService      : 任务1：07:50:00
+2025-05-12 11:22:17.185  INFO 23712 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.d.DispensingThreadManager        : 查询是否关闭
+2025-05-12 11:22:17.189  INFO 23712 --- [main] c.y.v.system.dispensing.TaskService      : 任务2：11:00:00
+2025-05-12 11:22:17.199  INFO 23712 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 01 00 0C 01 03 00 03 AA 3C 55
+2025-05-12 11:22:17.911  INFO 23712 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 02 00 0C 01 03 00 03 99 3C 55
+2025-05-12 11:22:18.617  INFO 23712 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 03 00 0C 01 03 00 03 89 FC 55
+2025-05-12 11:22:19.227  INFO 23712 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2025-05-12 11:22:19.253  INFO 23712 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : false
+2025-05-12 11:22:19.253  INFO 23712 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 7.462 seconds (JVM running for 8.205)
+2025-05-12 11:22:19.261  INFO 23712 --- [scheduling-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 04 00 0C 01 03 00 03 FF 3C 55
+2025-05-12 11:22:19.331  INFO 23712 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 05 00 0C 01 03 00 03 EF FC 55
+2025-05-12 11:22:19.904  INFO 23712 --- [main] c.y.v.s.dispensing.DispensingFunction    : 抬升走到距离：null
+2025-05-12 11:22:19.967  INFO 23712 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-05-12 11:22:19.990  INFO 23712 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-05-12 11:22:20.045  INFO 23712 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 07 00 0C 01 03 00 03 CC 3C 55
+2025-05-12 11:23:23.822  INFO 24468 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on 施林浩 with PID 24468 (started by 78671 in D:\work\yiwan\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2025-05-12 11:23:23.823  INFO 24468 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "test"
+2025-05-12 11:23:24.689  INFO 24468 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2025-05-12 11:23:24.693  INFO 24468 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-05-12 11:23:24.772  INFO 24468 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 56 ms. Found 0 Redis repository interfaces.
+2025-05-12 11:23:28.218  INFO 24468 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-05-12 11:23:28.362  INFO 24468 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-05-12 11:23:28.395  INFO 24468 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2025-05-12 11:23:28.454  INFO 24468 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2025-05-12 11:23:28.569  INFO 24468 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：C, 进行初始化
+2025-05-12 11:23:29.539  INFO 24468 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.d.DispensingThreadManager        : 查询是否关闭
+2025-05-12 11:23:29.542  INFO 24468 --- [main] c.y.v.system.dispensing.TaskService      : 任务1：07:50:00
+2025-05-12 11:23:29.548  INFO 24468 --- [main] c.y.v.system.dispensing.TaskService      : 任务2：11:00:00
+2025-05-12 11:23:29.560  INFO 24468 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 01 00 0C 01 03 00 03 AA 3C 55
+2025-05-12 11:23:30.305  INFO 24468 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 02 00 0C 01 03 00 03 99 3C 55
+2025-05-12 11:23:31.018  INFO 24468 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 03 00 0C 01 03 00 03 89 FC 55
+2025-05-12 11:23:31.728  INFO 24468 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 04 00 0C 01 03 00 03 FF 3C 55
+2025-05-12 11:23:31.791  INFO 24468 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2025-05-12 11:23:31.815  INFO 24468 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 8.398 seconds (JVM running for 9.221)
+2025-05-12 11:23:31.817  INFO 24468 --- [scheduling-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 05 00 0C 01 03 00 03 EF FC 55
+2025-05-12 11:23:32.035  INFO 24468 --- [scheduling-1] c.y.v.system.dispensing.VacTimer         : false
+2025-05-12 11:23:32.401  INFO 24468 --- [main] c.y.v.s.dispensing.DispensingFunction    : 抬升走到距离：2000
+2025-05-12 11:23:32.404  INFO 24468 --- [main] c.y.v.s.s.s.n.impl.CabinetAServiceImpl   : 0x0A A柜柜-0x03 伺服：A5 5A 0D 00 06 00 0A 03 01 09 00 D0 07 00 00 BF 81 55
+2025-05-12 11:23:32.434  INFO 24468 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 07 00 0C 01 03 00 03 CC 3C 55
+2025-05-12 11:23:33.160  INFO 24468 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 08 00 0C 01 03 00 03 33 3C 55
+2025-05-12 11:23:33.880  INFO 24468 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 09 00 0C 01 03 00 03 23 FC 55
+2025-05-12 11:23:34.594  INFO 24468 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 0A 00 0C 01 03 00 03 10 FC 55
+2025-05-12 11:23:35.309  INFO 24468 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 0B 00 0C 01 03 00 03 00 3C 55
+2025-05-12 11:23:36.025  INFO 24468 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 0C 00 0C 01 03 00 03 76 FC 55
+2025-05-12 11:23:36.741  INFO 24468 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 0D 00 0C 01 03 00 03 66 3C 55
+2025-05-12 11:23:37.456  INFO 24468 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 0E 00 0C 01 03 00 03 55 3C 55
+2025-05-12 11:23:38.173  INFO 24468 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 0F 00 0C 01 03 00 03 45 FC 55
+2025-05-12 11:23:38.890  INFO 24468 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 10 00 0C 01 03 00 03 AB 3D 55
+2025-05-12 11:23:39.604  INFO 24468 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 11 00 0C 01 03 00 03 BB FD 55
+2025-05-12 11:23:40.379  INFO 24468 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 12 00 0C 01 03 00 03 88 FD 55
+2025-05-12 11:23:41.101  INFO 24468 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 13 00 0C 01 03 00 03 98 3D 55
+2025-05-12 11:23:41.818  INFO 24468 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 14 00 0C 01 03 00 03 EE FD 55
+2025-05-12 11:23:42.534  INFO 24468 --- [ForkJoinPool.commonPool-worker-1] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 15 00 0C 01 03 00 03 FE 3D 55
+2025-05-12 11:23:42.568  INFO 24468 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-05-12 11:23:42.602  INFO 24468 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-05-12 11:23:42.758  WARN 24468 --- [ForkJoinPool.commonPool-worker-1] io.netty.channel.AbstractChannel         : Force-closing a channel whose registration task was not accepted by an event loop: [id: 0xf0c03875]
+
+java.util.concurrent.RejectedExecutionException: event executor terminated
+	at io.netty.util.concurrent.SingleThreadEventExecutor.reject(SingleThreadEventExecutor.java:934)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.offerTask(SingleThreadEventExecutor.java:351)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.addTask(SingleThreadEventExecutor.java:344)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.execute(SingleThreadEventExecutor.java:836)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.execute0(SingleThreadEventExecutor.java:827)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.execute(SingleThreadEventExecutor.java:817)
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.register(AbstractChannel.java:483)
+	at io.netty.channel.SingleThreadEventLoop.register(SingleThreadEventLoop.java:89)
+	at io.netty.channel.SingleThreadEventLoop.register(SingleThreadEventLoop.java:83)
+	at io.netty.channel.MultithreadEventLoopGroup.register(MultithreadEventLoopGroup.java:86)
+	at io.netty.bootstrap.AbstractBootstrap.initAndRegister(AbstractBootstrap.java:323)
+	at io.netty.bootstrap.Bootstrap.doResolveAndConnect(Bootstrap.java:155)
+	at io.netty.bootstrap.Bootstrap.connect(Bootstrap.java:139)
+	at io.lettuce.core.AbstractRedisClient.initializeChannelAsync0(AbstractRedisClient.java:409)
+	at io.lettuce.core.AbstractRedisClient.lambda$initializeChannelAsync$2(AbstractRedisClient.java:391)
+	at reactor.core.publisher.LambdaMonoSubscriber.onNext(LambdaMonoSubscriber.java:171)
+	at reactor.core.publisher.FluxOnAssembly$OnAssemblySubscriber.onNext(FluxOnAssembly.java:539)
+	at reactor.core.publisher.FluxPeekFuseable$PeekFuseableSubscriber.onNext(FluxPeekFuseable.java:210)
+	at reactor.core.publisher.FluxOnAssembly$OnAssemblySubscriber.onNext(FluxOnAssembly.java:539)
+	at reactor.core.publisher.MonoPeekTerminal$MonoTerminalPeekSubscriber.onNext(MonoPeekTerminal.java:180)
+	at reactor.core.publisher.FluxOnAssembly$OnAssemblySubscriber.onNext(FluxOnAssembly.java:539)
+	at reactor.core.publisher.FluxPeekFuseable$PeekFuseableConditionalSubscriber.onNext(FluxPeekFuseable.java:503)
+	at reactor.core.publisher.FluxOnAssembly$OnAssemblySubscriber.onNext(FluxOnAssembly.java:539)
+	at reactor.core.publisher.FluxOnAssembly$OnAssemblySubscriber.onNext(FluxOnAssembly.java:539)
+	at reactor.core.publisher.Operators$MonoSubscriber.complete(Operators.java:1839)
+	at reactor.core.publisher.MonoCallable.subscribe(MonoCallable.java:62)
+	at reactor.core.publisher.InternalMonoOperator.subscribe(InternalMonoOperator.java:64)
+	at reactor.core.publisher.MonoDefer.subscribe(MonoDefer.java:52)
+	at reactor.core.publisher.Mono.subscribe(Mono.java:4490)
+	at reactor.core.publisher.Mono.subscribeWith(Mono.java:4605)
+	at reactor.core.publisher.Mono.subscribe(Mono.java:4457)
+	at reactor.core.publisher.Mono.subscribe(Mono.java:4393)
+	at reactor.core.publisher.Mono.subscribe(Mono.java:4365)
+	at io.lettuce.core.AbstractRedisClient.initializeChannelAsync(AbstractRedisClient.java:386)
+	at io.lettuce.core.RedisClient.connectStatefulAsync(RedisClient.java:325)
+	at io.lettuce.core.RedisClient.connectStandaloneAsync(RedisClient.java:287)
+	at io.lettuce.core.RedisClient.connect(RedisClient.java:216)
+	at org.springframework.data.redis.connection.lettuce.StandaloneConnectionProvider.lambda$getConnection$1(StandaloneConnectionProvider.java:115)
+	at java.base/java.util.Optional.orElseGet(Optional.java:364)
+	at org.springframework.data.redis.connection.lettuce.StandaloneConnectionProvider.getConnection(StandaloneConnectionProvider.java:115)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory$ExceptionTranslatingConnectionProvider.getConnection(LettuceConnectionFactory.java:1595)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory$SharedConnection.getNativeConnection(LettuceConnectionFactory.java:1383)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory$SharedConnection.getConnection(LettuceConnectionFactory.java:1366)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory.getSharedConnection(LettuceConnectionFactory.java:1093)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory.getConnection(LettuceConnectionFactory.java:421)
+	at org.springframework.data.redis.core.RedisConnectionUtils.fetchConnection(RedisConnectionUtils.java:193)
+	at org.springframework.data.redis.core.RedisConnectionUtils.doGetConnection(RedisConnectionUtils.java:144)
+	at org.springframework.data.redis.core.RedisConnectionUtils.getConnection(RedisConnectionUtils.java:105)
+	at org.springframework.data.redis.core.RedisTemplate.execute(RedisTemplate.java:211)
+	at org.springframework.data.redis.core.RedisTemplate.execute(RedisTemplate.java:191)
+	at org.springframework.data.redis.core.AbstractOperations.execute(AbstractOperations.java:97)
+	at org.springframework.data.redis.core.DefaultValueOperations.get(DefaultValueOperations.java:54)
+	at com.yiwan.vaccinedispenser.system.dispensing.DispensingFunction.closeBlank(DispensingFunction.java:815)
+	at com.yiwan.vaccinedispenser.system.dispensing.DispensingThreadManager.lambda$blankStatus$6(DispensingThreadManager.java:276)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncRun.run$$$capture(CompletableFuture.java:1804)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncRun.run(CompletableFuture.java)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncRun.exec(CompletableFuture.java:1796)
+	at java.base/java.util.concurrent.ForkJoinTask.doExec$$$capture(ForkJoinTask.java:373)
+	at java.base/java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java)
+	at java.base/java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(ForkJoinPool.java:1182)
+	at java.base/java.util.concurrent.ForkJoinPool.scan(ForkJoinPool.java:1655)
+	at java.base/java.util.concurrent.ForkJoinPool.runWorker(ForkJoinPool.java:1622)
+	at java.base/java.util.concurrent.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:165)
+
+2025-05-12 11:23:42.760 ERROR 24468 --- [ForkJoinPool.commonPool-worker-1] i.n.u.c.D.rejectedExecution              : Failed to submit a listener notification task. Event loop shut down?
+
+java.util.concurrent.RejectedExecutionException: event executor terminated
+	at io.netty.util.concurrent.SingleThreadEventExecutor.reject(SingleThreadEventExecutor.java:934)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.offerTask(SingleThreadEventExecutor.java:351)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.addTask(SingleThreadEventExecutor.java:344)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.execute(SingleThreadEventExecutor.java:836)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.execute0(SingleThreadEventExecutor.java:827)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.execute(SingleThreadEventExecutor.java:817)
+	at io.netty.util.concurrent.DefaultPromise.safeExecute(DefaultPromise.java:862)
+	at io.netty.util.concurrent.DefaultPromise.notifyListeners(DefaultPromise.java:500)
+	at io.netty.util.concurrent.DefaultPromise.addListener(DefaultPromise.java:185)
+	at io.netty.channel.DefaultChannelPromise.addListener(DefaultChannelPromise.java:95)
+	at io.netty.channel.DefaultChannelPromise.addListener(DefaultChannelPromise.java:30)
+	at io.lettuce.core.AbstractRedisClient.initializeChannelAsync0(AbstractRedisClient.java:418)
+	at io.lettuce.core.AbstractRedisClient.lambda$initializeChannelAsync$2(AbstractRedisClient.java:391)
+	at reactor.core.publisher.LambdaMonoSubscriber.onNext(LambdaMonoSubscriber.java:171)
+	at reactor.core.publisher.FluxOnAssembly$OnAssemblySubscriber.onNext(FluxOnAssembly.java:539)
+	at reactor.core.publisher.FluxPeekFuseable$PeekFuseableSubscriber.onNext(FluxPeekFuseable.java:210)
+	at reactor.core.publisher.FluxOnAssembly$OnAssemblySubscriber.onNext(FluxOnAssembly.java:539)
+	at reactor.core.publisher.MonoPeekTerminal$MonoTerminalPeekSubscriber.onNext(MonoPeekTerminal.java:180)
+	at reactor.core.publisher.FluxOnAssembly$OnAssemblySubscriber.onNext(FluxOnAssembly.java:539)
+	at reactor.core.publisher.FluxPeekFuseable$PeekFuseableConditionalSubscriber.onNext(FluxPeekFuseable.java:503)
+	at reactor.core.publisher.FluxOnAssembly$OnAssemblySubscriber.onNext(FluxOnAssembly.java:539)
+	at reactor.core.publisher.FluxOnAssembly$OnAssemblySubscriber.onNext(FluxOnAssembly.java:539)
+	at reactor.core.publisher.Operators$MonoSubscriber.complete(Operators.java:1839)
+	at reactor.core.publisher.MonoCallable.subscribe(MonoCallable.java:62)
+	at reactor.core.publisher.InternalMonoOperator.subscribe(InternalMonoOperator.java:64)
+	at reactor.core.publisher.MonoDefer.subscribe(MonoDefer.java:52)
+	at reactor.core.publisher.Mono.subscribe(Mono.java:4490)
+	at reactor.core.publisher.Mono.subscribeWith(Mono.java:4605)
+	at reactor.core.publisher.Mono.subscribe(Mono.java:4457)
+	at reactor.core.publisher.Mono.subscribe(Mono.java:4393)
+	at reactor.core.publisher.Mono.subscribe(Mono.java:4365)
+	at io.lettuce.core.AbstractRedisClient.initializeChannelAsync(AbstractRedisClient.java:386)
+	at io.lettuce.core.RedisClient.connectStatefulAsync(RedisClient.java:325)
+	at io.lettuce.core.RedisClient.connectStandaloneAsync(RedisClient.java:287)
+	at io.lettuce.core.RedisClient.connect(RedisClient.java:216)
+	at org.springframework.data.redis.connection.lettuce.StandaloneConnectionProvider.lambda$getConnection$1(StandaloneConnectionProvider.java:115)
+	at java.base/java.util.Optional.orElseGet(Optional.java:364)
+	at org.springframework.data.redis.connection.lettuce.StandaloneConnectionProvider.getConnection(StandaloneConnectionProvider.java:115)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory$ExceptionTranslatingConnectionProvider.getConnection(LettuceConnectionFactory.java:1595)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory$SharedConnection.getNativeConnection(LettuceConnectionFactory.java:1383)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory$SharedConnection.getConnection(LettuceConnectionFactory.java:1366)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory.getSharedConnection(LettuceConnectionFactory.java:1093)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory.getConnection(LettuceConnectionFactory.java:421)
+	at org.springframework.data.redis.core.RedisConnectionUtils.fetchConnection(RedisConnectionUtils.java:193)
+	at org.springframework.data.redis.core.RedisConnectionUtils.doGetConnection(RedisConnectionUtils.java:144)
+	at org.springframework.data.redis.core.RedisConnectionUtils.getConnection(RedisConnectionUtils.java:105)
+	at org.springframework.data.redis.core.RedisTemplate.execute(RedisTemplate.java:211)
+	at org.springframework.data.redis.core.RedisTemplate.execute(RedisTemplate.java:191)
+	at org.springframework.data.redis.core.AbstractOperations.execute(AbstractOperations.java:97)
+	at org.springframework.data.redis.core.DefaultValueOperations.get(DefaultValueOperations.java:54)
+	at com.yiwan.vaccinedispenser.system.dispensing.DispensingFunction.closeBlank(DispensingFunction.java:815)
+	at com.yiwan.vaccinedispenser.system.dispensing.DispensingThreadManager.lambda$blankStatus$6(DispensingThreadManager.java:276)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncRun.run$$$capture(CompletableFuture.java:1804)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncRun.run(CompletableFuture.java)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncRun.exec(CompletableFuture.java:1796)
+	at java.base/java.util.concurrent.ForkJoinTask.doExec$$$capture(ForkJoinTask.java:373)
+	at java.base/java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java)
+	at java.base/java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(ForkJoinPool.java:1182)
+	at java.base/java.util.concurrent.ForkJoinPool.scan(ForkJoinPool.java:1655)
+	at java.base/java.util.concurrent.ForkJoinPool.runWorker(ForkJoinPool.java:1622)
+	at java.base/java.util.concurrent.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:165)
+

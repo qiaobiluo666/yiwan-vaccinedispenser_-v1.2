@@ -1,0 +1,51 @@
+spring:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource  #com.alibaba.druid.pool.DruidDataSource
+    url: jdbc:mysql://127.0.0.1:3306/vaccine_dispenser_init?useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true&characterEncoding=utf8
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+#    password: root
+    password: yiwan123
+    hikari:
+      maximum-pool-size: 100
+      max-lifetime: 1800000
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password:
+    database: 10
+    timeout: 5000
+    jedis:
+      pool:
+        max-wait: 2000
+        min-idle: 2
+        max-idle: 8
+        max-active: 8
+  servlet:
+    multipart:
+      enabled: true
+      max-request-size: 100MB
+      max-file-size: 100MB
+
+app:
+  apiKey: 176891037
+  privateKeyPath: D:/yiwan/backend/config/private_key.pem
+  isOpen: true
+  sendIsOpen: false
+  #  apiEnvironment: https://convenient.wsjkw.zj.gov.cn/test/open/api
+  apiEnvironment: http://59.202.53.246/open/api
+  version: 1.0.0
+
+cabinetB:
+  ## true left +x -y   right -x -y
+  isX: true
+
+
+## netty相关的配置
+netty:
+  ## (控制A、B柜子)是否启用netty_client服务，true表示启用。false禁用所有
+  enable: true
+
+pdf:
+  fontPath: D:/yiwan/backend/config/fonts/simsun.ttf
+

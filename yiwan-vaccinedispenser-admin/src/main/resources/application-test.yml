@@ -1,0 +1,53 @@
+
+spring:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource  #com.alibaba.druid.pool.DruidDataSource
+#    url: jdbc:mysql://127.0.0.1:3306/vaccine_dispenser_shounan?useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true&characterEncoding=utf8
+    url: jdbc:mysql://127.0.0.1:3306/vaccine_dispenser_gongchenqiao?useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true&characterEncoding=utf8
+#    url: jdbc:mysql://127.0.0.1:3306/vaccine_dispenser_jiangdong?useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true&characterEncoding=utf8
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: root
+    hikari:
+      maximum-pool-size: 100
+      max-lifetime: 1800000
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password:
+    database: 10
+    timeout: 5000
+    jedis:
+      pool:
+        max-wait: 2000
+        min-idle: 2
+        max-idle: 8
+        max-active: 8
+  servlet:
+    multipart:
+      enabled: true
+      max-request-size: 100MB
+      max-file-size: 100MB
+
+
+## netty相关的配置
+netty:
+  ## (控制A、B柜子)是否启用netty_client服务，true表示启用。false禁用所有
+  enable: true
+
+app:
+  apiKey: 176891037
+  privateKeyPath: ./yiwan-vaccinedispenser-admin/src/main/resources/private_key.pem
+  #发药政采云接口
+  isOpen: false
+  #送药政采云接口
+  sendIsOpen: false
+  #  apiEnvironment: https://convenient.wsjkw.zj.gov.cn/test/open/api
+  apiEnvironment: http://59.202.53.246/open/api
+  version: 1.0.0
+
+cabinetB:
+  ## true left +x -y   right -x -y
+  isX: true
+pdf:
+  fontPath: ./yiwan-vaccinedispenser-admin/src/main/resources/fonts/simsun.ttf

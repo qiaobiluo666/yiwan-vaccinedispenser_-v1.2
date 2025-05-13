@@ -1,0 +1,140 @@
+2024-07-10 10:26:03.943  INFO 3928 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on ZH with PID 3928 (started by 78671 in D:\work\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2024-07-10 10:26:03.946  INFO 3928 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "dev"
+2024-07-10 10:26:05.791  INFO 3928 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2024-07-10 10:26:05.796  INFO 3928 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2024-07-10 10:26:05.896  INFO 3928 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 72 ms. Found 0 Redis repository interfaces.
+2024-07-10 10:26:09.368  INFO 3928 --- [main] c.y.v.system.com.ComService              : 连接串口：COM10失败！
+2024-07-10 10:26:09.586  INFO 3928 --- [main] c.y.v.system.com.ComService              : 连接串口：COM9失败！
+2024-07-10 10:26:09.790  INFO 3928 --- [main] c.y.v.system.com.ComService              : 连接串口：COM4失败！
+2024-07-10 10:26:10.304  INFO 3928 --- [nioEventLoopGroup-5-1] c.y.v.system.camera.CameraClient         : 当前客户端：下方扫码相机 服务端连接成功...
+2024-07-10 10:26:10.304  INFO 3928 --- [nioEventLoopGroup-4-1] c.y.v.system.camera.CameraClient         : 当前客户端：上方扫码相机 服务端连接成功...
+2024-07-10 10:26:10.304  INFO 3928 --- [nioEventLoopGroup-6-1] c.y.v.system.camera.CameraClient         : 当前客户端：侧方扫码相机 服务端连接成功...
+2024-07-10 10:26:10.895  INFO 3928 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-07-10 10:26:11.228  INFO 3928 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-07-10 10:26:11.303  INFO 3928 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2024-07-10 10:26:11.392  INFO 3928 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2024-07-10 10:26:11.403  INFO 3928 --- [nioEventLoopGroup-7-1] c.y.v.system.netty.NettyClient           : 当前客户端：A 服务端连接成功...
+2024-07-10 10:26:11.404  INFO 3928 --- [nioEventLoopGroup-7-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：A 连接服务器成功
+2024-07-10 10:26:11.480  INFO 3928 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：C, 进行初始化
+2024-07-10 10:26:11.487  INFO 3928 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClient           : 当前客户端：B 服务端连接成功...
+2024-07-10 10:26:11.487  INFO 3928 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：B 连接服务器成功
+2024-07-10 10:26:15.240  INFO 3928 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2024-07-10 10:26:15.281  INFO 3928 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 12.343 seconds (JVM running for 15.025)
+2024-07-10 10:26:16.453  INFO 3928 --- [main] c.y.v.s.s.s.n.impl.CabinetBServiceImpl   : 0x0B B柜柜-0x02 -距离传感器控制：A5 5A 09 00 01 00 0B 02 01 03 00 FE 89 55
+2024-07-10 10:26:16.519  INFO 3928 --- [t_netty_pool_746150237] c.y.v.system.netty.function.CabinetBMsg  : 收到B柜0x02 -距离传感器控制:A5 5A 0C 00 01 00 0B 02 01 03 00 00 00 00 06 60 55
+2024-07-10 10:26:16.539  INFO 3928 --- [t_netty_pool_1027154031] c.y.v.system.netty.function.CabinetBMsg  : 收到B柜0x02 -距离传感器控制:A5 5A 0E 00 01 00 0B 02 01 03 00 0D 12 00 00 01 EA F1 55
+2024-07-10 10:26:18.475  INFO 3928 --- [main] YuandiInjectiondispenserApplicationTests : null
+2024-07-10 10:26:18.577  INFO 3928 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-07-10 10:26:18.668  INFO 3928 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2024-07-10 10:27:54.496  INFO 13564 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on ZH with PID 13564 (started by 78671 in D:\work\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2024-07-10 10:27:54.501  INFO 13564 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "dev"
+2024-07-10 10:27:56.965  INFO 13564 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2024-07-10 10:27:56.971  INFO 13564 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2024-07-10 10:27:57.101  INFO 13564 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 96 ms. Found 0 Redis repository interfaces.
+2024-07-10 10:28:01.429  INFO 13564 --- [main] c.y.v.system.com.ComService              : 连接串口：COM10失败！
+2024-07-10 10:28:01.649  INFO 13564 --- [main] c.y.v.system.com.ComService              : 连接串口：COM9失败！
+2024-07-10 10:28:01.852  INFO 13564 --- [main] c.y.v.system.com.ComService              : 连接串口：COM4失败！
+2024-07-10 10:28:02.477  INFO 13564 --- [nioEventLoopGroup-6-1] c.y.v.system.camera.CameraClient         : 当前客户端：侧方扫码相机 服务端连接成功...
+2024-07-10 10:28:02.477  INFO 13564 --- [nioEventLoopGroup-5-1] c.y.v.system.camera.CameraClient         : 当前客户端：下方扫码相机 服务端连接成功...
+2024-07-10 10:28:02.477  INFO 13564 --- [nioEventLoopGroup-4-1] c.y.v.system.camera.CameraClient         : 当前客户端：上方扫码相机 服务端连接成功...
+2024-07-10 10:28:03.140  INFO 13564 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-07-10 10:28:03.532  INFO 13564 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-07-10 10:28:03.633  INFO 13564 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2024-07-10 10:28:03.712  INFO 13564 --- [nioEventLoopGroup-7-1] c.y.v.system.netty.NettyClient           : 当前客户端：A 服务端连接成功...
+2024-07-10 10:28:03.713  INFO 13564 --- [nioEventLoopGroup-7-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：A 连接服务器成功
+2024-07-10 10:28:03.715  INFO 13564 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2024-07-10 10:28:03.808  INFO 13564 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClient           : 当前客户端：B 服务端连接成功...
+2024-07-10 10:28:03.809  INFO 13564 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：B 连接服务器成功
+2024-07-10 10:28:03.814  INFO 13564 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：C, 进行初始化
+2024-07-10 10:28:08.115  INFO 13564 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2024-07-10 10:28:08.182  INFO 13564 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 15.606 seconds (JVM running for 19.385)
+2024-07-10 10:28:09.399  INFO 13564 --- [main] c.y.v.s.s.s.n.impl.CabinetBServiceImpl   : 0x0B B柜柜-0x02 -距离传感器控制：A5 5A 09 00 01 00 0B 02 01 03 00 FE 89 55
+2024-07-10 10:28:09.473  INFO 13564 --- [t_netty_pool_325747750] c.y.v.system.netty.function.CabinetBMsg  : 收到B柜0x02 -距离传感器控制:A5 5A 0C 00 01 00 0B 02 01 03 00 00 00 00 06 60 55
+2024-07-10 10:28:09.473  INFO 13564 --- [t_netty_pool_1731615854] c.y.v.system.netty.function.CabinetBMsg  : 收到B柜0x02 -距离传感器控制:A5 5A 0E 00 01 00 0B 02 01 03 00 0E 12 00 00 01 AE F1 55
+2024-07-10 10:28:11.425  INFO 13564 --- [main] YuandiInjectiondispenserApplicationTests : null
+2024-07-10 10:28:11.503  INFO 13564 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-07-10 10:28:11.609  INFO 13564 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2024-07-10 10:29:23.827  INFO 12268 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on ZH with PID 12268 (started by 78671 in D:\work\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2024-07-10 10:29:23.828  INFO 12268 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "dev"
+2024-07-10 10:29:24.654  INFO 12268 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2024-07-10 10:29:24.656  INFO 12268 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2024-07-10 10:29:24.702  INFO 12268 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 33 ms. Found 0 Redis repository interfaces.
+2024-07-10 10:29:26.452  INFO 12268 --- [main] c.y.v.system.com.ComService              : 连接串口：COM10失败！
+2024-07-10 10:29:26.658  INFO 12268 --- [main] c.y.v.system.com.ComService              : 连接串口：COM9失败！
+2024-07-10 10:29:26.862  INFO 12268 --- [main] c.y.v.system.com.ComService              : 连接串口：COM4失败！
+2024-07-10 10:29:27.147  INFO 12268 --- [nioEventLoopGroup-4-1] c.y.v.system.camera.CameraClient         : 当前客户端：上方扫码相机 服务端连接成功...
+2024-07-10 10:29:27.147  INFO 12268 --- [nioEventLoopGroup-5-1] c.y.v.system.camera.CameraClient         : 当前客户端：下方扫码相机 服务端连接成功...
+2024-07-10 10:29:27.147  INFO 12268 --- [nioEventLoopGroup-6-1] c.y.v.system.camera.CameraClient         : 当前客户端：侧方扫码相机 服务端连接成功...
+2024-07-10 10:29:27.435  INFO 12268 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-07-10 10:29:27.589  INFO 12268 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-07-10 10:29:27.619  INFO 12268 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2024-07-10 10:29:27.644  INFO 12268 --- [nioEventLoopGroup-7-1] c.y.v.system.netty.NettyClient           : 当前客户端：A 服务端连接成功...
+2024-07-10 10:29:27.644  INFO 12268 --- [nioEventLoopGroup-7-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：A 连接服务器成功
+2024-07-10 10:29:27.644  INFO 12268 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2024-07-10 10:29:27.670  INFO 12268 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClient           : 当前客户端：B 服务端连接成功...
+2024-07-10 10:29:27.671  INFO 12268 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：B 连接服务器成功
+2024-07-10 10:29:27.672  INFO 12268 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：C, 进行初始化
+2024-07-10 10:29:29.640  INFO 12268 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2024-07-10 10:29:29.660  INFO 12268 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 6.311 seconds (JVM running for 7.319)
+2024-07-10 10:29:30.286  INFO 12268 --- [main] c.y.v.s.s.s.n.impl.CabinetBServiceImpl   : 0x0B B柜柜-0x02 -距离传感器控制：A5 5A 09 00 01 00 0B 02 01 02 00 FF 19 55
+2024-07-10 10:29:30.332  INFO 12268 --- [t_netty_pool_556944813] c.y.v.system.netty.function.CabinetBMsg  : 收到B柜0x02 -距离传感器控制:A5 5A 0C 00 01 00 0B 02 01 02 00 00 00 00 3B A0 55
+2024-07-10 10:29:30.346  INFO 12268 --- [t_netty_pool_1113648069] c.y.v.system.netty.function.CabinetBMsg  : 收到B柜0x02 -距离传感器控制:A5 5A 10 00 01 00 0B 02 01 02 00 B8 C1 03 00 01 00 00 30 1C 55
+2024-07-10 10:29:32.303  INFO 12268 --- [main] YuandiInjectiondispenserApplicationTests : null
+2024-07-10 10:29:32.333  INFO 12268 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-07-10 10:29:32.374  INFO 12268 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2024-07-10 10:30:32.737  INFO 13936 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on ZH with PID 13936 (started by 78671 in D:\work\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2024-07-10 10:30:32.739  INFO 13936 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "dev"
+2024-07-10 10:30:35.554  INFO 13936 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2024-07-10 10:30:35.557  INFO 13936 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2024-07-10 10:30:35.616  INFO 13936 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 42 ms. Found 0 Redis repository interfaces.
+2024-07-10 10:30:37.695  INFO 13936 --- [main] c.y.v.system.com.ComService              : 连接串口：COM10失败！
+2024-07-10 10:30:37.912  INFO 13936 --- [main] c.y.v.system.com.ComService              : 连接串口：COM9失败！
+2024-07-10 10:30:38.113  INFO 13936 --- [main] c.y.v.system.com.ComService              : 连接串口：COM4失败！
+2024-07-10 10:30:38.426  INFO 13936 --- [nioEventLoopGroup-6-1] c.y.v.system.camera.CameraClient         : 当前客户端：侧方扫码相机 服务端连接成功...
+2024-07-10 10:30:38.426  INFO 13936 --- [nioEventLoopGroup-5-1] c.y.v.system.camera.CameraClient         : 当前客户端：下方扫码相机 服务端连接成功...
+2024-07-10 10:30:38.426  INFO 13936 --- [nioEventLoopGroup-4-1] c.y.v.system.camera.CameraClient         : 当前客户端：上方扫码相机 服务端连接成功...
+2024-07-10 10:30:38.775  INFO 13936 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-07-10 10:30:38.948  INFO 13936 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-07-10 10:30:38.991  INFO 13936 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2024-07-10 10:30:39.021  INFO 13936 --- [nioEventLoopGroup-7-1] c.y.v.system.netty.NettyClient           : 当前客户端：A 服务端连接成功...
+2024-07-10 10:30:39.021  INFO 13936 --- [nioEventLoopGroup-7-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：A 连接服务器成功
+2024-07-10 10:30:39.022  INFO 13936 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2024-07-10 10:30:39.045  INFO 13936 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClient           : 当前客户端：B 服务端连接成功...
+2024-07-10 10:30:39.046  INFO 13936 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：B 连接服务器成功
+2024-07-10 10:30:39.047  INFO 13936 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：C, 进行初始化
+2024-07-10 10:30:41.076  INFO 13936 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2024-07-10 10:30:41.104  INFO 13936 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 8.953 seconds (JVM running for 10.195)
+2024-07-10 10:30:41.840  INFO 13936 --- [main] c.y.v.s.s.s.n.impl.CabinetBServiceImpl   : 0x0B B柜柜-0x02 -距离传感器控制：A5 5A 09 00 01 00 0B 02 01 03 00 FE 89 55
+2024-07-10 10:30:41.901  INFO 13936 --- [t_netty_pool_1084604596] c.y.v.system.netty.function.CabinetBMsg  : 收到B柜0x02 -距离传感器控制:A5 5A 0C 00 01 00 0B 02 01 03 00 00 00 00 06 60 55
+2024-07-10 10:30:41.902  INFO 13936 --- [t_netty_pool_447883666] c.y.v.system.netty.function.CabinetBMsg  : 收到B柜0x02 -距离传感器控制:A5 5A 0E 00 01 00 0B 02 01 03 00 0E 12 00 00 01 AE F1 55
+2024-07-10 10:30:43.854  INFO 13936 --- [main] YuandiInjectiondispenserApplicationTests : null
+2024-07-10 10:30:43.886  INFO 13936 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-07-10 10:30:43.921  INFO 13936 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2024-07-10 10:33:14.192  INFO 17952 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on ZH with PID 17952 (started by 78671 in D:\work\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2024-07-10 10:33:14.194  INFO 17952 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "dev"
+2024-07-10 10:33:15.326  INFO 17952 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2024-07-10 10:33:15.329  INFO 17952 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2024-07-10 10:33:15.402  INFO 17952 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 54 ms. Found 0 Redis repository interfaces.
+2024-07-10 10:33:19.148  INFO 17952 --- [main] c.y.v.system.com.ComService              : 连接串口：COM10失败！
+2024-07-10 10:33:19.366  INFO 17952 --- [main] c.y.v.system.com.ComService              : 连接串口：COM9失败！
+2024-07-10 10:33:19.568  INFO 17952 --- [main] c.y.v.system.com.ComService              : 连接串口：COM4失败！
+2024-07-10 10:33:20.147  INFO 17952 --- [nioEventLoopGroup-4-1] c.y.v.system.camera.CameraClient         : 当前客户端：上方扫码相机 服务端连接成功...
+2024-07-10 10:33:20.147  INFO 17952 --- [nioEventLoopGroup-5-1] c.y.v.system.camera.CameraClient         : 当前客户端：下方扫码相机 服务端连接成功...
+2024-07-10 10:33:20.147  INFO 17952 --- [nioEventLoopGroup-6-1] c.y.v.system.camera.CameraClient         : 当前客户端：侧方扫码相机 服务端连接成功...
+2024-07-10 10:33:20.765  INFO 17952 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-07-10 10:33:21.093  INFO 17952 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-07-10 10:33:21.168  INFO 17952 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2024-07-10 10:33:21.226  INFO 17952 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2024-07-10 10:33:21.229  INFO 17952 --- [nioEventLoopGroup-7-1] c.y.v.system.netty.NettyClient           : 当前客户端：A 服务端连接成功...
+2024-07-10 10:33:21.230  INFO 17952 --- [nioEventLoopGroup-7-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：A 连接服务器成功
+2024-07-10 10:33:21.299  INFO 17952 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClient           : 当前客户端：B 服务端连接成功...
+2024-07-10 10:33:21.301  INFO 17952 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：B 连接服务器成功
+2024-07-10 10:33:21.307  INFO 17952 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：C, 进行初始化
+2024-07-10 10:33:24.594  INFO 17952 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2024-07-10 10:33:24.626  INFO 17952 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 11.011 seconds (JVM running for 12.171)
+2024-07-10 10:33:25.554  INFO 17952 --- [main] c.y.v.s.s.s.n.impl.CabinetBServiceImpl   : 0x0B B柜柜-0x02 -距离传感器控制：A5 5A 09 00 01 00 0B 02 01 03 00 FE 89 55
+2024-07-10 10:33:25.629  INFO 17952 --- [t_netty_pool_130365344] c.y.v.system.netty.function.CabinetBMsg  : 收到B柜0x02 -距离传感器控制:A5 5A 0C 00 01 00 0B 02 01 03 00 00 00 00 06 60 55
+2024-07-10 10:33:25.645  INFO 17952 --- [t_netty_pool_1752417147] c.y.v.system.netty.function.CabinetBMsg  : 收到B柜0x02 -距离传感器控制:A5 5A 10 00 01 00 0B 02 01 03 00 0C 12 00 00 01 00 00 9E 24 55
+2024-07-10 10:33:27.583  INFO 17952 --- [main] YuandiInjectiondispenserApplicationTests : 4620
+2024-07-10 10:33:27.626  INFO 17952 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-07-10 10:33:27.682  INFO 17952 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.

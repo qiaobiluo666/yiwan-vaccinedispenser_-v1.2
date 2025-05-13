@@ -1,0 +1,54 @@
+2024-06-26 17:13:31.153  INFO 22120 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on ZH with PID 22120 (started by 78671 in D:\work\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2024-06-26 17:13:31.157  INFO 22120 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "dev"
+2024-06-26 17:13:33.470  INFO 22120 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2024-06-26 17:13:33.475  INFO 22120 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2024-06-26 17:13:33.581  INFO 22120 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 81 ms. Found 0 Redis repository interfaces.
+2024-06-26 17:13:37.751  INFO 22120 --- [main] c.y.v.system.com.ComService              : 连接串口：COM17成功!
+2024-06-26 17:13:37.968  INFO 22120 --- [main] c.y.v.system.com.ComService              : 连接串口：COM9失败！
+2024-06-26 17:13:38.173  INFO 22120 --- [main] c.y.v.system.com.ComService              : 连接串口：COM4失败！
+2024-06-26 17:13:38.893  INFO 22120 --- [nioEventLoopGroup-6-1] c.y.v.system.camera.CameraClient         : 当前客户端：侧方扫码相机 服务端连接成功...
+2024-06-26 17:13:38.893  INFO 22120 --- [nioEventLoopGroup-5-1] c.y.v.system.camera.CameraClient         : 当前客户端：下方扫码相机 服务端连接成功...
+2024-06-26 17:13:38.893  INFO 22120 --- [nioEventLoopGroup-4-1] c.y.v.system.camera.CameraClient         : 当前客户端：上方扫码相机 服务端连接成功...
+2024-06-26 17:13:39.628  INFO 22120 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-06-26 17:13:40.069  INFO 22120 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-06-26 17:13:40.160  INFO 22120 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2024-06-26 17:13:40.261  INFO 22120 --- [nioEventLoopGroup-7-1] c.y.v.system.netty.NettyClient           : 当前客户端：A 服务端连接成功...
+2024-06-26 17:13:40.261  INFO 22120 --- [nioEventLoopGroup-7-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：A 连接服务器成功
+2024-06-26 17:13:40.269  INFO 22120 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2024-06-26 17:13:40.381  INFO 22120 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClient           : 当前客户端：B 服务端连接成功...
+2024-06-26 17:13:40.382  INFO 22120 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：B 连接服务器成功
+2024-06-26 17:13:40.388  INFO 22120 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：C, 进行初始化
+2024-06-26 17:13:45.239  INFO 22120 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2024-06-26 17:13:45.299 ERROR 22120 --- [scheduling-1] o.s.s.s.TaskUtils$LoggingErrorHandler    : Unexpected error occurred in scheduled task
+
+java.nio.file.NoSuchFileException: D:\work\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin\yiwan-vaccinedispenser-admin\src\main\resources\private_key.pem
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:236)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:380)
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:432)
+	at java.base/java.nio.file.Files.readAllBytes(Files.java:3288)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getRequest(ZcyRequestBuilder.java:145)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder.getVaccineListRequest(ZcyRequestBuilder.java:54)
+	at com.yiwan.vaccinedispenser.system.zyc.ZcyFunction.getVaccine(ZcyFunction.java:47)
+	at com.yiwan.vaccinedispenser.system.dispensing.VacTimer.getVaccine(VacTimer.java:27)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.runAndReset$$$capture(FutureTask.java:305)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+
+2024-06-26 17:13:45.312  INFO 22120 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 15.566 seconds (JVM running for 19.083)
+2024-06-26 17:13:46.842  INFO 22120 --- [ForkJoinPool.commonPool-worker-1] c.y.v.system.com.ComService              : 
+2024-06-26 17:13:46.843 ERROR 22120 --- [ForkJoinPool.commonPool-worker-1] c.y.v.system.com.ComService              : Communication error on COM17: java.lang.StringIndexOutOfBoundsException: start 10, end 12, length 0
+2024-06-26 17:13:46.868  INFO 22120 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-06-26 17:13:48.975  INFO 22120 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.

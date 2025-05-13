@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.yiwan.vaccinedispenser.system.sys.dao.VacMachineMapper">
+
+    <update id="decrementNumById">
+        UPDATE vac_machine
+        SET
+             vaccine_id = CASE WHEN vaccine_num - 1 = 0 THEN NULL ELSE vaccine_id END,
+             product_name = CASE WHEN vaccine_num - 1 = 0 THEN NULL ELSE product_name END,
+             product_no = CASE WHEN vaccine_num - 1 = 0 THEN NULL ELSE product_no END,
+             vaccine_use_num = CASE WHEN vaccine_num - 1 = 0 THEN NULL ELSE vaccine_use_num END,
+             expired_at = CASE WHEN vaccine_num - 1  = 0 THEN NULL ELSE expired_at END,
+             status = CASE WHEN vaccine_num - 1 = 0 THEN 1 ELSE status END,
+             vaccine_num = CASE WHEN vaccine_num - 1 = 0  THEN NULL ELSE vaccine_num - 1 END
+
+        WHERE id = #{id}
+    </update>
+
+
+    <select id="inventoryList" resultType="com.yiwan.vaccinedispenser.system.sys.data.response.vac.InventoryResponse">
+        SELECT
+            MIN(vaccine_id) AS vaccineId,
+            COUNT(*) AS productCount,
+            MAX(update_time) AS latestUpdateTime,
+            product_name AS productName,
+            product_No AS productNo,
+            SUM(vaccine_num) AS totalVaccineNum,
+            status AS status
+        FROM
+            vac_machine
+        WHERE
+            deleted =0
+
+        <if test="productName != null and productName!='' ">
+            and   product_name LIKE CONCAT('%',#{productName},'%')
+        </if>
+        GROUP BY
+            product_name,productNo,status
+
+        HAVING
+        productName IS NOT NULL AND totalVaccineNum > 0
+
+        ORDER BY
+            totalVaccineNum ASC
+
+    </select>
+
+
+
+    <update id="updateNullById">
+        UPDATE vac_machine
+        <set>
+            line_num = #{vacMachine.lineNum},
+            position_num = #{vacMachine.positionNum},
+            box_no = #{vacMachine.boxNo},
+            box_spec_id = #{vacMachine.boxSpecId},
+            box_spec_name = #{vacMachine.boxSpecName},
+            status = #{vacMachine.status},
+            box_max = #{vacMachine.boxMax},
+            vaccine_id = #{vacMachine.vaccineId},
+            product_name = #{vacMachine.productName},
+            product_no = #{vacMachine.productNo},
+            vaccine_num = #{vacMachine.vaccineNum},
+            vaccine_use_num = #{vacMachine.vaccineUseNum},
+            expired_at = #{vacMachine.expiredAt},
+            led_num = #{vacMachine.ledNum},
+            auto_x = #{vacMachine.autoX},
+            auto_z = #{vacMachine.autoZ},
+            count_x = #{vacMachine.countX},
+            count_z = #{vacMachine.countZ},
+            update_by = #{vacMachine.updateBy},
+            deleted = #{vacMachine.deleted}
+        </set>
+        WHERE id = #{vacMachine.id}
+    </update>
+
+
+
+
+
+</mapper>

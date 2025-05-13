@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.7.12</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+
+
+    <!-- 杭州医万智能装备有限公司 智能疫苗管理终端 后端系统V1.0-->
+
+
+    <groupId>com.yiwan.vaccinedispenser</groupId>
+    <artifactId>yiwan-vaccinedispenser</artifactId>
+    <version>1.0.0</version>
+
+
+    <name>yiwan-vaccinedispenser</name>
+    <description>yiwan-vaccinedispenser</description>
+    <!-- 子模块-->
+    <modules>
+        <module>yiwan-vaccinedispenser-system</module>
+        <module>yiwan-vaccinedispenser-admin</module>
+        <module>yiwan-vaccinedispenser-core</module>
+    </modules>
+    <packaging>pom</packaging>
+
+    <properties>
+        <java.version>17</java.version>
+        <yiwan.project.verson>1.0.0</yiwan.project.verson>
+    </properties>
+
+
+
+    <dependencyManagement>
+    <dependencies>
+        <!--mybatis-->
+        <dependency>
+            <groupId>org.mybatis.spring.boot</groupId>
+            <artifactId>mybatis-spring-boot-starter</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+
+        <!--工具类-->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>5.8.18</version>
+        </dependency>
+
+
+        <!--jwt token-->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+            <version>0.9.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>java-jwt</artifactId>
+            <version>3.5.0</version>
+        </dependency>
+        <!-- https://blog.csdn.net/qq_41340258/article/details/125145502 -->
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.3.1</version>
+        </dependency>
+
+        <!-- JSON工具类 -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.13.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.39</version>
+        </dependency>
+
+
+        <!-- websocket 推送 -->
+        <dependency>
+            <groupId>org.yeauty</groupId>
+            <artifactId>netty-websocket-spring-boot-starter</artifactId>
+            <version>0.12.0</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>com.yiwan.vaccinedispenser</groupId>
+            <artifactId>yiwan-vaccinedispenser-core</artifactId>
+            <version>${yiwan.project.verson}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.yiwan.vaccinedispenser</groupId>
+            <artifactId>yiwan-vaccinedispenser-system</artifactId>
+            <version>${yiwan.project.verson}</version>
+        </dependency>
+
+
+
+
+    </dependencies>
+    </dependencyManagement>
+
+
+
+
+
+
+</project>

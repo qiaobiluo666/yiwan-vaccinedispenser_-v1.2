@@ -1,0 +1,332 @@
+2024-10-22 15:27:19.034  INFO 8176 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on ZH with PID 8176 (started by 78671 in D:\work\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2024-10-22 15:27:19.036  INFO 8176 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "dev"
+2024-10-22 15:27:19.908  INFO 8176 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2024-10-22 15:27:19.911  INFO 8176 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2024-10-22 15:27:19.964  INFO 8176 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 33 ms. Found 0 Redis repository interfaces.
+2024-10-22 15:27:21.866  INFO 8176 --- [main] c.y.v.system.com.ComService              : 连接串口：COM10失败！
+2024-10-22 15:27:22.082  INFO 8176 --- [main] c.y.v.system.com.ComService              : 连接串口：COM9失败！
+2024-10-22 15:27:22.285  INFO 8176 --- [main] c.y.v.system.com.ComService              : 连接串口：COM4失败！
+2024-10-22 15:27:22.550  INFO 8176 --- [nioEventLoopGroup-5-1] c.y.v.system.camera.CameraClient         : 当前客户端：下方扫码相机 服务端连接成功...
+2024-10-22 15:27:22.550  INFO 8176 --- [nioEventLoopGroup-6-1] c.y.v.system.camera.CameraClient         : 当前客户端：侧方扫码相机 服务端连接成功...
+2024-10-22 15:27:22.550  INFO 8176 --- [nioEventLoopGroup-4-1] c.y.v.system.camera.CameraClient         : 当前客户端：上方扫码相机 服务端连接成功...
+2024-10-22 15:27:22.936  INFO 8176 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-10-22 15:27:23.108  INFO 8176 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-10-22 15:27:23.151  INFO 8176 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2024-10-22 15:27:23.180  INFO 8176 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClient           : 当前客户端：A 服务端连接成功...
+2024-10-22 15:27:23.181  INFO 8176 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2024-10-22 15:27:23.182  INFO 8176 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：A 连接服务器成功
+2024-10-22 15:27:23.200  INFO 8176 --- [nioEventLoopGroup-9-1] c.y.v.system.netty.NettyClient           : 当前客户端：B 服务端连接成功...
+2024-10-22 15:27:23.202  INFO 8176 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：C, 进行初始化
+2024-10-22 15:27:23.202  INFO 8176 --- [nioEventLoopGroup-9-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：B 连接服务器成功
+2024-10-22 15:27:24.749  INFO 8176 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2024-10-22 15:27:24.772  INFO 8176 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 6.169 seconds (JVM running for 7.311)
+2024-10-22 15:27:25.298  INFO 8176 --- [main] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 01 00 0C 01 03 00 03 AA 3C 55
+2024-10-22 15:27:25.335  INFO 8176 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-10-22 15:27:25.364  INFO 8176 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2024-10-22 15:28:36.883  INFO 16092 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on ZH with PID 16092 (started by 78671 in D:\work\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2024-10-22 15:28:36.884  INFO 16092 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "dev"
+2024-10-22 15:28:37.675  INFO 16092 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2024-10-22 15:28:37.678  INFO 16092 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2024-10-22 15:28:37.724  INFO 16092 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 32 ms. Found 0 Redis repository interfaces.
+2024-10-22 15:28:39.610  INFO 16092 --- [main] c.y.v.system.com.ComService              : 连接串口：COM10失败！
+2024-10-22 15:28:39.828  INFO 16092 --- [main] c.y.v.system.com.ComService              : 连接串口：COM9失败！
+2024-10-22 15:28:40.032  INFO 16092 --- [main] c.y.v.system.com.ComService              : 连接串口：COM4失败！
+2024-10-22 15:28:40.281  INFO 16092 --- [nioEventLoopGroup-5-1] c.y.v.system.camera.CameraClient         : 当前客户端：下方扫码相机 服务端连接成功...
+2024-10-22 15:28:40.281  INFO 16092 --- [nioEventLoopGroup-6-1] c.y.v.system.camera.CameraClient         : 当前客户端：侧方扫码相机 服务端连接成功...
+2024-10-22 15:28:40.281  INFO 16092 --- [nioEventLoopGroup-4-1] c.y.v.system.camera.CameraClient         : 当前客户端：上方扫码相机 服务端连接成功...
+2024-10-22 15:28:40.620  INFO 16092 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-10-22 15:28:40.777  INFO 16092 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-10-22 15:28:40.815  INFO 16092 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2024-10-22 15:28:40.845  INFO 16092 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClient           : 当前客户端：A 服务端连接成功...
+2024-10-22 15:28:40.846  INFO 16092 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2024-10-22 15:28:40.847  INFO 16092 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：A 连接服务器成功
+2024-10-22 15:28:40.868  INFO 16092 --- [nioEventLoopGroup-9-1] c.y.v.system.netty.NettyClient           : 当前客户端：B 服务端连接成功...
+2024-10-22 15:28:40.868  INFO 16092 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：C, 进行初始化
+2024-10-22 15:28:40.869  INFO 16092 --- [nioEventLoopGroup-9-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：B 连接服务器成功
+2024-10-22 15:28:40.888  INFO 16092 --- [nioEventLoopGroup-10-1] c.y.v.system.netty.NettyClient           : 当前客户端：C 服务端连接成功...
+2024-10-22 15:28:40.891  INFO 16092 --- [nioEventLoopGroup-10-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：C 连接服务器成功
+2024-10-22 15:28:42.362  INFO 16092 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2024-10-22 15:28:42.392  INFO 16092 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 5.886 seconds (JVM running for 6.942)
+2024-10-22 15:28:42.850  INFO 16092 --- [main] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 01 00 0C 01 03 00 03 AA 3C 55
+2024-10-22 15:28:42.883  INFO 16092 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-10-22 15:28:42.901 ERROR 16092 --- [nioEventLoopGroup-10-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：C 发生了异常处理
+2024-10-22 15:28:42.901  WARN 16092 --- [nioEventLoopGroup-10-1] c.y.v.system.netty.NettyClientHandler    : 重新连接
+2024-10-22 15:28:42.902  INFO 16092 --- [nioEventLoopGroup-10-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：C 断开了连接
+2024-10-22 15:28:42.904  INFO 16092 --- [nioEventLoopGroup-10-2] c.y.v.system.netty.NettyClient           : 当前客户端：C 服务端连接成功...
+2024-10-22 15:28:42.906  INFO 16092 --- [nioEventLoopGroup-10-2] c.y.v.system.netty.NettyClientHandler    : 当前的client：C 连接服务器成功
+2024-10-22 15:28:42.921  INFO 16092 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2024-10-22 15:28:42.937 ERROR 16092 --- [nioEventLoopGroup-10-2] c.y.v.system.netty.NettyClientHandler    : 当前的client：C 发生了异常处理
+2024-10-22 15:28:42.937  WARN 16092 --- [nioEventLoopGroup-10-2] c.y.v.system.netty.NettyClientHandler    : 重新连接
+2024-10-22 15:28:42.938  INFO 16092 --- [nioEventLoopGroup-10-2] c.y.v.system.netty.NettyClientHandler    : 当前的client：C 断开了连接
+2024-10-22 15:28:42.940  INFO 16092 --- [nioEventLoopGroup-10-3] c.y.v.system.netty.NettyClient           : 当前客户端：C 服务端连接成功...
+2024-10-22 15:28:43.044  WARN 16092 --- [nioEventLoopGroup-10-3] io.netty.util.concurrent.DefaultPromise  : An exception was thrown by com.yiwan.vaccinedispenser.system.netty.NettyClient$$Lambda$1244/0x000001b40570e220.operationComplete()
+
+org.springframework.data.redis.RedisConnectionFailureException: Unable to connect to Redis; nested exception is io.lettuce.core.RedisConnectionException: Unable to connect to 127.0.0.1/<unresolved>:6379
+	at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory$ExceptionTranslatingConnectionProvider.translateException(LettuceConnectionFactory.java:1689)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory$ExceptionTranslatingConnectionProvider.getConnection(LettuceConnectionFactory.java:1597)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory$SharedConnection.getNativeConnection(LettuceConnectionFactory.java:1383)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory$SharedConnection.getConnection(LettuceConnectionFactory.java:1366)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory.getSharedConnection(LettuceConnectionFactory.java:1093)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory.getConnection(LettuceConnectionFactory.java:421)
+	at org.springframework.data.redis.core.RedisConnectionUtils.fetchConnection(RedisConnectionUtils.java:193)
+	at org.springframework.data.redis.core.RedisConnectionUtils.doGetConnection(RedisConnectionUtils.java:144)
+	at org.springframework.data.redis.core.RedisConnectionUtils.getConnection(RedisConnectionUtils.java:105)
+	at org.springframework.data.redis.core.RedisTemplate.execute(RedisTemplate.java:211)
+	at org.springframework.data.redis.core.RedisTemplate.execute(RedisTemplate.java:191)
+	at org.springframework.data.redis.core.AbstractOperations.execute(AbstractOperations.java:97)
+	at org.springframework.data.redis.core.DefaultValueOperations.set(DefaultValueOperations.java:305)
+	at com.yiwan.vaccinedispenser.system.netty.NettyClient.lambda$connect$0(NettyClient.java:124)
+	at io.netty.util.concurrent.DefaultPromise.notifyListener0(DefaultPromise.java:590)
+	at io.netty.util.concurrent.DefaultPromise.notifyListeners0(DefaultPromise.java:583)
+	at io.netty.util.concurrent.DefaultPromise.notifyListenersNow(DefaultPromise.java:559)
+	at io.netty.util.concurrent.DefaultPromise.notifyListeners(DefaultPromise.java:492)
+	at io.netty.util.concurrent.DefaultPromise.setValue0(DefaultPromise.java:636)
+	at io.netty.util.concurrent.DefaultPromise.setSuccess0(DefaultPromise.java:625)
+	at io.netty.util.concurrent.DefaultPromise.trySuccess(DefaultPromise.java:105)
+	at io.netty.channel.DefaultChannelPromise.trySuccess(DefaultChannelPromise.java:84)
+	at io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.fulfillConnectPromise(AbstractNioChannel.java:300)
+	at io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.finishConnect(AbstractNioChannel.java:335)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:776)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+Caused by: io.lettuce.core.RedisConnectionException: Unable to connect to 127.0.0.1/<unresolved>:6379
+	at io.lettuce.core.RedisConnectionException.create(RedisConnectionException.java:78)
+	at io.lettuce.core.RedisConnectionException.create(RedisConnectionException.java:56)
+	at io.lettuce.core.AbstractRedisClient.getConnection(AbstractRedisClient.java:330)
+	at io.lettuce.core.RedisClient.connect(RedisClient.java:216)
+	at org.springframework.data.redis.connection.lettuce.StandaloneConnectionProvider.lambda$getConnection$1(StandaloneConnectionProvider.java:115)
+	at java.base/java.util.Optional.orElseGet(Optional.java:364)
+	at org.springframework.data.redis.connection.lettuce.StandaloneConnectionProvider.getConnection(StandaloneConnectionProvider.java:115)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory$ExceptionTranslatingConnectionProvider.getConnection(LettuceConnectionFactory.java:1595)
+	... 30 common frames omitted
+Caused by: java.lang.IllegalStateException: executor not accepting a task
+	at io.netty.resolver.AddressResolverGroup.getResolver(AddressResolverGroup.java:61)
+	at io.netty.bootstrap.Bootstrap.doResolveAndConnect0(Bootstrap.java:194)
+	at io.netty.bootstrap.Bootstrap.access$000(Bootstrap.java:46)
+	at io.netty.bootstrap.Bootstrap$1.operationComplete(Bootstrap.java:180)
+	at io.netty.bootstrap.Bootstrap$1.operationComplete(Bootstrap.java:166)
+	at io.netty.util.concurrent.DefaultPromise.notifyListener0(DefaultPromise.java:590)
+	at io.netty.util.concurrent.DefaultPromise.notifyListenersNow(DefaultPromise.java:557)
+	at io.netty.util.concurrent.DefaultPromise.notifyListeners(DefaultPromise.java:492)
+	at io.netty.util.concurrent.DefaultPromise.setValue0(DefaultPromise.java:636)
+	at io.netty.util.concurrent.DefaultPromise.setSuccess0(DefaultPromise.java:625)
+	at io.netty.util.concurrent.DefaultPromise.trySuccess(DefaultPromise.java:105)
+	at io.netty.channel.DefaultChannelPromise.trySuccess(DefaultChannelPromise.java:84)
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.safeSetSuccess(AbstractChannel.java:990)
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.register0(AbstractChannel.java:516)
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.access$200(AbstractChannel.java:429)
+	at io.netty.channel.AbstractChannel$AbstractUnsafe$1.run(AbstractChannel.java:486)
+	at io.netty.util.concurrent.AbstractEventExecutor.runTask$$$capture(AbstractEventExecutor.java:174)
+	at io.netty.util.concurrent.AbstractEventExecutor.runTask(AbstractEventExecutor.java)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute$$$capture(AbstractEventExecutor.java:167)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:470)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:569)
+	... 4 common frames omitted
+
+2024-10-22 15:28:43.044  INFO 16092 --- [nioEventLoopGroup-10-3] c.y.v.system.netty.NettyClientHandler    : 当前的client：C 连接服务器成功
+2024-10-22 15:29:01.482  INFO 7200 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on ZH with PID 7200 (started by 78671 in D:\work\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2024-10-22 15:29:01.484  INFO 7200 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "dev"
+2024-10-22 15:29:02.414  INFO 7200 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2024-10-22 15:29:02.423  INFO 7200 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2024-10-22 15:29:02.519  INFO 7200 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 45 ms. Found 0 Redis repository interfaces.
+2024-10-22 15:29:04.339  INFO 7200 --- [main] c.y.v.system.com.ComService              : 连接串口：COM10失败！
+2024-10-22 15:29:04.555  INFO 7200 --- [main] c.y.v.system.com.ComService              : 连接串口：COM9失败！
+2024-10-22 15:29:04.758  INFO 7200 --- [main] c.y.v.system.com.ComService              : 连接串口：COM4失败！
+2024-10-22 15:29:05.005  INFO 7200 --- [nioEventLoopGroup-5-1] c.y.v.system.camera.CameraClient         : 当前客户端：下方扫码相机 服务端连接成功...
+2024-10-22 15:29:05.005  INFO 7200 --- [nioEventLoopGroup-6-1] c.y.v.system.camera.CameraClient         : 当前客户端：侧方扫码相机 服务端连接成功...
+2024-10-22 15:29:05.005  INFO 7200 --- [nioEventLoopGroup-4-1] c.y.v.system.camera.CameraClient         : 当前客户端：上方扫码相机 服务端连接成功...
+2024-10-22 15:29:05.339  INFO 7200 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-10-22 15:29:05.514  INFO 7200 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-10-22 15:29:05.576  INFO 7200 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2024-10-22 15:29:05.608  INFO 7200 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClient           : 当前客户端：A 服务端连接成功...
+2024-10-22 15:29:05.609  INFO 7200 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：A 连接服务器成功
+2024-10-22 15:29:05.611  INFO 7200 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2024-10-22 15:29:05.650  INFO 7200 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：C, 进行初始化
+2024-10-22 15:29:05.651  INFO 7200 --- [nioEventLoopGroup-9-1] c.y.v.system.netty.NettyClient           : 当前客户端：B 服务端连接成功...
+2024-10-22 15:29:05.654  INFO 7200 --- [nioEventLoopGroup-9-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：B 连接服务器成功
+2024-10-22 15:29:05.706  INFO 7200 --- [nioEventLoopGroup-10-1] c.y.v.system.netty.NettyClient           : 当前客户端：C 服务端连接成功...
+2024-10-22 15:29:05.708  INFO 7200 --- [nioEventLoopGroup-10-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：C 连接服务器成功
+2024-10-22 15:29:07.510  INFO 7200 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2024-10-22 15:29:07.531  INFO 7200 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 6.472 seconds (JVM running for 7.465)
+2024-10-22 15:29:08.031  INFO 7200 --- [main] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 01 00 0C 01 03 00 03 AA 3C 55
+2024-10-22 15:29:08.055  INFO 7200 --- [t_netty_pool_273229434] .s.n.m.i.NettyReceiveCabinetCServiceImpl : 收到C柜0x01-药指令:A5 5A 0C 00 01 00 0C 01 03 00 03 00 00 00 31 20 55
+2024-10-22 15:29:08.068  INFO 7200 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-10-22 15:29:08.094 ERROR 7200 --- [nioEventLoopGroup-10-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：C 发生了异常处理
+2024-10-22 15:29:08.094  WARN 7200 --- [nioEventLoopGroup-10-1] c.y.v.system.netty.NettyClientHandler    : 重新连接
+2024-10-22 15:29:08.095  INFO 7200 --- [nioEventLoopGroup-10-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：C 断开了连接
+2024-10-22 15:29:08.098  INFO 7200 --- [nioEventLoopGroup-10-2] c.y.v.system.netty.NettyClient           : 当前客户端：C 服务端连接成功...
+2024-10-22 15:29:08.099  INFO 7200 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2024-10-22 15:29:08.099  INFO 7200 --- [nioEventLoopGroup-10-2] c.y.v.system.netty.NettyClientHandler    : 当前的client：C 连接服务器成功
+2024-10-22 15:29:37.301  INFO 5740 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on ZH with PID 5740 (started by 78671 in D:\work\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2024-10-22 15:29:37.304  INFO 5740 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "dev"
+2024-10-22 15:29:38.212  INFO 5740 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2024-10-22 15:29:38.215  INFO 5740 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2024-10-22 15:29:38.278  INFO 5740 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 44 ms. Found 0 Redis repository interfaces.
+2024-10-22 15:29:40.164  INFO 5740 --- [main] c.y.v.system.com.ComService              : 连接串口：COM10失败！
+2024-10-22 15:29:40.382  INFO 5740 --- [main] c.y.v.system.com.ComService              : 连接串口：COM9失败！
+2024-10-22 15:29:40.585  INFO 5740 --- [main] c.y.v.system.com.ComService              : 连接串口：COM4失败！
+2024-10-22 15:29:40.850  INFO 5740 --- [nioEventLoopGroup-4-1] c.y.v.system.camera.CameraClient         : 当前客户端：上方扫码相机 服务端连接成功...
+2024-10-22 15:29:40.850  INFO 5740 --- [nioEventLoopGroup-6-1] c.y.v.system.camera.CameraClient         : 当前客户端：侧方扫码相机 服务端连接成功...
+2024-10-22 15:29:40.850  INFO 5740 --- [nioEventLoopGroup-5-1] c.y.v.system.camera.CameraClient         : 当前客户端：下方扫码相机 服务端连接成功...
+2024-10-22 15:29:41.209  INFO 5740 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-10-22 15:29:41.406  INFO 5740 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-10-22 15:29:41.449  INFO 5740 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2024-10-22 15:29:41.483  INFO 5740 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClient           : 当前客户端：A 服务端连接成功...
+2024-10-22 15:29:41.485  INFO 5740 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：A 连接服务器成功
+2024-10-22 15:29:41.485  INFO 5740 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2024-10-22 15:29:41.510  INFO 5740 --- [nioEventLoopGroup-9-1] c.y.v.system.netty.NettyClient           : 当前客户端：B 服务端连接成功...
+2024-10-22 15:29:41.512  INFO 5740 --- [nioEventLoopGroup-9-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：B 连接服务器成功
+2024-10-22 15:29:41.513  INFO 5740 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：C, 进行初始化
+2024-10-22 15:29:41.541  INFO 5740 --- [nioEventLoopGroup-10-1] c.y.v.system.netty.NettyClient           : 当前客户端：C 服务端连接成功...
+2024-10-22 15:29:41.544  INFO 5740 --- [nioEventLoopGroup-10-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：C 连接服务器成功
+2024-10-22 15:29:43.062  INFO 5740 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2024-10-22 15:29:43.087  INFO 5740 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 6.246 seconds (JVM running for 7.299)
+2024-10-22 15:29:43.634  INFO 5740 --- [main] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 01 00 0C 01 03 00 03 AA 3C 55
+2024-10-22 15:29:43.681  INFO 5740 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-10-22 15:29:43.699 ERROR 5740 --- [nioEventLoopGroup-10-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：C 发生了异常处理
+2024-10-22 15:29:43.700  WARN 5740 --- [nioEventLoopGroup-10-1] c.y.v.system.netty.NettyClientHandler    : 重新连接
+2024-10-22 15:29:43.701  INFO 5740 --- [nioEventLoopGroup-10-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：C 断开了连接
+2024-10-22 15:29:43.703  INFO 5740 --- [nioEventLoopGroup-10-2] c.y.v.system.netty.NettyClient           : 当前客户端：C 服务端连接成功...
+2024-10-22 15:29:43.705  INFO 5740 --- [nioEventLoopGroup-10-2] c.y.v.system.netty.NettyClientHandler    : 当前的client：C 连接服务器成功
+2024-10-22 15:29:43.725  INFO 5740 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2024-10-22 15:29:43.734 ERROR 5740 --- [nioEventLoopGroup-10-2] c.y.v.system.netty.NettyClientHandler    : 当前的client：C 发生了异常处理
+2024-10-22 15:29:43.734  WARN 5740 --- [nioEventLoopGroup-10-2] c.y.v.system.netty.NettyClientHandler    : 重新连接
+2024-10-22 15:29:43.735  INFO 5740 --- [nioEventLoopGroup-10-2] c.y.v.system.netty.NettyClientHandler    : 当前的client：C 断开了连接
+2024-10-22 15:29:43.737  INFO 5740 --- [nioEventLoopGroup-10-3] c.y.v.system.netty.NettyClient           : 当前客户端：C 服务端连接成功...
+2024-10-22 15:29:43.838  WARN 5740 --- [nioEventLoopGroup-10-3] io.netty.util.concurrent.DefaultPromise  : An exception was thrown by com.yiwan.vaccinedispenser.system.netty.NettyClient$$Lambda$1242/0x000001ff3a70e520.operationComplete()
+
+org.springframework.data.redis.RedisConnectionFailureException: Unable to connect to Redis; nested exception is io.lettuce.core.RedisConnectionException: Unable to connect to 127.0.0.1/<unresolved>:6379
+	at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory$ExceptionTranslatingConnectionProvider.translateException(LettuceConnectionFactory.java:1689)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory$ExceptionTranslatingConnectionProvider.getConnection(LettuceConnectionFactory.java:1597)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory$SharedConnection.getNativeConnection(LettuceConnectionFactory.java:1383)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory$SharedConnection.getConnection(LettuceConnectionFactory.java:1366)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory.getSharedConnection(LettuceConnectionFactory.java:1093)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory.getConnection(LettuceConnectionFactory.java:421)
+	at org.springframework.data.redis.core.RedisConnectionUtils.fetchConnection(RedisConnectionUtils.java:193)
+	at org.springframework.data.redis.core.RedisConnectionUtils.doGetConnection(RedisConnectionUtils.java:144)
+	at org.springframework.data.redis.core.RedisConnectionUtils.getConnection(RedisConnectionUtils.java:105)
+	at org.springframework.data.redis.core.RedisTemplate.execute(RedisTemplate.java:211)
+	at org.springframework.data.redis.core.RedisTemplate.execute(RedisTemplate.java:191)
+	at org.springframework.data.redis.core.AbstractOperations.execute(AbstractOperations.java:97)
+	at org.springframework.data.redis.core.DefaultValueOperations.set(DefaultValueOperations.java:305)
+	at com.yiwan.vaccinedispenser.system.netty.NettyClient.lambda$connect$0(NettyClient.java:124)
+	at io.netty.util.concurrent.DefaultPromise.notifyListener0(DefaultPromise.java:590)
+	at io.netty.util.concurrent.DefaultPromise.notifyListeners0(DefaultPromise.java:583)
+	at io.netty.util.concurrent.DefaultPromise.notifyListenersNow(DefaultPromise.java:559)
+	at io.netty.util.concurrent.DefaultPromise.notifyListeners(DefaultPromise.java:492)
+	at io.netty.util.concurrent.DefaultPromise.setValue0(DefaultPromise.java:636)
+	at io.netty.util.concurrent.DefaultPromise.setSuccess0(DefaultPromise.java:625)
+	at io.netty.util.concurrent.DefaultPromise.trySuccess(DefaultPromise.java:105)
+	at io.netty.channel.DefaultChannelPromise.trySuccess(DefaultChannelPromise.java:84)
+	at io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.fulfillConnectPromise(AbstractNioChannel.java:300)
+	at io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.finishConnect(AbstractNioChannel.java:335)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:776)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+Caused by: io.lettuce.core.RedisConnectionException: Unable to connect to 127.0.0.1/<unresolved>:6379
+	at io.lettuce.core.RedisConnectionException.create(RedisConnectionException.java:78)
+	at io.lettuce.core.RedisConnectionException.create(RedisConnectionException.java:56)
+	at io.lettuce.core.AbstractRedisClient.getConnection(AbstractRedisClient.java:330)
+	at io.lettuce.core.RedisClient.connect(RedisClient.java:216)
+	at org.springframework.data.redis.connection.lettuce.StandaloneConnectionProvider.lambda$getConnection$1(StandaloneConnectionProvider.java:115)
+	at java.base/java.util.Optional.orElseGet(Optional.java:364)
+	at org.springframework.data.redis.connection.lettuce.StandaloneConnectionProvider.getConnection(StandaloneConnectionProvider.java:115)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory$ExceptionTranslatingConnectionProvider.getConnection(LettuceConnectionFactory.java:1595)
+	... 30 common frames omitted
+Caused by: java.lang.IllegalStateException: executor not accepting a task
+	at io.netty.resolver.AddressResolverGroup.getResolver(AddressResolverGroup.java:61)
+	at io.netty.bootstrap.Bootstrap.doResolveAndConnect0(Bootstrap.java:194)
+	at io.netty.bootstrap.Bootstrap.access$000(Bootstrap.java:46)
+	at io.netty.bootstrap.Bootstrap$1.operationComplete(Bootstrap.java:180)
+	at io.netty.bootstrap.Bootstrap$1.operationComplete(Bootstrap.java:166)
+	at io.netty.util.concurrent.DefaultPromise.notifyListener0(DefaultPromise.java:590)
+	at io.netty.util.concurrent.DefaultPromise.notifyListenersNow(DefaultPromise.java:557)
+	at io.netty.util.concurrent.DefaultPromise.notifyListeners(DefaultPromise.java:492)
+	at io.netty.util.concurrent.DefaultPromise.setValue0(DefaultPromise.java:636)
+	at io.netty.util.concurrent.DefaultPromise.setSuccess0(DefaultPromise.java:625)
+	at io.netty.util.concurrent.DefaultPromise.trySuccess(DefaultPromise.java:105)
+	at io.netty.channel.DefaultChannelPromise.trySuccess(DefaultChannelPromise.java:84)
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.safeSetSuccess(AbstractChannel.java:990)
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.register0(AbstractChannel.java:516)
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.access$200(AbstractChannel.java:429)
+	at io.netty.channel.AbstractChannel$AbstractUnsafe$1.run(AbstractChannel.java:486)
+	at io.netty.util.concurrent.AbstractEventExecutor.runTask$$$capture(AbstractEventExecutor.java:174)
+	at io.netty.util.concurrent.AbstractEventExecutor.runTask(AbstractEventExecutor.java)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute$$$capture(AbstractEventExecutor.java:167)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:470)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:569)
+	... 4 common frames omitted
+
+2024-10-22 15:29:43.839  INFO 5740 --- [nioEventLoopGroup-10-3] c.y.v.system.netty.NettyClientHandler    : 当前的client：C 连接服务器成功
+2024-10-22 15:30:20.967  INFO 18476 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on ZH with PID 18476 (started by 78671 in D:\work\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2024-10-22 15:30:20.970  INFO 18476 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "dev"
+2024-10-22 15:30:21.930  INFO 18476 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2024-10-22 15:30:21.932  INFO 18476 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2024-10-22 15:30:21.981  INFO 18476 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 33 ms. Found 0 Redis repository interfaces.
+2024-10-22 15:30:23.867  INFO 18476 --- [main] c.y.v.system.com.ComService              : 连接串口：COM10失败！
+2024-10-22 15:30:24.073  INFO 18476 --- [main] c.y.v.system.com.ComService              : 连接串口：COM9失败！
+2024-10-22 15:30:24.276  INFO 18476 --- [main] c.y.v.system.com.ComService              : 连接串口：COM4失败！
+2024-10-22 15:30:24.614  INFO 18476 --- [nioEventLoopGroup-4-1] c.y.v.system.camera.CameraClient         : 当前客户端：上方扫码相机 服务端连接成功...
+2024-10-22 15:30:24.614  INFO 18476 --- [nioEventLoopGroup-5-1] c.y.v.system.camera.CameraClient         : 当前客户端：下方扫码相机 服务端连接成功...
+2024-10-22 15:30:24.614  INFO 18476 --- [nioEventLoopGroup-6-1] c.y.v.system.camera.CameraClient         : 当前客户端：侧方扫码相机 服务端连接成功...
+2024-10-22 15:30:24.965  INFO 18476 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-10-22 15:30:25.141  INFO 18476 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-10-22 15:30:25.189  INFO 18476 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2024-10-22 15:30:25.219  INFO 18476 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClient           : 当前客户端：A 服务端连接成功...
+2024-10-22 15:30:25.221  INFO 18476 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2024-10-22 15:30:25.222  INFO 18476 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：A 连接服务器成功
+2024-10-22 15:30:25.247  INFO 18476 --- [nioEventLoopGroup-9-1] c.y.v.system.netty.NettyClient           : 当前客户端：B 服务端连接成功...
+2024-10-22 15:30:25.248  INFO 18476 --- [nioEventLoopGroup-9-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：B 连接服务器成功
+2024-10-22 15:30:25.248  INFO 18476 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：C, 进行初始化
+2024-10-22 15:30:25.279  INFO 18476 --- [nioEventLoopGroup-10-1] c.y.v.system.netty.NettyClient           : 当前客户端：C 服务端连接成功...
+2024-10-22 15:30:25.282  INFO 18476 --- [nioEventLoopGroup-10-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：C 连接服务器成功
+2024-10-22 15:30:27.202  INFO 18476 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2024-10-22 15:30:27.231  INFO 18476 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 6.822 seconds (JVM running for 7.926)
+2024-10-22 15:30:27.737  INFO 18476 --- [main] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 01 00 0C 01 03 00 03 AA 3C 55
+2024-10-22 15:30:27.801  INFO 18476 --- [t_netty_pool_704953748] .s.n.m.i.NettyReceiveCabinetCServiceImpl : 收到C柜0x01-药指令:A5 5A 0C 00 01 00 0C 01 03 00 03 00 00 00 31 20 55
+2024-10-22 15:30:27.831  INFO 18476 --- [t_netty_pool_1352276081] .s.n.m.i.NettyReceiveCabinetCServiceImpl : 收到C柜0x01-药指令:A5 5A 0D 00 01 00 0C 01 03 00 03 02 01 00 00 B1 AC 55
+2024-10-22 15:30:27.831  INFO 18476 --- [t_netty_pool_1352276081] c.y.v.system.netty.function.CabinetCMsg  : C柜挡片关闭状态
+2024-10-22 15:30:32.792  INFO 18476 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-10-22 15:30:32.838  INFO 18476 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2024-10-22 15:37:59.423  INFO 14268 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on ZH with PID 14268 (started by 78671 in D:\work\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
+2024-10-22 15:37:59.425  INFO 14268 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "dev"
+2024-10-22 15:38:00.384  INFO 14268 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2024-10-22 15:38:00.389  INFO 14268 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2024-10-22 15:38:00.463  INFO 14268 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 56 ms. Found 0 Redis repository interfaces.
+2024-10-22 15:38:02.704  INFO 14268 --- [main] c.y.v.system.com.ComService              : 连接串口：COM10失败！
+2024-10-22 15:38:02.920  INFO 14268 --- [main] c.y.v.system.com.ComService              : 连接串口：COM9失败！
+2024-10-22 15:38:03.123  INFO 14268 --- [main] c.y.v.system.com.ComService              : 连接串口：COM4失败！
+2024-10-22 15:38:03.447  INFO 14268 --- [nioEventLoopGroup-6-1] c.y.v.system.camera.CameraClient         : 当前客户端：侧方扫码相机 服务端连接成功...
+2024-10-22 15:38:03.447  INFO 14268 --- [nioEventLoopGroup-5-1] c.y.v.system.camera.CameraClient         : 当前客户端：下方扫码相机 服务端连接成功...
+2024-10-22 15:38:03.447  INFO 14268 --- [nioEventLoopGroup-4-1] c.y.v.system.camera.CameraClient         : 当前客户端：上方扫码相机 服务端连接成功...
+2024-10-22 15:38:03.904  INFO 14268 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-10-22 15:38:04.104  INFO 14268 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-10-22 15:38:04.159  INFO 14268 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：A, 进行初始化
+2024-10-22 15:38:04.192  INFO 14268 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：B, 进行初始化
+2024-10-22 15:38:04.192  INFO 14268 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClient           : 当前客户端：A 服务端连接成功...
+2024-10-22 15:38:04.194  INFO 14268 --- [nioEventLoopGroup-8-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：A 连接服务器成功
+2024-10-22 15:38:04.215  INFO 14268 --- [nioEventLoopGroup-9-1] c.y.v.system.netty.NettyClient           : 当前客户端：B 服务端连接成功...
+2024-10-22 15:38:04.216  INFO 14268 --- [nioEventLoopGroup-9-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：B 连接服务器成功
+2024-10-22 15:38:04.217  INFO 14268 --- [main] c.y.v.system.netty.NettyClient           : 当前客户端：C, 进行初始化
+2024-10-22 15:38:04.247  INFO 14268 --- [nioEventLoopGroup-10-1] c.y.v.system.netty.NettyClient           : 当前客户端：C 服务端连接成功...
+2024-10-22 15:38:04.248  INFO 14268 --- [nioEventLoopGroup-10-1] c.y.v.system.netty.NettyClientHandler    : 当前的client：C 连接服务器成功
+2024-10-22 15:38:06.100  INFO 14268 --- [main] o.y.standard.ServerEndpointExporter      : [34mNetty WebSocket started on port: 8880 with context path(s): '/websocket/{pageId}' .[0m
+2024-10-22 15:38:06.124  INFO 14268 --- [main] YuandiInjectiondispenserApplicationTests : Started YuandiInjectiondispenserApplicationTests in 7.209 seconds (JVM running for 8.454)
+2024-10-22 15:38:06.684  INFO 14268 --- [main] c.y.v.s.s.s.n.impl.CabinetCServiceImpl   : 0x0C C柜柜-0x01-药指令：A5 5A 09 00 01 00 0C 01 03 00 03 AA 3C 55
+2024-10-22 15:38:06.727  INFO 14268 --- [t_netty_pool_1726528345] .s.n.m.i.NettyReceiveCabinetCServiceImpl : 收到C柜0x01-药指令:A5 5A 0C 00 01 00 0C 01 03 00 03 00 00 00 31 20 55
+2024-10-22 15:38:06.744  INFO 14268 --- [t_netty_pool_1031275924] .s.n.m.i.NettyReceiveCabinetCServiceImpl : 收到C柜0x01-药指令:A5 5A 0D 00 01 00 0C 01 03 00 03 02 01 00 00 B1 AC 55
+2024-10-22 15:38:06.744  INFO 14268 --- [t_netty_pool_1031275924] c.y.v.system.netty.function.CabinetCMsg  : C柜挡片关闭状态
+2024-10-22 15:38:11.735  INFO 14268 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-10-22 15:38:11.768  INFO 14268 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
