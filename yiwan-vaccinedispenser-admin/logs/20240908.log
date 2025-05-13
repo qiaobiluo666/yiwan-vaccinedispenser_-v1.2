@@ -1,5 +1,0 @@
-2024-09-08 14:43:05.621  INFO 3064 --- [main] YuandiInjectiondispenserApplicationTests : Starting YuandiInjectiondispenserApplicationTests using Java 17.0.9 on ZH with PID 3064 (started by 78671 in D:\work\疫苗发药机\yiwan-vaccinedispenser_-v1.0\yiwan-vaccinedispenser-admin)
-2024-09-08 14:43:05.624  INFO 3064 --- [main] YuandiInjectiondispenserApplicationTests : The following 1 profile is active: "dev"
-2024-09-08 14:43:06.583  INFO 3064 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
-2024-09-08 14:43:06.586  INFO 3064 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
-2024-09-08 14:43:06.643  INFO 3064 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 43 ms. Found 0 Redis repository interfaces.
