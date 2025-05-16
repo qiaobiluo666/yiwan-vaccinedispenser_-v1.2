@@ -55,6 +55,8 @@ public class MachineListRequest implements Serializable {
     //药品保质期
     private Date expiredAt;
 
+    private String batchNo;
+
     //灯板Id
     private Integer ledNum;
 

@@ -2,6 +2,7 @@ package com.yiwan.vaccinedispenser.system.dispensing;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yiwan.vaccinedispenser.core.common.CommandEnums;
 import com.yiwan.vaccinedispenser.core.common.SettingConstants;
@@ -21,10 +22,7 @@ import com.yiwan.vaccinedispenser.system.sys.data.request.netty.*;
 import com.yiwan.vaccinedispenser.system.sys.service.netty.CabinetAService;
 import com.yiwan.vaccinedispenser.system.sys.service.netty.CabinetCService;
 import com.yiwan.vaccinedispenser.system.sys.service.sys.SysConfigService;
-import com.yiwan.vaccinedispenser.system.sys.service.vac.VacMachineDrugService;
-import com.yiwan.vaccinedispenser.system.sys.service.vac.VacMachineExceptionService;
-import com.yiwan.vaccinedispenser.system.sys.service.vac.VacMachineService;
-import com.yiwan.vaccinedispenser.system.sys.service.vac.VacSendDrugRecordService;
+import com.yiwan.vaccinedispenser.system.sys.service.vac.*;
 import com.yiwan.vaccinedispenser.system.until.VacUntil;
 import com.yiwan.vaccinedispenser.system.zyc.ZcyFunction;
 import lombok.extern.slf4j.Slf4j;
@@ -98,6 +96,9 @@ public class DispensingFunction {
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
 
+    @Autowired
+    private VacDrugRecordService vacDrugRecordService;
+
     /**
      * 条形码 扫码以后用政采云的数据 实现发药
      */
@@ -153,7 +154,7 @@ public class DispensingFunction {
         }
 
             //过滤掉 设备异常 导致的仓位 或者皮带问题
-            LambdaQueryWrapper<VacMachine> lambdaQueryWrapper = new LambdaQueryWrapper<VacMachine>();
+            LambdaQueryWrapper<VacMachine> lambdaQueryWrapper = new LambdaQueryWrapper<>();
             lambdaQueryWrapper.eq(VacMachine::getDeleted,"0")
                     .eq(VacMachine::getProductNo,vacGetVaccine.getProductNo())
                     .gt(VacMachine::getVaccineUseNum,0)
@@ -168,8 +169,8 @@ public class DispensingFunction {
 
             //先判断该药品是否有余量
             List<VacMachine>  drugList =  vacMachineMapper.selectList(lambdaQueryWrapper);
-            if(drugList.isEmpty()){
 
+            if(drugList.isEmpty()){
             if("true".equals(configSetting.getZcySend())){
                 zcyFunction.sendResult(vacGetVaccine,"机器没有库存！");
             }
@@ -192,15 +193,19 @@ public class DispensingFunction {
                     beltQueueSizeMap.put(i, listSize);
                 }
 
-                // 多人份疫苗先发
+                // 多人份疫苗先发  选取有效期最早的
                 Optional<VacMachine> priorityVacMachine = drugList.stream()
                         .filter(drug -> drug.getStatus() == 2)
-                        .min(Comparator.comparing(VacMachine::getExpiredAt)); // 选取有效期最早的
+                        .min(Comparator.comparing(VacMachine::getExpiredAt));
 
                 VacMachine vacMachine;
                 if (priorityVacMachine.isPresent()) {
-                    vacMachine = priorityVacMachine.get(); // 直接选用 `status == 2` 的疫苗
+
+                    // 直接选用 `status == 2` 的疫苗
+                    vacMachine = priorityVacMachine.get();
+
                 } else {
+
                     // 找到有效期最近的疫苗
                     List<VacMachine> nearestExpiryDrugList = drugList.stream()
                             .filter(drug -> drug.getExpiredAt() != null)
@@ -209,10 +214,40 @@ public class DispensingFunction {
 
                     // 获取最近的有效期
                     Date nearestExpiryDate = nearestExpiryDrugList.get(0).getExpiredAt();
+
                     // 筛选出所有有效期等于最近有效期的疫苗
-                    List<VacMachine> drugsWithNearestExpiry = nearestExpiryDrugList.stream()
+                    List<String> distinctBatchNos = nearestExpiryDrugList.stream()
                             .filter(drug -> drug.getExpiredAt().equals(nearestExpiryDate))
+                            .map(VacMachine::getBatchNo)
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toCollection(LinkedHashSet::new))
+                            .stream()
                             .toList();
+
+//                    List<VacMachine> drugsWithNearestExpiry = nearestExpiryDrugList.stream()
+//                            .filter(drug -> drug.getExpiredAt().equals(nearestExpiryDate))
+//                            .toList();
+                    List<VacMachine> drugsWithNearestExpiry;
+                    //如果批号为空 直接按照有效期发苗
+                    if(distinctBatchNos.isEmpty()){
+                        drugsWithNearestExpiry = nearestExpiryDrugList.stream()
+                                .filter(drug -> drug.getExpiredAt().equals(nearestExpiryDate))
+                                .toList();
+                    }else {
+                        //通过疫苗列表 查早 最早的记录
+                        String batchNo = vacDrugRecordService.getBatchNoEarly(distinctBatchNos);
+
+                        if(batchNo!=null){
+                            drugsWithNearestExpiry = nearestExpiryDrugList.stream()
+                                    .filter(drug -> drug.getExpiredAt().equals(nearestExpiryDate))
+                                    .filter(drug -> Objects.equals(drug.getBatchNo(), batchNo))
+                                    .toList();
+                        }else {
+                            drugsWithNearestExpiry = nearestExpiryDrugList.stream()
+                                    .filter(drug -> drug.getExpiredAt().equals(nearestExpiryDate))
+                                    .toList();
+                        }
+                    }
 
                     // 2. 如果有效期最近的疫苗有多个仓位，再根据皮带队列大小选择
                     if (drugsWithNearestExpiry.size() > 1) {
@@ -263,6 +298,7 @@ public class DispensingFunction {
                 redisDrugListData.setRequestNo(vacGetVaccine.getRequestNo());
                 redisDrugListData.setWorkbenchNum(vacGetVaccine.getWorkbenchNum());
                 redisDrugListData.setWorkbenchNo(vacGetVaccine.getWorkbenchNo());
+                redisDrugListData.setWorkbenchName(vacGetVaccine.getWorkbenchName());
                 //将皮带层数存入redis
                 redisDrugListData.setBeltNum(realBeltLine);
                 redisDrugListData.setUuid(UUID.randomUUID());
@@ -310,7 +346,13 @@ public class DispensingFunction {
                     });
                     thread.start();
                 }
-                log.info("添加发药处方：{}",JSON.toJSONString(redisDrugListData));
+                log.info("添加发药处方：{}",JSON.toJSONStringWithDateFormat(
+                        redisDrugListData,
+                        "yyyy-MM-dd HH:mm:ss",
+                        SerializerFeature.WriteDateUseDateFormat
+                ));
+
+
             }
     }
 

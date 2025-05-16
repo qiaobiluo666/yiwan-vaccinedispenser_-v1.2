@@ -65,6 +65,7 @@
             vaccine_num = #{vacMachine.vaccineNum},
             vaccine_use_num = #{vacMachine.vaccineUseNum},
             expired_at = #{vacMachine.expiredAt},
+            batch_no = #{vacMachine.batchNo},
             led_num = #{vacMachine.ledNum},
             auto_x = #{vacMachine.autoX},
             auto_z = #{vacMachine.autoZ},

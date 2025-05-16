@@ -99,7 +99,7 @@ public class PdfController {
 
 
     /**
-     *上药记录导出
+     *库存详情
      */
     @GetMapping("/inventory/detail")
     public ResponseEntity<byte[]> downloadInventoryPdfDetail(String productName) throws Exception {

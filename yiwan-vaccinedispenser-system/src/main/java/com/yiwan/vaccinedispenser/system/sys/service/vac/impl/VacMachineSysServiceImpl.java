@@ -49,11 +49,14 @@ public class VacMachineSysServiceImpl extends ServiceImpl<VacMachineExceptionMap
     public Page<VacMachineException> machineExceptionList(MachineExceptionRequest request) {
 
         IPage<VacMachineException> page= new Page<>(request.getPage(),request.getSize());
+
         LambdaQueryWrapper<VacMachineException> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(VacMachineException::getDeleted,0)
                 .orderByDesc(VacMachineException::getCreateTime);
         IPage<VacMachineException> vacMachineExceptionIPage = vacMachineExceptionMapper.selectPage(page, wrapper);
+
         return (Page<VacMachineException>) vacMachineExceptionIPage;
+
     }
 
     @Override

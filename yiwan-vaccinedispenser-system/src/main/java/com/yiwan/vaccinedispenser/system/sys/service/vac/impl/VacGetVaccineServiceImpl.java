@@ -46,8 +46,15 @@ public class VacGetVaccineServiceImpl extends ServiceImpl<VacGetVaccineMapper, V
     @Override
     public VacGetVaccine getMsgByTaskId(String taskId) {
         LambdaQueryWrapper<VacGetVaccine> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(VacGetVaccine::getTaskId,taskId);
-        return vacGetVaccineMapper.selectOne(lambdaQueryWrapper);
+        lambdaQueryWrapper.eq(VacGetVaccine::getTaskId,taskId)
+                .eq(VacGetVaccine::getDeleted,0);
+        List<VacGetVaccine> vacGetVaccineList = vacGetVaccineMapper.selectList(lambdaQueryWrapper);
+        if(vacGetVaccineList.isEmpty()){
+            return null;
+        }else {
+            return vacGetVaccineList.get(0);
+        }
+
     }
 
     @Override

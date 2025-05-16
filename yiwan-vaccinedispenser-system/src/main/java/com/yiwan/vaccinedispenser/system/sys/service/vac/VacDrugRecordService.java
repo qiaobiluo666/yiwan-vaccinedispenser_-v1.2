@@ -53,7 +53,7 @@ public interface VacDrugRecordService extends IService<VacDrugRecord>{
 
 
 
-
+    String getBatchNoEarly(List<String>  batchNoList);
 
 
 

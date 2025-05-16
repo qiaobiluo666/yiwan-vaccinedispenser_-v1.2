@@ -153,7 +153,7 @@ public class ExcelServiceImpl implements ExcelService {
         titleCell.setCellStyle(titleStyle);
 
         // 合并标题单元格
-        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 1));
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 4));
 
         // 表头样式
         CellStyle headerStyle = workbook.createCellStyle();
@@ -173,7 +173,7 @@ public class ExcelServiceImpl implements ExcelService {
         // 表头
         Row headerRow = sheet.createRow(1);
         headerRow.setHeightInPoints(25);
-        String[] tableHeaders = {"疫苗名称", "仓位号", "数量(支)","疫苗有效期" };
+        String[] tableHeaders = {"疫苗名称", "仓位号", "数量(支)","疫苗有效期","批号" };
         for (int i = 0; i < tableHeaders.length; i++) {
             Cell cell = headerRow.createCell(i);
             cell.setCellValue(tableHeaders[i]);
@@ -184,6 +184,13 @@ public class ExcelServiceImpl implements ExcelService {
         CellStyle dateCellStyle = workbook.createCellStyle();
         CreationHelper creationHelper = workbook.getCreationHelper();
         dateCellStyle.setDataFormat(creationHelper.createDataFormat().getFormat("yyyy-MM-dd"));
+        dateCellStyle.setAlignment(HorizontalAlignment.CENTER);
+        dateCellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        dateCellStyle.setBorderTop(BorderStyle.THIN);
+        dateCellStyle.setBorderBottom(BorderStyle.THIN);
+        dateCellStyle.setBorderLeft(BorderStyle.THIN);
+        dateCellStyle.setBorderRight(BorderStyle.THIN);
+
 
 
         // 数据样式
@@ -217,13 +224,18 @@ public class ExcelServiceImpl implements ExcelService {
             exportCell.setCellValue(record.getExpiredAt());
             exportCell.setCellStyle(dateCellStyle);
 
+            Cell bactNoCell = row.createCell(4);
+            bactNoCell.setCellValue(record.getBatchNo());
+            bactNoCell.setCellStyle(dataStyle);
+
         }
 
         // 设置列宽
         sheet.setColumnWidth(0, 70 * 256);
         sheet.setColumnWidth(1, 15 * 256);
         sheet.setColumnWidth(2, 15 * 256);
-        sheet.setColumnWidth(3, 60 * 256);
+        sheet.setColumnWidth(3, 20 * 256);
+        sheet.setColumnWidth(4, 15 * 256);
         // 写入内存流
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         workbook.write(out);

@@ -117,6 +117,11 @@ public class VacMachine extends Model<VacMachine> {
 
     private Date expiredAt;
 
+    /**
+     *  疫苗批号
+     */
+
+    private String batchNo;
 
     /**
      * 灯板Id

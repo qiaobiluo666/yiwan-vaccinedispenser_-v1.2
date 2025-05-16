@@ -327,7 +327,7 @@ public class PdfServiceImpl implements PdfService {
     @Override
     public ResponseEntity<byte[]> getInventoryPdfDetail(String productName) throws DocumentException, IOException {
 
-        Document document = new Document(PageSize.A4);
+        Document document = new Document(PageSize.A4.rotate());
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         // 2. 获取 PdfWriter 实例
@@ -351,15 +351,15 @@ public class PdfServiceImpl implements PdfService {
         document.add(titleParagraph);
 
         List<VacMachine> vacMachineList = vacMachineService.getVacMachineListByProductNo(productName);
-        PdfPTable table = new PdfPTable(4);
+        PdfPTable table = new PdfPTable(5);
         table.setWidthPercentage(100);
         table.setSpacingBefore(10f);
         //表头固定
         table.setHeaderRows(1);
-        table.setWidths(new float[]{2.5f, 1.5f, 1.5f,2.5f});
+        table.setWidths(new float[]{2.5f, 1.5f, 1.5f,2.5f,1.5f});
 
         // 8. 设置表头
-        String[] headers = {"疫苗名称", "仓位号", "数量(支)","疫苗有效期" };
+        String[] headers = {"疫苗名称", "仓位号", "数量(支)","疫苗有效期","批号" };
         for (String header : headers) {
             PdfPCell cell = new PdfPCell(new Paragraph(header, headerFont));
             cell.setHorizontalAlignment(Element.ALIGN_CENTER);
@@ -376,6 +376,7 @@ public class PdfServiceImpl implements PdfService {
             table.addCell(createTableCell(record.getBoxNo(), chineseFont));
             table.addCell(createTableCell(String.valueOf(Integer.parseInt(StringUntils.extractValue(record.getProductName()))*record.getVaccineNum()), chineseFont));
             table.addCell(createTableCell(dateFormat.format(record.getExpiredAt()), chineseFont));
+            table.addCell(createTableCell(record.getBatchNo(), chineseFont));
         }
 
         // 10. 添加表格到文档

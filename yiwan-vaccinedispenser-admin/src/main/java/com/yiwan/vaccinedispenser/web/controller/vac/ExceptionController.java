@@ -40,7 +40,6 @@ public class ExceptionController {
     @PostMapping("/machine-exception-list")
     public Result boxSpecList(@RequestBody @Validated MachineExceptionRequest request){
         log.info("入参-DrugListRequest:{}",request);
-        log.info(JSON.toJSONString(Result.success(vacMachineExceptionService.machineExceptionList(request)).getData()));
         return Result.success(vacMachineExceptionService.machineExceptionList(request));
     }
 

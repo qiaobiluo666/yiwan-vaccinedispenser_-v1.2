@@ -2,6 +2,7 @@ package com.yiwan.vaccinedispenser.system.sys.data;
 
 import lombok.Data;
 
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -21,6 +22,7 @@ public class RedisDrugListData {
     private String boxNo;
 
 
+
     //药仓id
     private Long machineId;
 
@@ -33,10 +35,16 @@ public class RedisDrugListData {
     private Integer positionNum;
 
 
+
     //产品名称
     private String productName;
     //产品编号
     private String productNo;
+
+    //批号
+    private String batchNo;
+
+    private Date expiredAt;
 
     //第几层皮带
     private Integer beltNum;
