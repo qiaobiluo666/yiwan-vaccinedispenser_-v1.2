@@ -18,6 +18,6 @@ public class StringUntils {
                 }
             }
         }
-        return "";
+        return "1";
     }
 }
