@@ -458,10 +458,12 @@ public class SendDrugFunction {
                 log.info("================================开始机械手程序===============================");
                 valueOperations.set(RedisKeyConstant.CABINET_A_HANDLE_IS_MOVE_END,"true");
 
-                //夹紧 空出200
+                //夹紧
                 int clampDis = configData.getHandLen()-longs-configData.getGap();
                 //走的行程
                 int dropDis = configData.getHandLen()-longs+200;
+
+
                 if(!dropDrugHandle(clampDis,dropDis,drugRecordRequest)){
                     log.error("自动上药异常：药物异常报警,药没掉入药仓");
                     return;
@@ -473,7 +475,6 @@ public class SendDrugFunction {
 
                 //A柜 步进电机 回原
                 cabinetAStepInit(CabinetConstants.CabinetAStepMode.BLOCK);
-
                 //机械手回原
                 moveHandServoInit(configData);
 
@@ -504,6 +505,7 @@ public class SendDrugFunction {
     public boolean dropDrugHandle(int clampDis , int dropDis ,DrugRecordRequest drugRecordRequest){
 
         cabinetAStepPosition(CabinetConstants.CabinetAStepMode.CLAMP,clampDis);
+
         //等待夹爪步进电机运动完成
         waitCabinetAStepEnd(1);
 
@@ -514,8 +516,8 @@ public class SendDrugFunction {
         cabinetAStepPosition(CabinetConstants.CabinetAStepMode.BLOCK,900);
         waitCabinetAStepEnd(2);
 
-        //A柜机械手 步进电机走 0
-        cabinetAStepPosition(CabinetConstants.CabinetAStepMode.CLAMP,0);
+        //A柜机械手 步进电机走 往外走5mm
+        cabinetAStepPosition(CabinetConstants.CabinetAStepMode.CLAMP,clampDis-500);
         waitCabinetAStepEnd(1);
 
 
@@ -538,6 +540,9 @@ public class SendDrugFunction {
             }
 
             if((System.currentTimeMillis() - timeouts)>3000&&(System.currentTimeMillis() - timeouts)<15000){
+                //A柜 步进电机 回原
+                cabinetAStepInit(CabinetConstants.CabinetAStepMode.CLAMP);
+                waitCabinetAStepEnd(1);
 
                 //夹紧
                 cabinetAStepPosition(CabinetConstants.CabinetAStepMode.CLAMP,dropDis);
@@ -551,6 +556,7 @@ public class SendDrugFunction {
                 cabinetAStepPosition(CabinetConstants.CabinetAStepMode.CLAMP,0);
                 waitCabinetAStepEnd(1);
                 VacUntil.sleep(500);
+
 
             }
 

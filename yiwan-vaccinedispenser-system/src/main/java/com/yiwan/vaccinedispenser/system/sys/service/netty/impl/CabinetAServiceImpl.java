@@ -9,9 +9,16 @@ import com.yiwan.vaccinedispenser.system.sys.data.request.netty.*;
 import com.yiwan.vaccinedispenser.system.sys.service.netty.CabinetAService;
 import com.yiwan.vaccinedispenser.system.until.CRC16Modbus;
 import com.yiwan.vaccinedispenser.system.until.NettyUtils;
+import com.yiwan.vaccinedispenser.system.until.VacUntil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author slh
@@ -25,6 +32,12 @@ public class CabinetAServiceImpl implements CabinetAService {
 
     @Autowired
     private NettySendService nettySendService;
+
+    @Resource(name = "redisTemplate")
+    private ValueOperations<String, String> valueOperations;
+
+
+
     @Override
     public void dropCommand(DropRequest request) {
         //当前帧号
@@ -301,7 +314,7 @@ public class CabinetAServiceImpl implements CabinetAService {
         //stringBuilder 转化为byte
         byte[] bytes = HexUtil.decodeHex(stringBuilder.toString().toUpperCase());
 
-//        log.info("{}柜-{}：{}", request.getWorkMode().name, CabinetConstants.CabinetAType.INPUT.desc,HexUtil.format(stringBuilder.toString().toUpperCase()));
+        log.info("{}柜-{}：{}", request.getWorkMode().name, CabinetConstants.CabinetAType.INPUT.desc,HexUtil.format(stringBuilder.toString().toUpperCase()));
         //给AB控制板 发送消息
         nettySendService.sendMsg(request.getWorkMode(),bytes,frameNumberNow);
 
@@ -339,6 +352,35 @@ public class CabinetAServiceImpl implements CabinetAService {
         log.info("{}柜-{}：{}", CabinetConstants.Cabinet.CAB_A.desc, CabinetConstants.CabinetAType.DISTANCE.desc,HexUtil.format(stringBuilder.toString().toUpperCase()));
         //给B控制板 发送消息
         nettySendService.sendMsg(request.getWorkMode(),bytes,frameNumberNow);
+    }
+
+    @Override
+    public Map<String,String> getInputAll() {
+        //发送A柜查询所有传感器状态
+        InPutRequest request = new InPutRequest();
+        request.setCommand(CabinetConstants.InPutCommand.QUERY);
+        request.setMode(0);
+        request.setCabinet(CabinetConstants.Cabinet.CAB_A);
+        request.setWorkMode(CabinetConstants.Cabinet.CAB_A);
+        intPut(request);
+        //发送B柜查询所有传感器状态
+        request.setCabinet(CabinetConstants.Cabinet.CAB_B);
+        request.setWorkMode(CabinetConstants.Cabinet.CAB_B);
+        intPut(request);
+        //发送C柜查询所有传感器状态
+        request.setCabinet(CabinetConstants.Cabinet.CAB_C);
+        request.setWorkMode(CabinetConstants.Cabinet.CAB_C);
+        intPut(request);
+        VacUntil.sleep(500);
+        String inputListA= valueOperations.get(RedisKeyConstant.sensor.SENSOR_CABINET_A);
+        String inputListB= valueOperations.get(RedisKeyConstant.sensor.SENSOR_CABINET_B);
+        String inputListC= valueOperations.get(RedisKeyConstant.sensor.SENSOR_CABINET_C);
+
+        Map<String,String> maps = new HashMap<>();
+        maps.put("cabinetA",inputListA);
+        maps.put("cabinetB",inputListB);
+        maps.put("cabinetC",inputListC);
+        return maps;
     }
 
 

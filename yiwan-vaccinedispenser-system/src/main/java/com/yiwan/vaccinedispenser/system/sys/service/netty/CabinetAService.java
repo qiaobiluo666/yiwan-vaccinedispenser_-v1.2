@@ -3,6 +3,9 @@ package com.yiwan.vaccinedispenser.system.sys.service.netty;
 
 import com.yiwan.vaccinedispenser.system.sys.data.request.netty.*;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * @author slh
  * @date 2023/5/8
@@ -60,5 +63,8 @@ public interface CabinetAService {
     void getDistance(CabinetAGetDistanceRequest request);
 
 
+    //获取A、B、C柜的所有传感器状态
+
+    Map<String,String> getInputAll();
 
 }

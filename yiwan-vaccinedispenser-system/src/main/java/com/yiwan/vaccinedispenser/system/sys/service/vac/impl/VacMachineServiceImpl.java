@@ -248,6 +248,7 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
 
     @Override
     public DrugRecordRequest findPeople(List<Long> boxSepcIds, Integer num, DrugRecordRequest request) {
+
         // 多人份优先查找新仓位
         VacDrug vacDrug = vacDrugService.vacDrugGetByproductNo(request.getProductNo());
         List<VacMachine> vacMachineList = getNewBoxNo(boxSepcIds,request.getProductNo());
@@ -272,10 +273,13 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
 
     @Override
     public DrugRecordRequest findBox(List<Long> boxSepcIds, Integer num, DrugRecordRequest request) {
+
         log.info("获取政采云request：{}",JSON.toJSONString(request));
         VacDrug vacDrug = vacDrugService.vacDrugGetByproductNo(request.getProductNo());
 
-        //先查找是否有 有效期一致的苗仓
+
+
+        //先查找是否有 有效期、批次一致的苗仓
         List<VacMachine> vacMachineList = getExpiredAtBoxNoBatchNo(boxSepcIds,num,request.getExpiredAt(),request.getProductNo(),request.getBatchNo());
         if (!vacMachineList.isEmpty()) {
             VacMachine vacMachineData = vacMachineList.get(0);
@@ -283,21 +287,24 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
             return getDrugRecordRequestHaveNum(request,vacMachineData,vacDrug);
         }
 
-        //自动上药 老仓位 没有批次 新旧代码迭代
-        List<VacMachine> vacMachineList1 =getBoxNoNullBatchNo(boxSepcIds, request.getProductNo(),num);
+
+        //自动上药 老仓位 同效期   没有批次
+        List<VacMachine> vacMachineList1 =getBoxNoNullBatchNo(boxSepcIds, request.getProductNo(),request.getExpiredAt(),num);
         if(!vacMachineList1.isEmpty()){
             VacMachine vacMachineData1 = vacMachineList1.get(0);
-            log.info("自动上药 老仓位 没有batchNo：{}",vacMachineData1.getBoxNo());
+            log.info("自动上药 老仓位 同效期  没有batchNo：{}",vacMachineData1.getBoxNo());
             return getDrugRecordRequestZeroNum(request,vacMachineData1,vacDrug);
         }
 
         // 如果列表为空， 找一个新的药仓
         List<VacMachine> vacMachineList2 =getNewBoxNo(boxSepcIds, request.getProductNo());
+
         if (!vacMachineList2.isEmpty()) {
             VacMachine vacMachineData2 = vacMachineList2.get(0);
             log.info("自动上药 新仓位：{}",vacMachineData2.getBoxNo());
             return getDrugRecordRequestZeroNum(request,vacMachineData2,vacDrug);
         }
+
 
         //同效期不同批次
         List<VacMachine> vacMachineList3 = getOldBoxNoExpiredAt(boxSepcIds,num,request.getProductNo(),request.getExpiredAt());
@@ -306,6 +313,7 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
             log.info("自动上药 同效期 不同批次 老仓位：{}，数量：{}",vacMachineData3.getBoxNo(),vacMachineData3.getVaccineNum());
             return getDrugRecordRequestExpiredAt(request,vacMachineData3,vacDrug);
         }
+
 
         //同种药
         List<VacMachine> vacMachineList4 = getOldBoxNo(boxSepcIds,num,request.getProductNo());
@@ -1097,8 +1105,12 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
 
             }
             log.info("==============================================测距结束=================================================");
-        }
 
+
+        }
+        //回到原位置
+        ConfigData configData = configFunction.getAutoDrugConfigData();
+        sendDrugFunction.moveHandServoInit(configData);
         return Result.success();
     }
 
@@ -1181,6 +1193,7 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
                 RedisDrugListData drugListData = new RedisDrugListData();
                 drugListData.setMachineId(data.getId());
                 drugListData.setWorkbenchNum(1);
+                drugListData.setProductNo(data.getProductNo());
                 dispensingFunction.dropRecordAndMachine(drugListData,2,"疫苗退药");
             }
             else {
@@ -1300,6 +1313,13 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
             VacUntil.sleep(1000);
         }
 
+    }
+
+    @Override
+    public List<VacMachine> cabinetLedTest(Integer lineNum) {
+        return vacMachineMapper.selectList(new LambdaQueryWrapper<VacMachine>()
+                .eq(VacMachine::getDeleted,0)
+                .eq(VacMachine::getLineNum,lineNum));
     }
 
     @Override
@@ -1428,11 +1448,12 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
         return vacMachineMapper.selectList(queryWrapper);
 
     }
-    private  List<VacMachine> getBoxNoNullBatchNo(List<Long> boxSepcIds,String productNo,Integer num){
+    private  List<VacMachine> getBoxNoNullBatchNo(List<Long> boxSepcIds,String productNo,Date expiredAt, Integer num){
         LambdaQueryWrapper<VacMachine> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(VacMachine::getDeleted,0)
                 .in(VacMachine::getBoxSpecId,boxSepcIds)
                 .eq(VacMachine::getProductNo,productNo)
+                .eq(VacMachine::getExpiredAt,expiredAt)
                 .isNull(VacMachine::getBatchNo)
                 .eq(VacMachine::getStatus,1)
                 .lt(VacMachine::getVaccineNum,num)

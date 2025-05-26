@@ -401,12 +401,12 @@ public class CabinetBMsg {
             //查询所有传感器状态
             case "00"->{
                 List<Integer> sensorList = NettyUtils.allInPut(bytesStr);
-
-                //检测药品是否到直角的传感器
-                if(sensorList.get(17) ==1){
-                    valueOperations.set(RedisKeyConstant.sensor.TABLE_SENSOR,"true");
-                }else {
-                    valueOperations.set(RedisKeyConstant.sensor.TABLE_SENSOR,"false");
+                for (Integer integer : sensorList) {
+                    if (integer == 1) {
+                        valueOperations.set(RedisKeyConstant.sensor.SENSOR_CABINET_B, sensorList.toString());
+                    } else {
+                        valueOperations.set(RedisKeyConstant.sensor.SENSOR_CABINET_B, sensorList.toString());
+                    }
                 }
             }
 

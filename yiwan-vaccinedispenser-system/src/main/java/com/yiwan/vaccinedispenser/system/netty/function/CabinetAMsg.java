@@ -112,7 +112,6 @@ public class CabinetAMsg {
                 log.info("收到A柜{}:{}",CabinetConstants.CabinetAType.OUTPUT.desc,NettyUtils.StringListToString(bytesStr));
             }
 
-
             //输入检测
             case "06"->{
                 log.info("收到A柜{}:{}",CabinetConstants.CabinetAType.INPUT.desc,NettyUtils.StringListToString(bytesStr));
@@ -124,14 +123,10 @@ public class CabinetAMsg {
                 receiveDistance(bytesStr);
             }
 
-
-
             //设置系统参数
             case "80" -> {
                 log.info("收到A柜{}:{}",CabinetConstants.CabinetSettingType.SET_SETTING.desc,NettyUtils.StringListToString(bytesStr));
             }
-
-
 
             //获取系统参数
             case "81" -> {
@@ -222,6 +217,7 @@ public class CabinetAMsg {
                         }
 
                     }
+
                     //扫码Z伺服
                     case "08" ->{
                         switch (bytesStr[11]){
@@ -245,65 +241,6 @@ public class CabinetAMsg {
 
             }
 
-
-
-
-
-
-//            //速度模式
-//            case "02"->{
-//                switch (bytesStr[10]) {
-//                    //将药品送到边缘
-//                    case "10" -> {
-//                        switch (bytesStr[11]) {
-//                            //动作完成
-//                            case "01" -> {
-//                                //药停在皮带边缘状态 为 true
-//                                valueOperations.set(String.format(RedisKeyConstant.CABINET_A_BELT_STOP_DRUG, address), "true");
-//                            }
-//
-//                            //动作出错
-//                            case "02" -> {
-//                                switch (bytesStr[12]){
-//                                    case "0A", "0D" ->{
-//                                        valueOperations.set(String.format(RedisKeyConstant.CABINET_A_BELT_STOP_DRUG, address), "error");
-//                                    }
-//
-//                                }
-//
-//                            }
-//
-//
-//                        }
-//                    }
-//
-//                    //将在边缘的药掉下
-//                    case "20" -> {
-//                        switch (bytesStr[11]) {
-//                            //动作完成
-//                            case "01" -> {
-//                                //A柜皮带上是否有药 为 false
-//                                valueOperations.set(String.format(RedisKeyConstant.CABINET_A_BELT_HAVE_DRUG, address), "false");
-//                                //药停在皮带边缘状态 为 false
-//                                valueOperations.set(String.format(RedisKeyConstant.CABINET_A_BELT_STOP_DRUG, address), "false");
-//                            }
-//                            //动作出错
-//                            case "02" -> {
-//
-//                            }
-//                            //传感器超时
-//                            case "03" -> {
-//
-//                            }
-//                            //伺服报警
-//                            case "04" -> {
-//
-//                            }
-//                        }
-//                    }
-//
-//                }
-//            }
         }
 
 
@@ -403,27 +340,17 @@ public class CabinetAMsg {
     public void receiveSensor(String[] bytesStr){
         int address = Integer.parseInt(bytesStr[9], 16);
         switch (bytesStr[9]) {
+
             //查询所有传感器状态
             case "00"->{
                 List<Integer> sensorList = NettyUtils.allInPut(bytesStr);
-//                //查询10个药仓位的传感器状态
-//                for (int i=6;i<16;i++){
-//                    //传感器触发
-//                    if(sensorList.get(i) ==1){
-//                        valueOperations.set(String.format(RedisKeyConstant.sensor.DROP_SENSOR, i-5),CabinetConstants.SensorStatus.NORMAL.code);
-//                    }else {
-//                        valueOperations.set(String.format(RedisKeyConstant.sensor.DROP_SENSOR, i-5),CabinetConstants.SensorStatus.RESET.code);
-//                    }
-//                }
-
-                if(sensorList.get(21) ==1){
-                    log.info("光栅传感器触发");
-                    valueOperations.set(String.format(RedisKeyConstant.sensor.BELT_SENSOR),CabinetConstants.SensorStatus.NORMAL.code);
-                }else {
-                    log.info("光栅传感器未触发");
-                    valueOperations.set(String.format(RedisKeyConstant.sensor.BELT_SENSOR),CabinetConstants.SensorStatus.RESET.code);
+                for (Integer integer : sensorList) {
+                    if (integer == 1) {
+                        valueOperations.set(RedisKeyConstant.sensor.SENSOR_CABINET_A, sensorList.toString());
+                    } else {
+                        valueOperations.set(RedisKeyConstant.sensor.SENSOR_CABINET_A, sensorList.toString());
+                    }
                 }
-
             }
 
             //机械手传感器

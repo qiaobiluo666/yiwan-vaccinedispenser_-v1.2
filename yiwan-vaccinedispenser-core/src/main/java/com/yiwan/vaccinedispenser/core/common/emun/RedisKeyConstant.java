@@ -160,6 +160,16 @@ public interface RedisKeyConstant {
     }
 
     interface sensor{
+        //A柜传感器
+        String SENSOR_CABINET_A = "Machine:sensor:cabinetAAll";
+
+        //B柜传感器
+        String SENSOR_CABINET_B = "Machine:sensor:cabinetBAll";
+
+        //C柜传感器
+        String SENSOR_CABINET_C = "Machine:sensor:cabinetCAll";
+
+
 
         //A柜传感器 SensorStatus
         //运输小皮带传感器状态 (光栅传感器) SensorStatus

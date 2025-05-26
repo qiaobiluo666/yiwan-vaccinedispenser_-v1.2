@@ -70,7 +70,7 @@ public class CabinetCMsg {
     /**
      *
      * @param bytesStr
-     * B柜接收信息
+     * C柜接收信息
      */
 
         public  void receiveMsgCabinetC(String[] bytesStr) throws Exception {
@@ -291,6 +291,21 @@ public class CabinetCMsg {
 
             }
 
+            //输入检测
+            case "06"->{
+                log.info("收到C柜{}:{}",CabinetConstants.CabinetCType.INPUT.desc,NettyUtils.StringListToString(bytesStr));
+                //查询所有传感器状态
+                if ("00".equals(bytesStr[9])) {
+                    List<Integer> sensorList = NettyUtils.allInPut(bytesStr);
+                    for (Integer integer : sensorList) {
+                        if (integer == 1) {
+                            valueOperations.set(RedisKeyConstant.sensor.SENSOR_CABINET_C, sensorList.toString());
+                        } else {
+                            valueOperations.set(RedisKeyConstant.sensor.SENSOR_CABINET_C, sensorList.toString());
+                        }
+                    }
+                }
+            }
 
             //设置系统参数
             case "80" -> {

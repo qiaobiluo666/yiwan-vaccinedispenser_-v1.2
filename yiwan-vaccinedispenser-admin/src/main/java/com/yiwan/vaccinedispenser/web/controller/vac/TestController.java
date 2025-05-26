@@ -162,34 +162,17 @@ public class TestController {
     @PostMapping("/scan")
     public Result aboveScan( @RequestBody OtherRequest request){
 
-//       int type = request.getType();
-//        String result = null;
-//        if(type==1){
-//            cameraSendMsg.sendCommandToAboveCamera();
-//            result = CameraRunStatusVariable.getAboveCameraResult();
-//            if(result.split(";").length>1){
-//               result="俩个药";
-//            }
-//        }else if(type==2){
-//            cameraSendMsg.sendCommandToBelowCamera();
-//            result = CameraRunStatusVariable.getBelowCameraResult();
-//        }else {
-//            cameraSendMsg.sendCommandToSideCamera();
-//            result = CameraRunStatusVariable.getSideCameraResult();
-//        }
-
-
         int count=0;
         while (count<50){
             cameraSendMsg.sendCommandToSideCamera();
             VacUntil.sleep(100);
             count++;
         }
-
-
         log.info(valueOperations.get(RedisKeyConstant.scanCode.SIDE));
         return Result.success();
+
     }
+
 
 
     /**
@@ -197,8 +180,6 @@ public class TestController {
      */
     @PostMapping("/led")
     public Result led( @RequestBody OtherRequest request) throws Exception {
-//        DrugRecordRequest drugRecordData = zcyFunction.getVaccineMsgByCode("81901010039410717437");
-//        log.info(JSON.toJSONString(drugRecordData));
 
         for(int i=1;i<=request.getLedNum();i++){
             LedRequest ledRequest = new LedRequest();
@@ -213,9 +194,35 @@ public class TestController {
             cabinetAService.ledCommand(ledRequest);
             VacUntil.sleep(1000);
         }
-
         return Result.success();
+
     }
+
+
+    /**
+     * 灯板批量测试
+     */
+    @PostMapping("/cabinetLed")
+    public Result cabinetLed( @RequestBody OtherRequest request) throws Exception {
+
+        List<VacMachine> vacMachineList = vacMachineService.cabinetLedTest(request.getLedLine());
+        for(VacMachine vacMachine :vacMachineList){
+            if(vacMachine.getLedNum()!=null){
+                LedRequest ledRequest = new LedRequest();
+                ledRequest.setWorkMode(CabinetConstants.Cabinet.CAB_A);
+                ledRequest.setCommand(request.getLedLine());
+                ledRequest.setMode(CabinetConstants.LedMode.OUTPUT);
+                ledRequest.setLedNum(vacMachine.getLedNum());
+                ledRequest.setStatus(CabinetConstants.LedStatus.GREEN);
+                cabinetAService.ledCommand(ledRequest);
+                VacUntil.sleep(request.getLedTime());
+            }
+        }
+        return Result.success();
+
+    }
+
+
 
 
     /**
@@ -238,7 +245,6 @@ public class TestController {
     while (count<=request.getCount()) {
         DropRequest dropRequest = new DropRequest();
         for(int i=request.getIoNumStart();i<=request.getIoNumEnd();i++){
-
             dropRequest.setWorkMode(CabinetConstants.Cabinet.CAB_A);
             dropRequest.setMode(CabinetConstants.IOMode.AUTO);
             dropRequest.setCommand(request.getIoLine());
@@ -247,9 +253,7 @@ public class TestController {
             cabinetAService.dropCommand(dropRequest);
             VacUntil.sleep(request.getIoWaitTime());
         }
-
         count++;
-
     }
 
         return Result.success();
@@ -260,12 +264,9 @@ public class TestController {
      */
     @PostMapping("/handAutoX")
     public Result handAutoX( @RequestBody OtherRequest request) throws InterruptedException {
-
         vacMachineService.handAutoX(request);
         return Result.success();
-
     }
-
 
 
 }

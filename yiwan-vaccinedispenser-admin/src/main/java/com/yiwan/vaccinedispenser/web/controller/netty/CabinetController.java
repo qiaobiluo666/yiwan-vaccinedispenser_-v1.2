@@ -17,6 +17,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.Map;
 
 /**
  * AB柜相关接口
@@ -197,8 +198,26 @@ public class CabinetController {
     @PostMapping("/intPut")
     public Result intPut(@RequestBody @Validated InPutRequest request){
         log.info("入参-InPutRequest:{}",request);
-        cabinetAService.intPut(request);
+
+        if(request.getMode()==0){
+            Map<String,String> map =  cabinetAService.getInputAll();
+            log.info(map.toString());
+        }else {
+            cabinetAService.intPut(request);
+        }
+
+
         return Result.success();
+    }
+
+
+    /**
+     * AB控制板输入 /A/B/C/D/E 4类传感器
+     * */
+    @GetMapping("/intPutAll")
+    public Result intPutAll(){
+        Map<String,String> map =  cabinetAService.getInputAll();
+        return Result.success(map);
     }
 
 }

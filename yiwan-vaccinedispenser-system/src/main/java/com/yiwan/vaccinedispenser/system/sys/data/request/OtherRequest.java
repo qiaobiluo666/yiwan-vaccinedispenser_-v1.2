@@ -32,5 +32,8 @@ public class OtherRequest {
     //第一个仓位X数据
     private Integer autoXOne;
 
+    //灯与灯的间隔时间
+    private Integer ledTime;
+
 
 }

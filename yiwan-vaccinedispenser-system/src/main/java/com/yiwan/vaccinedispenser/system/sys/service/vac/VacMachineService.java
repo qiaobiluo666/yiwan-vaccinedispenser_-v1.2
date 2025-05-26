@@ -109,6 +109,11 @@ public interface VacMachineService extends IService<VacMachine>{
     void  testIOAll(int ioTime);
 
 
+    //测试led
+    List<VacMachine> cabinetLedTest(Integer lineNum);
+
+
+
     //测试仓位几个到几个
     void testCabinet(OtherRequest request);
 

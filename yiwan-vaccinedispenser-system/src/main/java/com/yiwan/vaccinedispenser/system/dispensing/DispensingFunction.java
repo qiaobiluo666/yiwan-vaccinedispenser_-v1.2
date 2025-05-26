@@ -224,30 +224,34 @@ public class DispensingFunction {
                             .stream()
                             .toList();
 
-//                    List<VacMachine> drugsWithNearestExpiry = nearestExpiryDrugList.stream()
-//                            .filter(drug -> drug.getExpiredAt().equals(nearestExpiryDate))
-//                            .toList();
+
                     List<VacMachine> drugsWithNearestExpiry;
                     //如果批号为空 直接按照有效期发苗
                     if(distinctBatchNos.isEmpty()){
+
                         drugsWithNearestExpiry = nearestExpiryDrugList.stream()
                                 .filter(drug -> drug.getExpiredAt().equals(nearestExpiryDate))
                                 .toList();
+
                     }else {
                         //通过疫苗列表 查早 最早的记录
                         String batchNo = vacDrugRecordService.getBatchNoEarly(distinctBatchNos);
 
                         if(batchNo!=null){
+
                             drugsWithNearestExpiry = nearestExpiryDrugList.stream()
+
                                     .filter(drug -> drug.getExpiredAt().equals(nearestExpiryDate))
                                     .filter(drug -> Objects.equals(drug.getBatchNo(), batchNo))
                                     .toList();
+
                         }else {
                             drugsWithNearestExpiry = nearestExpiryDrugList.stream()
                                     .filter(drug -> drug.getExpiredAt().equals(nearestExpiryDate))
                                     .toList();
                         }
                     }
+
 
                     // 2. 如果有效期最近的疫苗有多个仓位，再根据皮带队列大小选择
                     if (drugsWithNearestExpiry.size() > 1) {

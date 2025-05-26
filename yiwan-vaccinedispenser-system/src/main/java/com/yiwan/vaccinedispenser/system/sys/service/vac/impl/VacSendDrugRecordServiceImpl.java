@@ -130,11 +130,13 @@ public class VacSendDrugRecordServiceImpl extends ServiceImpl<VacSendDrugRecordM
         //获取最早的入药记录
         VacDrugRecord vacDrugRecord = vacDrugRecordService.getListByMachineIdAndProductNo(drugListData.getMachineId(), drugListData.getProductNo());
 
-        VacWorkbench vacWorkbench =vacWorkbenchService.getByWorkbenchNum(drugListData.getWorkbenchNum());
+        VacWorkbench vacWorkbench =vacWorkbenchService.getByWorkbenchNum(1);
 
         if(vacDrugRecord!=null&&vacWorkbench!=null){
+            log.info("记录疫苗退回数据");
             //上药记录 药品的状态变成不在药仓里
             vacDrugRecordService.updateStatusById(vacDrugRecord.getId(),"1");
+
             VacSendDrugRecord vacSendDrugRecord = new VacSendDrugRecord();
             BeanUtils.copyProperties(vacDrugRecord,vacSendDrugRecord);
             vacSendDrugRecord.setWorkbenchName(vacWorkbench.getWorkbenchName());

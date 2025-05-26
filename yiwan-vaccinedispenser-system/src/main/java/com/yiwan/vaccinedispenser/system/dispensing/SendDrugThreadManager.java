@@ -128,16 +128,20 @@ public class SendDrugThreadManager {
         valueOperations.set(RedisKeyConstant.HANDLE_IS_DROP,"true");
         //A柜步进电机回原
         sendDrugFunction.cabinetAStepInit(CabinetConstants.CabinetAStepMode.CLAMP);
+
         sendDrugFunction.cabinetAStepInit(CabinetConstants.CabinetAStepMode.BLOCK);
         //A柜伺服 回原
         sendDrugFunction.moveHandServoInit(configData);
         //B柜步进电机回原
         sendDrugFunction.cabinetBStepInit();
+
         //B柜伺服回原到初始上方扫码位置
         sendDrugFunction.cabinetBServoInit();
 
-        valueOperations.set(RedisKeyConstant.CABINET_B_TEST_DRUGS_RESULT_IS_END,"false");
 
+        //等待夹爪步进电机运动完成
+        sendDrugFunction.waitCabinetAStepEnd(1);
+        valueOperations.set(RedisKeyConstant.CABINET_B_TEST_DRUGS_RESULT_IS_END,"false");
         //判断机器是否正在发药
         valueOperations.set(RedisKeyConstant.autoDrug.AUTO_DRUG_START,"true");
         //开始上药 设置皮带没有开启

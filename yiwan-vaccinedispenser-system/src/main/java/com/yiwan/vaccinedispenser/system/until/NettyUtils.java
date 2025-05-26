@@ -314,10 +314,13 @@ public class NettyUtils {
      * 拿出所有传感器是否输入输出信号
      */
     public static List<Integer> allInPut(String[] bytesStr){
+
         StringBuilder sb = new StringBuilder();
+
         for (int i = 11; i <= 14; i++) {
             sb.append(bytesStr[i]);
         }
+
         List<Integer> binaryList = new ArrayList<>(32);
         for (int i = 0; i < sb.length(); i++) {
             int decimal = Integer.parseInt(String.valueOf(sb.charAt(i)), 16);
@@ -325,6 +328,8 @@ public class NettyUtils {
                 binaryList.add((decimal >> j) & 1);
             }
         }
+
+
         return binaryList;
     }
 

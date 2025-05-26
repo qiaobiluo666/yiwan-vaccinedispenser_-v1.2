@@ -332,8 +332,10 @@ class YuandiInjectiondispenserApplicationTests {
 	@Test
 	void test9() throws Exception{
 
-		List<SendBtnData> sendBtnDataList = vacMachineService.getSendBtnMSg();
-		log.info(JSON.toJSONString(sendBtnDataList));
+		Map<String,String> map =  cabinetAService.getInputAll();
+		log.info(map.toString());
+
+
 	}
 
 }

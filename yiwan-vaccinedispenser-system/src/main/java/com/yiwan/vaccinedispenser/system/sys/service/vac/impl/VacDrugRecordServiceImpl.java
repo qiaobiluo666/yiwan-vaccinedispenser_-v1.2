@@ -205,17 +205,21 @@ public class VacDrugRecordServiceImpl extends ServiceImpl<VacDrugRecordMapper, V
 
     @Override
     public String getBatchNoEarly(List<String> batchNoList) {
+
         List<VacDrugRecord> vacDrugRecordList = vacDrugRecordMapper.selectList(new LambdaQueryWrapper<VacDrugRecord>()
                 .in(VacDrugRecord::getBatchNo,batchNoList)
                 .eq(VacDrugRecord::getDeleted,0)
                 .orderByAsc(VacDrugRecord::getCreateTime));
+
         if(!vacDrugRecordList.isEmpty()){
+
             return vacDrugRecordList.get(0).getBatchNo();
+
+
         }else {
             return null;
         }
     }
-
 
 }
 
