@@ -277,8 +277,6 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
         log.info("获取政采云request：{}",JSON.toJSONString(request));
         VacDrug vacDrug = vacDrugService.vacDrugGetByproductNo(request.getProductNo());
 
-
-
         //先查找是否有 有效期、批次一致的苗仓
         List<VacMachine> vacMachineList = getExpiredAtBoxNoBatchNo(boxSepcIds,num,request.getExpiredAt(),request.getProductNo(),request.getBatchNo());
         if (!vacMachineList.isEmpty()) {
@@ -1409,6 +1407,8 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
 
     //有效期一致的苗仓
     private  List<VacMachine> getExpiredAtBoxNoBatchNo(List<Long> boxSepcIds, Integer num, Date expiredAt, String productNo , String batchNo){
+
+
         LambdaQueryWrapper<VacMachine> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(VacMachine::getDeleted,0)
                 //可用量要小于最大存储量
@@ -1424,10 +1424,10 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
                 .orderByAsc(VacMachine::getLineNum)
                 //优先放最近的仓位
                 .orderByAsc(VacMachine::getBoxNo);
-//        //禁止ACYW 小药盒上第10层
-//        if("81576000501".equals(productNo)){
-//            queryWrapper.ne(VacMachine::getLineNum,10);
-//        }
+        getACYW(queryWrapper,productNo,boxSepcIds);
+
+
+
         return vacMachineMapper.selectList(queryWrapper);
 
     }
@@ -1441,10 +1441,8 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
                 .and(wp->wp.isNull(VacMachine::getVaccineNum).or().eq(VacMachine::getVaccineNum, 0))
                 .eq(VacMachine::getStatus,1)
                 .orderByAsc(VacMachine::getBoxNo);
-        //禁止ACYW 小药盒上第10层
-//        if("81576000501".equals(productNo)){
-//            queryWrapper.ne(VacMachine::getLineNum,10);
-//        }
+        getACYW(queryWrapper,productNo,boxSepcIds);
+
         return vacMachineMapper.selectList(queryWrapper);
 
     }
@@ -1458,10 +1456,8 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
                 .eq(VacMachine::getStatus,1)
                 .lt(VacMachine::getVaccineNum,num)
                 .orderByAsc(VacMachine::getBoxNo);
-        //禁止ACYW 小药盒上第10层
-//        if("81576000501".equals(productNo)){
-//            queryWrapper.ne(VacMachine::getLineNum,10);
-//        }
+
+        getACYW(queryWrapper,productNo,boxSepcIds);
         return vacMachineMapper.selectList(queryWrapper);
 
     }
@@ -1482,6 +1478,8 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
                 .orderByAsc(VacMachine::getLineNum)
                 //优先放最近的仓位
                 .orderByAsc(VacMachine::getBoxNo);
+
+        getACYW(queryWrapper,productNo,boxSepcIds);
         return vacMachineMapper.selectList(queryWrapper);
 
     }
@@ -1500,10 +1498,8 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
                 .orderByDesc(VacMachine::getVaccineNum)
                 .orderByAsc(VacMachine::getLineNum)
                 .orderByAsc(VacMachine::getBoxNo);
-//        //禁止ACYW 小药盒上第10层
-//        if("81576000501".equals(productNo)){
-//            queryWrapper.ne(VacMachine::getLineNum,10);
-//        }
+
+       getACYW(queryWrapper,productNo,boxSepcIds);
         return vacMachineMapper.selectList(queryWrapper);
     }
 
@@ -1522,12 +1518,31 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
                 .orderByDesc(VacMachine::getVaccineNum)
                 .orderByAsc(VacMachine::getLineNum)
                 .orderByAsc(VacMachine::getBoxNo);
-//        //禁止ACYW 小药盒上第10层
-//        if("81576000501".equals(productNo)){
-//            queryWrapper.ne(VacMachine::getLineNum,10);
-//        }
+
+
+        getACYW(queryWrapper,productNo,boxSepcIds);
         return vacMachineMapper.selectList(queryWrapper);
     }
+
+
+    private void  getACYW(LambdaQueryWrapper<VacMachine> queryWrapper,String productNo,List<Long> boxSepcIds){
+
+        //禁止ACYW 小药盒上第10层
+        if("81576000501".equals(productNo)){
+
+            queryWrapper.in(VacMachine::getLineNum, Arrays.asList(8, 10));
+            queryWrapper.orderByDesc(VacMachine::getLineNum);
+
+        }else {
+            if (boxSepcIds != null && boxSepcIds.contains(14L)) {
+                queryWrapper.notIn(VacMachine::getLineNum, Arrays.asList(8, 10));
+            }
+
+        }
+    }
+
+
+
 
 
     //有效期相同 有数量

@@ -1,5 +1,6 @@
 package com.yuandi.injectiondispenser.admin;
 
+import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
 import com.yiwan.vaccinedispenser.YiwanVaccinedispenserApplication;
 import com.yiwan.vaccinedispenser.core.common.CommandEnums;
@@ -330,12 +331,13 @@ class YuandiInjectiondispenserApplicationTests {
 	}
 
 	@Test
-	void test9() throws Exception{
+		void test9() throws Exception{
 
-		Map<String,String> map =  cabinetAService.getInputAll();
-		log.info(map.toString());
+		String x = "{\"batchNo\":\"Y0A361M\",\"beltNum\":3,\"boxNo\":\"A0513\",\"expiredAt\":1761840000000,\"lineNum\":5,\"machineId\":1032,\"machineStatus\":1,\"positionNum\":15,\"productName\":\"进-五联疫苗-巴斯德股份-1/复0.5ml/瓶-液冻其他注1\",\"productNo\":\"78977010201\",\"requestNo\":\"0ee9b334cb2d4ee694b18351988cae30\",\"taskId\":\"bf73970fac7e4e5b9667f98b96502e9b\",\"uuid\":\"c5c8bd37-4395-49fa-9413-e0fc0aff7658\",\"workbenchName\":\"接种台2\",\"workbenchNo\":\"S02\",\"workbenchNum\":4}";
+		RedisDrugListData data = JSONUtil.toBean(x, RedisDrugListData.class);
+		log.info(JSON.toJSONString(data));
+		dispensingFunction.dropRecordAndMachine(data,1,"发药正常");
 
-
-	}
+		}
 
 }

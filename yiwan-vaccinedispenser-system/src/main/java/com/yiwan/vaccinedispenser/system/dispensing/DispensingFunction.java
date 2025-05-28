@@ -746,10 +746,12 @@ public class DispensingFunction {
     //发药记录 以及 仓柜减少药品 -1 如果为0 为null
     public void  dropRecordAndMachine(RedisDrugListData drugListData,Integer status,String desc){
         log.info("开始减库存==================");
+
         //该药仓库存-1
         vacMachineService.decrementNumById(drugListData.getMachineId());
         //出药
         vacSendDrugRecordService.sendDrugRecordAdd(drugListData,status , desc);
+
 
         //多人份
         if(drugListData.getMachineStatus()==2){
