@@ -12,6 +12,7 @@ import com.yiwan.vaccinedispenser.system.sys.data.request.IdListRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.request.OtherRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.request.vac.DrugRecordRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.request.vac.MachineListRequest;
+import com.yiwan.vaccinedispenser.system.sys.data.request.vac.VacMachineRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.response.vac.InventoryResponse;
 
 import java.util.List;
@@ -99,7 +100,7 @@ public interface VacMachineService extends IService<VacMachine>{
 
 
     //自动退药 将医生选中的疫苗退出到机器外
-    Result autoBackVaccine(VacMachine vacMachine) throws ExecutionException, InterruptedException;
+    Result autoBackVaccine(VacMachineRequest request) throws ExecutionException, InterruptedException;
 
 
     //测试发药处方

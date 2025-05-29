@@ -136,6 +136,9 @@ public interface RedisKeyConstant {
 
     String  CABINET_C_BLANK_OPEN_TIME = "Machine:cabinetC:blankIsOpenTime";
 
+
+    String  DRUG_RETURN = "Machine:drugReturn";
+
     //手动上药状态
     interface handDrugStatus{
         String HAND_START_STATUS = "Machine:handleDrug:start";

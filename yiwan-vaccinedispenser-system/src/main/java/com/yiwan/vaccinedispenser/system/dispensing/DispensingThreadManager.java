@@ -100,6 +100,7 @@ public class DispensingThreadManager {
                         VacUntil.sleep(50);
                     }
 
+
                     try {
                         // 等待所有线程完成或超时
                         boolean completed = latch.await(10, TimeUnit.SECONDS); // 例如，超时时间为10秒
@@ -109,13 +110,13 @@ public class DispensingThreadManager {
                         }else {
                             VacUntil.sleep(200);
                         }
+
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt(); // 重新设置中断状态
                         log.error("掉药任务被中断", e);
                         break;
                     }
                 }
-
 
             }
 
@@ -200,7 +201,6 @@ public class DispensingThreadManager {
         if (size!=null&&size>0) {
             return true;
         }
-
         // 所有层都没有数据
         return false;
     }
@@ -244,6 +244,9 @@ public class DispensingThreadManager {
 
         }
 
+        //疫苗退回 不在运行状态
+        valueOperations.set(RedisKeyConstant.DRUG_RETURN,"false");
+
         valueOperations.set(RedisKeyConstant.CABINET_A_CAN_DROP_DRUG,"true");
 
         //A柜光栅皮带上没有药初始化
@@ -253,6 +256,11 @@ public class DispensingThreadManager {
         valueOperations.set(RedisKeyConstant.CABINET_C_WORK,"true");
 
         //TODO 数据库的可用库存和真实库存相等
+
+
+
+
+
 
         //TODO 查看A、B、C柜子的传感器状态
 

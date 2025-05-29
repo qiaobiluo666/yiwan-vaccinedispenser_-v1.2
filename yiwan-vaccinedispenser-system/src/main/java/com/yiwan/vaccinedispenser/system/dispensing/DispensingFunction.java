@@ -108,6 +108,12 @@ public class DispensingFunction {
         valueOperations.set(RedisKeyConstant.CABINET_C_BLANK_OPEN_TIME, LocalDateTime.now().toString());
         ConfigSetting configSetting = configFunction.getSettingConfigData();
 
+        //机器正在疫苗退回 不发药
+        if("true".equals(valueOperations.get(RedisKeyConstant.DRUG_RETURN))){
+            zcyFunction.sendResult(vacGetVaccine,"正在疫苗退回，无法发药！");
+            throw new ServiceException("正在疫苗退回，无法发药！");
+        }
+
 
         //抬升装置版本的C柜 如果复位按钮没有复位则 发不出来药
         if("true".equals(configSetting.getCLifting())){

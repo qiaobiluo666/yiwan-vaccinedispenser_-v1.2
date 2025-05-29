@@ -1,8 +1,10 @@
 package com.yiwan.vaccinedispenser.web.controller.vac;
 
+import com.alibaba.fastjson.JSON;
 import com.yiwan.vaccinedispenser.core.web.Result;
 import com.yiwan.vaccinedispenser.system.dispensing.SendDrugThreadManager;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacMachine;
+import com.yiwan.vaccinedispenser.system.sys.data.request.vac.VacMachineRequest;
 import com.yiwan.vaccinedispenser.system.sys.service.vac.VacMachineService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,9 +80,9 @@ public class DispensingController {
      * 疫苗退回
      */
     @PostMapping("/auto-back-drug")
-    public Result autoBackDrug(@RequestBody  VacMachine vacMachine) throws ExecutionException, InterruptedException {
-        log.info(vacMachine.getProductNo());
-        vacMachineService.autoBackVaccine(vacMachine);
+    public Result autoBackDrug(@RequestBody VacMachineRequest request) throws ExecutionException, InterruptedException {
+        log.info(JSON.toJSONString(request));
+        vacMachineService.autoBackVaccine(request);
         return Result.success();
     }
 

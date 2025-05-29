@@ -4,9 +4,9 @@ spring:
 
     type: com.zaxxer.hikari.HikariDataSource  #com.alibaba.druid.pool.DruidDataSource
 #    url: jdbc:mysql://127.0.0.1:3306/vaccine_dispenser_puyan?useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true&characterEncoding=utf8
-#    url: jdbc:mysql://127.0.0.1:3306/vaccine_dispenser_shounan?useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true&characterEncoding=utf8
+    url: jdbc:mysql://127.0.0.1:3306/vaccine_dispenser_shounan?useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true&characterEncoding=utf8
 #    url: jdbc:mysql://127.0.0.1:3306/vaccine_dispenser_gongchenqiao?useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true&characterEncoding=utf8
-    url: jdbc:mysql://127.0.0.1:3306/vaccine_dispenser_jiangdong?useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true&characterEncoding=utf8
+#    url: jdbc:mysql://127.0.0.1:3306/vaccine_dispenser_jiangdong?useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true&characterEncoding=utf8
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: root
