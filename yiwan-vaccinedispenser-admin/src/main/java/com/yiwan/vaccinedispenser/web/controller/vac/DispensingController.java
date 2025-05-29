@@ -82,8 +82,8 @@ public class DispensingController {
     @PostMapping("/auto-back-drug")
     public Result autoBackDrug(@RequestBody VacMachineRequest request) throws ExecutionException, InterruptedException {
         log.info(JSON.toJSONString(request));
-        vacMachineService.autoBackVaccine(request);
-        return Result.success();
+
+        return vacMachineService.autoBackVaccine(request);
     }
 
 
