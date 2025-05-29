@@ -1197,13 +1197,14 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
     @Override
     public Result autoBackVaccine(VacMachineRequest request) throws ExecutionException, InterruptedException {
 
-        valueOperations.set(RedisKeyConstant.DRUG_RETURN,"true");
+
         boolean flag = true;
         String flagStr = valueOperations.get(RedisKeyConstant.DRUG_RUN_START);
         if("true".equals(flagStr)){
             flag = false;
         }
         if(flag){
+            valueOperations.set(RedisKeyConstant.DRUG_RETURN,"true");
             while (true){
                 //查找该疫苗的信息  同一个效期
                 LambdaQueryWrapper<VacMachine> lambdaQueryWrapper = new LambdaQueryWrapper<>();
@@ -1290,6 +1291,7 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
             valueOperations.set(RedisKeyConstant.DRUG_RETURN,"false");
             return Result.success();
         }else {
+
             return Result.fail("正在发苗！不能退苗");
         }
 
