@@ -107,6 +107,8 @@ public class CabinetCMsg {
                                         zcyFunction.sendResult(drugListData,"1");
                                     }
 
+                                }else {
+                                    valueOperations.set(RedisKeyConstant.DRUG_RUN_START,"false");
                                 }
 
 //                                //如果设备有挡片
@@ -154,8 +156,12 @@ public class CabinetCMsg {
                                     //删除一条数据
                                     listOps.leftPop(RedisKeyConstant.SEND_LIST);
 
+                                    drugStr = listOps.index(RedisKeyConstant.SEND_LIST,0);
+                                    if (drugStr!=null){
+                                        valueOperations.set(RedisKeyConstant.DRUG_RUN_START,"false");
+                                    }
+
                                     if("true".equals(configSetting.getZcySend())){
-//                                    if("true".equals(isOpen)){
                                         zcyFunction.sendResult(drugListData,"0",zcyMsg);
                                     }
 

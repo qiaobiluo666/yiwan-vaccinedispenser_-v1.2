@@ -139,6 +139,8 @@ public interface RedisKeyConstant {
 
     String  DRUG_RETURN = "Machine:drugReturn";
 
+    String DRUG_RUN_START = "Machine:drugRunStart";
+
     //手动上药状态
     interface handDrugStatus{
         String HAND_START_STATUS = "Machine:handleDrug:start";

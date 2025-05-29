@@ -378,6 +378,7 @@ public class DispensingFunction {
                 //拿到发药信息
                 String drugStr = listOps.index(String.format(RedisKeyConstant.DROP_LIST, num), 0);
                 if (drugStr != null) {
+                    valueOperations.set(RedisKeyConstant.DRUG_RUN_START,"true");
     //                valueOperations.set(String.format(RedisKeyConstant.CABINET_A_DRUG_LIST,num),"true");
 
                     RedisDrugListData drugListData = JSON.parseObject(drugStr, RedisDrugListData.class);
@@ -408,8 +409,10 @@ public class DispensingFunction {
         //判断光栅传感器是否触发
         String sensorIsPut = valueOperations.get(RedisKeyConstant.sensor.BELT_SENSOR);
         if(sensorIsPut == null){
+
            //设置光栅信号 状态为不触发
             valueOperations.set(RedisKeyConstant.sensor.BELT_SENSOR,CabinetConstants.SensorStatus.RESET.code);
+
        }else if(sensorIsPut.equals(CabinetConstants.SensorStatus.RESET.code)){
 
            //如果传感器没触发 说明光栅皮带没药
@@ -593,8 +596,9 @@ public class DispensingFunction {
         valueOperations.set(RedisKeyConstant.CABINET_A_GS_BELT_HAVE_DRUG,"false");
         //将该发药队列移除
         listOps.leftPop(RedisKeyConstant.BELT_LIST);
-
         log.info("{}已经发往工作台：{}",drugListData.getProductName(),drugListData.getWorkbenchNum());
+
+
     }
 
     //重新发处方

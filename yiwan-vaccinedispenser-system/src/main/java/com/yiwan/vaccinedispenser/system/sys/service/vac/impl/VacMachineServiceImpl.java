@@ -1198,94 +1198,103 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
     public Result autoBackVaccine(VacMachineRequest request) throws ExecutionException, InterruptedException {
 
         valueOperations.set(RedisKeyConstant.DRUG_RETURN,"true");
-
-        while (true){
-
-            //查找该疫苗的信息  同一个效期
-            LambdaQueryWrapper<VacMachine> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-            lambdaQueryWrapper.eq(VacMachine::getDeleted,0)
-                    .eq(VacMachine::getProductNo, request.getProductNo())
-                    .eq(VacMachine::getExpiredAt, request.getExpiredAt())
-
-                    .orderByAsc(VacMachine::getBoxNo);
-
-            if(!request.getBackAll()){
-                lambdaQueryWrapper .eq(VacMachine::getBoxNo, request.getBoxNo());
-                log.info("单仓退苗");
-            }
-            List<VacMachine> vacMachineList = vacMachineMapper.selectList(lambdaQueryWrapper);
-
-            if(!vacMachineList.isEmpty()){
-                VacMachine data = vacMachineList.get(0);
-                //获取皮带id
-                Integer beltNum =  (int) Math.ceil((double) data.getLineNum() / 2);
-
-                //掉药
-                dispensingFunction.dropDrug(data.getLineNum(),data.getPositionNum(),SettingConstants.IO_DROP_WAIT_TIME);
-                //动皮带 到传感器接收到
-
-                //抬升去当前皮带
-                dispensingFunction.goToBelt(beltNum,false);
-
-                //发送小皮带运动 直到传感器触发 再暂停 指令
-                dispensingFunction.speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.SPEED,CabinetConstants.CabinetAServoStatus.BELT_STOP,50);
-
-                VacUntil.sleep(100);
-                //速度模式将药从皮带掉到光栅传感器
-                dispensingFunction.speedServo(beltNum,CabinetConstants.CabinetAServoCommand.SPEED,CabinetConstants.CabinetAServoStatus.COROTATION,500);
-
-
-                String sensorIsPut;
-                //等待掉药时间
-                long timeout = System.currentTimeMillis();
-                //判断是否掉药成功
-                boolean dropFlag = false;
-
-                while ((System.currentTimeMillis() - timeout) < SettingConstants.DRUG_BELT_WAIT_TIME){
-                    dispensingFunction.intPut(CabinetConstants.InPutCommand.QUERY,SettingConstants.SENSOR_CABINET_A_MOVE_BELT_NUM);
-                    VacUntil.sleep(200);
-                    //判断光栅传感器是否被触发
-                    sensorIsPut = valueOperations.get(RedisKeyConstant.sensor.BELT_SENSOR);
-                    assert sensorIsPut != null;
-                    if(sensorIsPut.equals(CabinetConstants.SensorStatus.NORMAL.code)){
-                        dropFlag = true;
-                        //皮带停止
-                    dispensingFunction.speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.PAUSE,CabinetConstants.CabinetAServoStatus.ZERO,50);
-                        break;
-                    }
-                }
-
-                //5层皮带伺服停止
-                dispensingFunction.speedServo(beltNum,CabinetConstants.CabinetAServoCommand.PAUSE,CabinetConstants.CabinetAServoStatus.ZERO,200);
-                VacUntil.sleep(200);
-
-                //传送小皮带回原位
-                dispensingFunction.goToBelt(beltNum,true);
-
-                //运动伺服 使疫苗落到运输皮带上
-                dispensingFunction.speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.SPEED,CabinetConstants.CabinetAServoStatus.COROTATION,150);
-                //C柜伺服先运动2秒 防止药盒夹扁
-                dispensingFunction.speedServoC(1,CabinetConstants.CabinetCServoCommand.SPEED,CabinetConstants.CabinetCServoStatus.COROTATION,150);
-                VacUntil.sleep(2000);
-                dispensingFunction.speedServoC(1,CabinetConstants.CabinetCServoCommand.PAUSE,CabinetConstants.CabinetCServoStatus.ZERO,150);
-
-                //掉药数据 加入数据库
-                RedisDrugListData drugListData = new RedisDrugListData();
-                drugListData.setMachineId(data.getId());
-                drugListData.setWorkbenchNum(1);
-                drugListData.setProductNo(data.getProductNo());
-                dispensingFunction.dropRecordAndMachine(drugListData,2,"疫苗退药");
-            }
-            else {
-                break;
-            }
+        boolean flag = true;
+        String flagStr = valueOperations.get(RedisKeyConstant.DRUG_RUN_START);
+        if("true".equals(flagStr)){
+            flag = false;
         }
-        //传送小皮带暂停
-        dispensingFunction.speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.PAUSE,CabinetConstants.CabinetAServoStatus.ZERO,50);
+        if(flag){
+            while (true){
+                //查找该疫苗的信息  同一个效期
+                LambdaQueryWrapper<VacMachine> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+                lambdaQueryWrapper.eq(VacMachine::getDeleted,0)
+                        .eq(VacMachine::getProductNo, request.getProductNo())
+                        .eq(VacMachine::getExpiredAt, request.getExpiredAt())
 
-        valueOperations.set(RedisKeyConstant.DRUG_RETURN,"false");
+                        .orderByAsc(VacMachine::getBoxNo);
 
-        return Result.success();
+                if(!request.getBackAll()){
+                    lambdaQueryWrapper .eq(VacMachine::getBoxNo, request.getBoxNo());
+                    log.info("单仓退苗");
+                }
+                List<VacMachine> vacMachineList = vacMachineMapper.selectList(lambdaQueryWrapper);
+
+                if(!vacMachineList.isEmpty()){
+                    VacMachine data = vacMachineList.get(0);
+                    //获取皮带id
+                    Integer beltNum =  (int) Math.ceil((double) data.getLineNum() / 2);
+
+                    //掉药
+                    dispensingFunction.dropDrug(data.getLineNum(),data.getPositionNum(),SettingConstants.IO_DROP_WAIT_TIME);
+                    //动皮带 到传感器接收到
+
+                    //抬升去当前皮带
+                    dispensingFunction.goToBelt(beltNum,false);
+
+                    //发送小皮带运动 直到传感器触发 再暂停 指令
+                    dispensingFunction.speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.SPEED,CabinetConstants.CabinetAServoStatus.BELT_STOP,50);
+
+                    VacUntil.sleep(100);
+                    //速度模式将药从皮带掉到光栅传感器
+                    dispensingFunction.speedServo(beltNum,CabinetConstants.CabinetAServoCommand.SPEED,CabinetConstants.CabinetAServoStatus.COROTATION,500);
+
+
+                    String sensorIsPut;
+                    //等待掉药时间
+                    long timeout = System.currentTimeMillis();
+                    //判断是否掉药成功
+                    boolean dropFlag = false;
+
+                    while ((System.currentTimeMillis() - timeout) < SettingConstants.DRUG_BELT_WAIT_TIME){
+                        dispensingFunction.intPut(CabinetConstants.InPutCommand.QUERY,SettingConstants.SENSOR_CABINET_A_MOVE_BELT_NUM);
+                        VacUntil.sleep(200);
+                        //判断光栅传感器是否被触发
+                        sensorIsPut = valueOperations.get(RedisKeyConstant.sensor.BELT_SENSOR);
+                        assert sensorIsPut != null;
+                        if(sensorIsPut.equals(CabinetConstants.SensorStatus.NORMAL.code)){
+                            dropFlag = true;
+                            //皮带停止
+                            dispensingFunction.speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.PAUSE,CabinetConstants.CabinetAServoStatus.ZERO,50);
+                            break;
+                        }
+                    }
+
+                    //5层皮带伺服停止
+                    dispensingFunction.speedServo(beltNum,CabinetConstants.CabinetAServoCommand.PAUSE,CabinetConstants.CabinetAServoStatus.ZERO,200);
+                    VacUntil.sleep(200);
+
+                    //传送小皮带回原位
+                    dispensingFunction.goToBelt(beltNum,true);
+
+                    //运动伺服 使疫苗落到运输皮带上
+                    dispensingFunction.speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.SPEED,CabinetConstants.CabinetAServoStatus.COROTATION,150);
+                    //C柜伺服先运动2秒 防止药盒夹扁
+                    dispensingFunction.speedServoC(1,CabinetConstants.CabinetCServoCommand.SPEED,CabinetConstants.CabinetCServoStatus.COROTATION,150);
+                    VacUntil.sleep(2000);
+                    dispensingFunction.speedServoC(1,CabinetConstants.CabinetCServoCommand.PAUSE,CabinetConstants.CabinetCServoStatus.ZERO,150);
+
+                    //掉药数据 加入数据库
+                    RedisDrugListData drugListData = new RedisDrugListData();
+                    drugListData.setMachineId(data.getId());
+                    drugListData.setWorkbenchNum(1);
+                    drugListData.setProductNo(data.getProductNo());
+                    dispensingFunction.dropRecordAndMachine(drugListData,2,"疫苗退药");
+                }
+                else {
+                    break;
+                }
+            }
+            //传送小皮带暂停
+            dispensingFunction.speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.PAUSE,CabinetConstants.CabinetAServoStatus.ZERO,50);
+
+            valueOperations.set(RedisKeyConstant.DRUG_RETURN,"false");
+            return Result.success();
+        }else {
+            return Result.fail("正在发苗！不能退苗");
+        }
+
+
+
     }
 
     @Override

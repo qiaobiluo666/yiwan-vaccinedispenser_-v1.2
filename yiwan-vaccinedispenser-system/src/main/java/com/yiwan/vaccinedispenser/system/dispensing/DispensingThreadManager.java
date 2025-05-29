@@ -245,6 +245,8 @@ public class DispensingThreadManager {
 
 
         }
+        //不在发苗种
+        valueOperations.set(RedisKeyConstant.DRUG_RUN_START,"false");
 
         //疫苗退回 不在运行状态
         valueOperations.set(RedisKeyConstant.DRUG_RETURN,"false");
