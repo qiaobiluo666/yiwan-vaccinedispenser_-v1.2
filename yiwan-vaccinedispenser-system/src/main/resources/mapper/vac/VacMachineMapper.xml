@@ -78,7 +78,11 @@
         WHERE id = #{vacMachine.id}
     </update>
 
-
+    <update id="syncUseNumWithTotal">
+        UPDATE vac_machine
+        SET vaccine_use_num = vaccine_num
+        WHERE deleted = 0
+    </update>
 
 
 

@@ -87,7 +87,8 @@ public interface VacMachineService extends IService<VacMachine>{
     Result handDrugMachine(String code) throws Exception;
 
 
-
+    //开机将vaccineNum 和vaccineUseNun 保持一致
+    void  vaccineNunEqualsUserNum();
 
     Result handDrugPeople(String code,Integer bulkNum) throws Exception;
 

@@ -5,6 +5,7 @@ import com.yiwan.vaccinedispenser.core.common.emun.RedisKeyConstant;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacMachine;
 import com.yiwan.vaccinedispenser.system.sys.data.ConfigSetting;
 import com.yiwan.vaccinedispenser.system.sys.service.sys.SysConfigService;
+import com.yiwan.vaccinedispenser.system.sys.service.vac.VacMachineService;
 import com.yiwan.vaccinedispenser.system.until.VacUntil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +54,8 @@ public class DispensingThreadManager {
     @Autowired
     private ConfigFunction configFunction;
 
-
+    @Autowired
+    private VacMachineService vacMachineService;
 
     @Autowired
     public DispensingThreadManager(@Qualifier("DispensingThreadPool") TaskExecutor taskExecutor) {
@@ -256,7 +258,7 @@ public class DispensingThreadManager {
         valueOperations.set(RedisKeyConstant.CABINET_C_WORK,"true");
 
         //TODO 数据库的可用库存和真实库存相等
-
+        vacMachineService.vaccineNunEqualsUserNum();
 
 
 

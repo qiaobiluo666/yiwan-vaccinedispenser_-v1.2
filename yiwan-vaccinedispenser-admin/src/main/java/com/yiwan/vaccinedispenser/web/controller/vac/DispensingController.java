@@ -3,7 +3,7 @@ package com.yiwan.vaccinedispenser.web.controller.vac;
 import com.alibaba.fastjson.JSON;
 import com.yiwan.vaccinedispenser.core.web.Result;
 import com.yiwan.vaccinedispenser.system.dispensing.SendDrugThreadManager;
-import com.yiwan.vaccinedispenser.system.domain.model.vac.VacMachine;
+
 import com.yiwan.vaccinedispenser.system.sys.data.request.vac.VacMachineRequest;
 import com.yiwan.vaccinedispenser.system.sys.service.vac.VacMachineService;
 import lombok.extern.slf4j.Slf4j;

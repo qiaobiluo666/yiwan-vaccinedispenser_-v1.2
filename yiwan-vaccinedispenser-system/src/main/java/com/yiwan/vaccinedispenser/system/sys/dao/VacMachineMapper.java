@@ -37,6 +37,6 @@ public interface VacMachineMapper extends BaseMapper<VacMachine> {
     int updateNullById(@Param("vacMachine") VacMachine vacMachine);
 
 
-
+    int syncUseNumWithTotal();
 
 }
