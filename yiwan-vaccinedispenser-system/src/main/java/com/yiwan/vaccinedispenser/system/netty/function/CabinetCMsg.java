@@ -107,9 +107,14 @@ public class CabinetCMsg {
                                         zcyFunction.sendResult(drugListData,"1");
                                     }
 
-                                }else {
+                                }
+
+                                drugStr = listOps.index(RedisKeyConstant.SEND_LIST,0);
+                                if (drugStr==null){
                                     valueOperations.set(RedisKeyConstant.DRUG_RUN_START,"false");
                                 }
+
+
 
 //                                //如果设备有挡片
 //                                if("true".equals(configSetting.getCBlank())){
