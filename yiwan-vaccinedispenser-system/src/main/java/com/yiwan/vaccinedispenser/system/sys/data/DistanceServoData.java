@@ -35,4 +35,15 @@ public class DistanceServoData {
 
     private String aboveCode;
 
+
+
+    //盘点距离传感器
+    private Integer inventoryDis;
+    //上方距离传感器
+    private Integer aboveDis;
+    //左侧距离传感器
+    private Integer leftDis;
+    //右侧距离传感器
+    private Integer rightDis;
+
 }

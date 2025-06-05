@@ -145,9 +145,8 @@ public class TestController {
      * 测试距离
      * */
     @PostMapping("/distance")
-    public Result distance() throws ExecutionException, InterruptedException, IOException {
-        ConfigData configData = configFunction.getAutoDrugConfigData();
-        DistanceServoData data =sendDrugFunction.distanceServoAll(configData);
+    public Result distance()  {
+        DistanceServoData data =sendDrugFunction.getDistanceSensor();
         return Result.success(data);
     }
 

@@ -989,7 +989,47 @@ public class SendDrugFunction {
         return data;
     }
 
+    //获取所有传感器参数
+    public  DistanceServoData getDistanceSensor(){
 
+        DistanceServoData distanceServoData = new DistanceServoData();
+
+        int count=0;
+        Integer resultLeft = getDistanceLeft();
+        Integer resultRight = getDistanceRight();
+        Integer resultAbove = getDistanceHigh();
+        Integer resultInventory = getDistanceCount();
+
+
+        //左右距离传感器会出现 多次给数据情况
+        while (count<5){
+            if(resultLeft==null || resultRight==null  || resultAbove==null  || resultInventory ==null){
+                if(resultLeft==null){
+                    log.error("B柜左方传感器异常");
+                    resultLeft = getDistanceLeft();
+                }else if(resultRight==null){
+                    log.error("B柜右方传感器异常");
+                    resultRight = getDistanceRight();
+                }else if(resultAbove==null){
+                    log.error("B柜上方传感器异常");
+                    resultAbove = getDistanceHigh();
+                }else {
+                    log.error("库存盘点传感器异常");
+                    resultInventory = getDistanceCount();
+                }
+
+
+            }else {
+                break;
+            }
+            count++;
+        }
+        distanceServoData.setLeftDis(resultLeft);
+        distanceServoData.setRightDis(resultRight);
+        distanceServoData.setAboveDis(resultAbove);
+        distanceServoData.setInventoryDis(resultInventory);
+        return distanceServoData;
+    }
 
 
     //2个距离传感器计算距离
