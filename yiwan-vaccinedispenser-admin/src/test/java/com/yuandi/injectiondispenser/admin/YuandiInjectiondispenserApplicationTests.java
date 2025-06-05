@@ -30,6 +30,7 @@ import com.yiwan.vaccinedispenser.system.sys.data.zyc.SendVaccineResultRequest;
 import com.yiwan.vaccinedispenser.system.sys.service.netty.CabinetAService;
 import com.yiwan.vaccinedispenser.system.sys.service.netty.CabinetBService;
 import com.yiwan.vaccinedispenser.system.sys.service.vac.*;
+import com.yiwan.vaccinedispenser.system.test.UploadController;
 import com.yiwan.vaccinedispenser.system.until.NettyUtils;
 import com.yiwan.vaccinedispenser.system.until.VacUntil;
 import com.yiwan.vaccinedispenser.system.zyc.ZcyFunction;
@@ -112,6 +113,9 @@ class YuandiInjectiondispenserApplicationTests {
 
 	@Autowired
 	private VacMachineDrugService vacMachineDrugService;
+
+	@Autowired
+	private UploadController uploadController;
 
 
 	@Test
@@ -339,5 +343,11 @@ class YuandiInjectiondispenserApplicationTests {
 		dispensingFunction.dropRecordAndMachine(data,1,"发药正常");
 
 		}
+
+	@Test
+		void test20() throws  Exception{
+
+
+	}
 
 }

@@ -50,6 +50,9 @@ public interface VacDrugService extends IService<VacDrug>{
     Result drugDistance(String code) throws Exception;
 
 
+    Result getZycDrugDetail(String code) throws Exception;
+
+
     List<VacDrug>  getVaccinePdf();
 
 

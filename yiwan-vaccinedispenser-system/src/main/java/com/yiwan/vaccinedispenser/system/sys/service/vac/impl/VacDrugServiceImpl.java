@@ -211,12 +211,50 @@ public class VacDrugServiceImpl extends ServiceImpl<VacDrugMapper, VacDrug> impl
         }
         //拿到疫苗信息
         VacDrug vacDrug = vacDrugGetByproductNo(drugRecordData.getProductNo());
+        //移动滑台开始测距
         vacDrug = sendDrugFunction.drugDistance(vacDrug);
 
         if(vacDrug==null){
             return Result.fail("未检测到药盒");
         }
         log.info("药盒测苗数据：{}",JSON.toJSONString(vacDrug));
+        return Result.success(vacDrug);
+    }
+
+    @Override
+    public Result getZycDrugDetail(String code) throws Exception {
+        ConfigSetting configSetting = configFunction.getSettingConfigData();
+        //跟政采云扫码 获得 药品信息
+        DrugRecordRequest drugRecordData;
+
+        if("true".equals(configSetting.getZcyAuto())){
+//        if("true".equals(isSendOpen)){
+            drugRecordData = zcyFunction.getVaccineMsgByCode(code);
+            log.info(JSON.toJSONString(drugRecordData));
+            if(drugRecordData.getIsReturn()){
+                //电子监管码请求失败
+                //TODO 没有仓位可以装这个药
+                String msg = "获取疫苗异常：政采云电子监管码请求失败："+drugRecordData.getProductNo();
+                log.error(msg);
+                return Result.fail(msg);
+            }
+
+        }else {
+            //测试使用
+            drugRecordData = sendDrugTest(code);
+            drugRecordData.setExpiredAt(new Date());
+            drugRecordData.setBatchNo("测试编号");
+            drugRecordData.setPrice(String.valueOf(321));
+            drugRecordData.setTag("测试标签");
+            drugRecordData.setSupervisedCode(code);
+            if(drugRecordData.getIsReturn()){
+                String msg = "获取疫苗异常：没有测试电子监管码："+code;
+                log.error(msg);
+                return Result.fail(msg);
+            }
+        }
+        //拿到疫苗信息
+        VacDrug vacDrug = vacDrugGetByproductNo(drugRecordData.getProductNo());
         return Result.success(vacDrug);
     }
 

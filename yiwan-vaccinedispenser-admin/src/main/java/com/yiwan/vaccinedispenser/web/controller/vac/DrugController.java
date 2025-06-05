@@ -84,6 +84,21 @@ public class DrugController {
         return vacDrugService.drugDistance(code);
     }
 
+
+
+    /**
+     * 获取疫苗信息
+     * */
+    @GetMapping("/zcyDetail")
+    public Result getZycDrugDetail(String code) throws Exception {
+        log.info("入参-code:{}",code);
+        return vacDrugService.getZycDrugDetail(code);
+    }
+
+
+
+
+
     /**
      * 疫苗获取
      * */

@@ -20,48 +20,17 @@ public class UploadController {
 
 
 
-    //访问服务器 将日志、数据库上传到服务器
-    @PostMapping("/upload")
-    public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file,
-                                                     @RequestParam("type") String type) {
-        try {
-            // 获取今天日期    2025-04-22
-            String dateStr = java.time.LocalDate.now().toString();
-            String baseDir = type.equals("log") ? "D:\\work\\yiwan\\疫苗发药机\\test\\log\\" : "D:\\work\\yiwan\\疫苗发药机\\test\\db\\";
-            String targetDirPath = baseDir + dateStr + "/";
-
-            // 创建目录
-            File targetDir = new File(targetDirPath);
-            if (!targetDir.exists()) {
-                targetDir.mkdirs();
-            }
-
-            // 存文件
-            File destFile = new File(targetDirPath + file.getOriginalFilename());
-            file.transferTo(destFile);
-
-            return ResponseEntity.ok("Upload successful: " + destFile.getAbsolutePath());
-        } catch (IOException e) {
-            return ResponseEntity.status(500).body("Upload failed: " + e.getMessage());
-        }
-    }
-
-
-
-
-
-    // 统一上传日志或数据库文件的函数
-    public  void exportAndUpload(String fileType, String dbName, String user, String password, String logFilePath, boolean compress) throws Exception {
+    public  void exportAndUpload(String hospitalName,String fileType, String dbName, String user, String password, String logFilePath, boolean compress) throws Exception {
         // 根据日期生成目录路径
         String date = LocalDate.now().toString();
         String uploadDir = "D:\\work\\yiwan\\疫苗发药机\\test\\" + ("log".equals(fileType) ? "logs" : "db") + "/" + date;
 
         // 如果是数据库类型，导出 MySQL 数据库
         if ("db".equals(fileType)) {
-            exportDatabase(dbName, user, password, uploadDir, compress);
+            exportDatabase(hospitalName,dbName, user, password, uploadDir, compress);
         } else if ("log".equals(fileType)) {
             // 如果是日志文件类型，上传日志文件
-            uploadFile(new File(logFilePath), "log", compress);
+            uploadFile(new File(logFilePath), "log", hospitalName,compress);
         } else {
             throw new IllegalArgumentException("Invalid file type. Use 'log' or 'db'.");
         }
@@ -72,9 +41,9 @@ public class UploadController {
 
 
     // 上传文件到远程服务器（通用上传函数）
-    private  void uploadFile(File file, String type, boolean compress) throws IOException {
+    private  void uploadFile(File file, String type,String hospitalName, boolean compress) throws IOException {
         String boundary = "----WebKitFormBoundary" + System.currentTimeMillis();
-        URL url = new URL("http://192.168.1.105:5160/upload");
+        URL url = new URL("http://47.97.48.26:5080/upload");
 
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setDoOutput(true);
@@ -86,12 +55,51 @@ public class UploadController {
         try (OutputStream output = conn.getOutputStream();
              PrintWriter writer = new PrintWriter(new OutputStreamWriter(output, "UTF-8"), true)) {
 
-            // 传type字段
+//            // 传type字段
+//            writer.append("--").append(boundary).append("\r\n");
+//            writer.append("Content-Disposition: form-data; name=\"type\"\r\n\r\n");
+//            writer.append(type).append("\r\n");
+//            writer.flush();
+//            writer.append("Content-Disposition: form-data; name=\"hospitalName\"\r\n\r\n");
+//            writer.append(hospitalName).append("\r\n");
+//            writer.flush();
+//            // 传文件字段
+//            writer.append("--").append(boundary).append("\r\n");
+//            String uploadName = file.getName() + (compress ? ".gz" : "");
+//            writer.append("Content-Disposition: form-data; name=\"file\"; filename=\"")
+//                    .append(uploadName).append("\"\r\n");
+//            writer.append("Content-Type: application/octet-stream\r\n\r\n");
+//            writer.flush();
+//
+//            // 压缩或直接上传
+//            try (InputStream fileInput = new FileInputStream(file);
+//                 InputStream input = compress ?
+//                         new BufferedInputStream(new GZIPInputStream(fileInput)) :
+//                         new BufferedInputStream(fileInput)) {
+//
+//                byte[] buffer = new byte[8192];
+//                int bytesRead;
+//                while ((bytesRead = input.read(buffer)) != -1) {
+//                    output.write(buffer, 0, bytesRead);
+//                }
+//                output.flush();
+//            }
+//
+//            writer.append("\r\n").flush();
+//            writer.append("--").append(boundary).append("--").append("\r\n");
+            // 1. 传 type 字段
             writer.append("--").append(boundary).append("\r\n");
             writer.append("Content-Disposition: form-data; name=\"type\"\r\n\r\n");
             writer.append(type).append("\r\n");
+            writer.flush();
+            // 缺少这行会导致参数丢失
+            // 2. 传 hospitalName 字段（必须添加边界前缀！）
+            writer.append("--").append(boundary).append("\r\n");
+            writer.append("Content-Disposition: form-data; name=\"hospitalName\"\r\n\r\n");
+            writer.append(hospitalName).append("\r\n");
+            writer.flush();
 
-            // 传文件字段
+            // 3. 传文件字段
             writer.append("--").append(boundary).append("\r\n");
             String uploadName = file.getName() + (compress ? ".gz" : "");
             writer.append("Content-Disposition: form-data; name=\"file\"; filename=\"")
@@ -99,7 +107,7 @@ public class UploadController {
             writer.append("Content-Type: application/octet-stream\r\n\r\n");
             writer.flush();
 
-            // 压缩或直接上传
+            // 4. 写入文件内容
             try (InputStream fileInput = new FileInputStream(file);
                  InputStream input = compress ?
                          new BufferedInputStream(new GZIPInputStream(fileInput)) :
@@ -113,8 +121,9 @@ public class UploadController {
                 output.flush();
             }
 
-            writer.append("\r\n").flush();
-            writer.append("--").append(boundary).append("--").append("\r\n");
+            // 5. 结束边界
+            writer.append("\r\n--").append(boundary).append("--\r\n");
+            writer.flush();
         }
 
         int responseCode = conn.getResponseCode();
@@ -130,7 +139,7 @@ public class UploadController {
 
 
     // 导出 MySQL 数据库为 SQL 文件
-    private  void exportDatabase(String dbName, String user, String password, String uploadDir, boolean compress) throws IOException, InterruptedException {
+    private  void exportDatabase(String hospitalName,String dbName, String user, String password, String uploadDir, boolean compress) throws IOException, InterruptedException {
         String fileName = dbName + "-" + LocalDate.now() + ".sql";
         File outputFile = new File(uploadDir, fileName);
 
@@ -147,12 +156,11 @@ public class UploadController {
         if (result == 0) {
             System.out.println("数据库导出成功: " + outputFile.getAbsolutePath());
             // 上传导出的数据库文件
-            uploadFile(outputFile, "db", compress);
+            uploadFile(outputFile, "db", hospitalName,compress);
         } else {
             throw new IOException("Database export failed with exit code: " + result);
         }
     }
-
 
 
 }
