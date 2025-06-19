@@ -19,7 +19,7 @@ public class SettingConstants {
 
         HAND(6,"手动上药报警"),
 
-
+        CONTROLLER(200,"控制系统报警"),
         SENDDRUG(7,"发药报警"),
 
         SENDWARING(9,"发药机警告！"),

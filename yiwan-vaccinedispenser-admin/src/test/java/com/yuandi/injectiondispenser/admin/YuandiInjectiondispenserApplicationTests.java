@@ -2,6 +2,7 @@ package com.yuandi.injectiondispenser.admin;
 
 import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yiwan.vaccinedispenser.YiwanVaccinedispenserApplication;
 import com.yiwan.vaccinedispenser.core.common.CommandEnums;
 import com.yiwan.vaccinedispenser.core.common.SettingConstants;
@@ -14,6 +15,7 @@ import com.yiwan.vaccinedispenser.system.com.ComService;
 import com.yiwan.vaccinedispenser.system.dispensing.ConfigFunction;
 import com.yiwan.vaccinedispenser.system.dispensing.DispensingFunction;
 import com.yiwan.vaccinedispenser.system.dispensing.SendDrugFunction;
+import com.yiwan.vaccinedispenser.system.domain.model.vac.VacDrug;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacGetVaccine;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacMachine;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacMachineDrug;
@@ -346,6 +348,10 @@ class YuandiInjectiondispenserApplicationTests {
 
 	@Test
 		void test20() throws  Exception{
+
+
+
+
 
 
 	}

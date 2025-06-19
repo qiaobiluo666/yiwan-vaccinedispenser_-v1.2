@@ -1,12 +1,15 @@
 package com.yiwan.vaccinedispenser.system.netty;
 
 import com.yiwan.vaccinedispenser.core.common.CommandEnums;
+import com.yiwan.vaccinedispenser.core.common.SettingConstants;
 import com.yiwan.vaccinedispenser.core.common.emun.CabinetConstants;
 import com.yiwan.vaccinedispenser.core.common.emun.RedisKeyConstant;
 import com.yiwan.vaccinedispenser.core.web.ErrorCode;
 import com.yiwan.vaccinedispenser.core.web.Result;
 import com.yiwan.vaccinedispenser.core.websocket.WebsocketService;
+import com.yiwan.vaccinedispenser.system.domain.model.vac.VacMachineException;
 import com.yiwan.vaccinedispenser.system.netty.msg.NettyReceiveCabinetService;
+import com.yiwan.vaccinedispenser.system.sys.service.vac.VacMachineExceptionService;
 import com.yiwan.vaccinedispenser.system.until.NettyUtils;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
@@ -21,8 +24,8 @@ import org.springframework.data.redis.core.ValueOperations;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 
@@ -38,6 +41,9 @@ public final class NettyClient {
 
     @Autowired
     private WebsocketService websocketService;
+
+    @Autowired
+    private VacMachineExceptionService vacMachineExceptionService;
 
     private String host;
     private int port;
@@ -114,11 +120,22 @@ public final class NettyClient {
             }
 
             if (!future.isSuccess()) {
+
+                String errorMsg  = String.format("当前客户端：%s, 执行重新连接到服务器%s:%s",name,host,port);
                 log.warn("当前客户端：{}, 执行重新连接到服务器{}:{}", name, host, port);
+                if(vacMachineExceptionService.getExceptionByName(name).isEmpty()){
+                    vacMachineExceptionService.sendException(SettingConstants.MachineException.CONTROLLER.code,name,errorMsg);
+                }
+
                 valueOperations.set(redisKey,"false");
                 commandData.put("data", "fail");
                 future.channel().eventLoop().schedule(this::connect, 2, TimeUnit.SECONDS);
             } else {
+                List<VacMachineException> vacMachineExceptionList = vacMachineExceptionService.getExceptionByName(name);
+                if(!vacMachineExceptionList.isEmpty()){
+                    vacMachineExceptionService.delExceptionByName(vacMachineExceptionList);
+                }
+
                 socketChannel = (SocketChannel) future.channel();
                 log.info("当前客户端：{} 服务端连接成功...", name);
                 valueOperations.set(redisKey,"true");
@@ -231,11 +248,18 @@ public final class NettyClient {
 //            }
                 return Result.success();
             } else{
-                log.warn("当前客户端：{} 已经断开了连接", name);
+                String errorMsg = String.format("当前客户端：%s 已经断开了连接", name);
+                log.warn(errorMsg);
+                if(vacMachineExceptionService.getExceptionByName(name).isEmpty()){
+                    vacMachineExceptionService.sendException(SettingConstants.MachineException.CONTROLLER.code,name,errorMsg);
+                }
+
                 if (!isConnecting()) {
                     setConnecting(true);
                     connect();
                 }
+                //数据库异常
+
                 return Result.failure(ErrorCode.CONTROL_BOARD_DISCONNECT);
             }
         }

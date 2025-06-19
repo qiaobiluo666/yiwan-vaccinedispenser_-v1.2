@@ -64,7 +64,8 @@ public interface CabinetAService {
 
 
     //获取A、B、C柜的所有传感器状态
-
     Map<String,String> getInputAll();
 
+
+    
 }

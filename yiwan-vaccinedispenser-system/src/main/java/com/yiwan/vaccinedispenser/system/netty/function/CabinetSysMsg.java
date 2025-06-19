@@ -142,6 +142,7 @@ public class CabinetSysMsg {
                 vacMachineSys.setWorkType(Integer.parseInt(bytesStr[11],16));
                 return vacMachineSys;
             }
+
             //0x02-IP设置
             case "02"->{
                 //ip地址
@@ -155,8 +156,10 @@ public class CabinetSysMsg {
                 vacMachineSys.setPort(port);
                 return vacMachineSys;
             }
+
             //0x03-版本号
             case "03"->{
+
                 StringBuilder versionBuilder = new StringBuilder();
                 versionBuilder.append(Integer.parseInt(bytesStr[11], 16))
                         .append(".")
@@ -164,24 +167,7 @@ public class CabinetSysMsg {
                         .append(".")
                         .append(Integer.parseInt(bytesStr[13], 16))
                         .append(".")
-                        .append(Integer.parseInt(bytesStr[14], 16))
-                        .append(" ")
-                        .append(Integer.parseInt(bytesStr[15], 16))
-                        .append(Integer.parseInt(bytesStr[16], 16));
-
-                int version17 = Integer.parseInt(bytesStr[17], 16);
-                int version18 = Integer.parseInt(bytesStr[18], 16);
-
-                if (version17 < 10) {
-                    versionBuilder.append("0");
-                }
-                versionBuilder.append(version17);
-
-                if (version18 < 10) {
-                    versionBuilder.append("0");
-                }
-                versionBuilder.append(version18);
-
+                        .append(Integer.parseInt(bytesStr[14], 16));
                 String version = versionBuilder.toString();
                 vacMachineSys.setVersion(version);
                 return vacMachineSys;

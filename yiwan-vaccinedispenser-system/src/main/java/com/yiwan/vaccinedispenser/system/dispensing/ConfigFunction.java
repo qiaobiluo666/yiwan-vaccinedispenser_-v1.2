@@ -114,12 +114,16 @@ public class ConfigFunction {
             switch (sysConfig.getConfigType()){
                 //政采云发药模块是否启用
                 case "ZCY_SEND"-> configSetting.setZcySend(sysConfig.getConfigValue());
+
                 //政采云自动上药模块是否启用
                 case "ZCY_AUTO"-> configSetting.setZcyAuto(sysConfig.getConfigValue());
+
                 //参数为 true 左边坐标点计算为 +x -y 右边坐标点 -x -y 反之为false
                 case "B_FIND_X"-> configSetting.setBFindX(sysConfig.getConfigValue());
+
                 //C柜是否有挡片
                 case "C_BLANK"-> configSetting.setCBlank(sysConfig.getConfigValue());
+
                 //C柜是否是抬升装置 true 抬升装置 false 不是抬升装置
                 case "C_LIFTING"-> configSetting.setCLifting(sysConfig.getConfigValue());
 
@@ -130,6 +134,14 @@ public class ConfigFunction {
                 case "OPEN_BLANK_AFTERNOON_TIME"-> configSetting.setCBlankOpenAfternoon(sysConfig.getConfigValue());
 
                 case "CLOSE_BLANK_AFTERNOON_TIME"-> configSetting.setCBlankCloseAfternoon(sysConfig.getConfigValue());
+
+                case "INVENTORY_COUNT_VALUE" ->  configSetting.setInventoryCountValue(Integer.valueOf(sysConfig.getConfigValue()));
+
+                case "INVENTORY_COUNT_LEN" ->  configSetting.setInventoryCountLen(Integer.valueOf(sysConfig.getConfigValue()));
+
+                case "INVENTORY_UPDATE" ->  configSetting.setInventoryUpdate(Boolean.parseBoolean(sysConfig.getConfigValue()));
+
+                case "INVENTORY_START" ->  configSetting.setInventoryStart(Boolean.parseBoolean(sysConfig.getConfigValue()));
 
             }
         }

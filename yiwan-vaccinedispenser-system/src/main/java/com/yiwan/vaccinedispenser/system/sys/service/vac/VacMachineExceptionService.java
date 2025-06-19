@@ -10,6 +10,8 @@ import com.yiwan.vaccinedispenser.system.sys.data.RedisDrugListData;
 import com.yiwan.vaccinedispenser.system.sys.data.request.IdListRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.request.vac.MachineExceptionRequest;
 
+import java.util.List;
+
 /**
  * @author slh
  **/
@@ -30,5 +32,11 @@ public interface VacMachineExceptionService extends IService<VacMachineException
     void sendException(Integer code,String desc);
 
     void sendException(Integer code,String productName,String desc);
+
+    //根据控制器名称查询
+    List<VacMachineException> getExceptionByName(String name);
+
+    //清除控制器异常报警
+    void  delExceptionByName(List<VacMachineException> vacMachineExceptionList);
 
 }

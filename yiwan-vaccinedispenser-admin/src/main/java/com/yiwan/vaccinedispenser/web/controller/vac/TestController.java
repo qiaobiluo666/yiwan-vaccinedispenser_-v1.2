@@ -24,6 +24,7 @@ import com.yiwan.vaccinedispenser.system.zyc.ZcyFunction;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.web.bind.annotation.*;
 
@@ -75,66 +76,71 @@ public class TestController {
     private UploadController uploadController;
 
 
+    @Value("${upload.hospitalName}")
+    private  String hospitalName;
+
+
+
+    @Value("${upload.databaseName}")
+    private  String databaseName;
+
+    @Value("${upload.password}")
+    private  String password;
+
+
     /**
      * 疫苗列表
      * */
     @PostMapping("/add-drug")
     public Result machineList() throws Exception {
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd-HH");
-        String logFileName = LocalDateTime.now().format(formatter) + ".log";
 
-        String path = "D:\\work\\yiwan\\疫苗发药机\\yiwan-vaccinedispenser_-v1.2\\logs\\"+logFileName;
-        uploadController.exportAndUpload("拱宸桥","log", null, null, null, path, false);
-        uploadController.exportAndUpload("拱宸桥","db", "vaccine_dispenser_gongchenqiao", "root", "root", null, false);
+        Random r = new Random();
+        VacGetVaccine vacGetVaccine =new VacGetVaccine();
+        VacMachine vacMachine6 = vacMachineService.testDrop(5);
+        if(vacMachine6==null){
+            return Result.fail("没有可发药的药仓");
+        }
 
+        BeanUtils.copyProperties(vacMachine6,vacGetVaccine);
+        vacGetVaccine.setTaskId(String.valueOf(UUID.randomUUID()));
+        vacGetVaccine.setRequestNo("requestNo");
+        vacGetVaccine.setWorkbenchName("接种台6");
+        vacGetVaccine.setWorkbenchNo("69");
+//        vacGetVaccine.setWorkbenchNum(1);
 
-//        Random r = new Random();
-//        VacGetVaccine vacGetVaccine =new VacGetVaccine();
-//        VacMachine vacMachine6 = vacMachineService.testDrop(5);
-//        if(vacMachine6==null){
-//            return Result.fail("没有可发药的药仓");
-//        }
-//
-//        BeanUtils.copyProperties(vacMachine6,vacGetVaccine);
-//        vacGetVaccine.setTaskId(String.valueOf(UUID.randomUUID()));
-//        vacGetVaccine.setRequestNo("requestNo");
-//        vacGetVaccine.setWorkbenchName("接种台6");
-//        vacGetVaccine.setWorkbenchNo("69");
-////        vacGetVaccine.setWorkbenchNum(1);
-//
-//        vacGetVaccine.setWorkbenchNum(r.nextInt(1,3));
-//
-//        dispensingFunction.addDrugList(vacGetVaccine);
-//
-//        VacMachine vacMachine5 = vacMachineService.testDrop(4);
-//        if(vacMachine5==null){
-//            return Result.fail("没有可发药的药仓");
-//        }
-//
-//        BeanUtils.copyProperties(vacMachine5,vacGetVaccine);
-//        vacGetVaccine.setTaskId(String.valueOf(UUID.randomUUID()));
-//        vacGetVaccine.setRequestNo("requestNo");
-//        vacGetVaccine.setWorkbenchName("接种台5");
-//        vacGetVaccine.setWorkbenchNo("69");
-////        vacGetVaccine.setWorkbenchNum(2);
-//        vacGetVaccine.setWorkbenchNum(r.nextInt(1,3));
-//
-//        dispensingFunction.addDrugList(vacGetVaccine);
-//
-//        VacMachine vacMachine4 = vacMachineService.testDrop(3);
-//        if(vacMachine4==null){
-//            return Result.fail("没有可发药的药仓");
-//        }
-//
-//        BeanUtils.copyProperties(vacMachine4,vacGetVaccine);
-//        vacGetVaccine.setTaskId(String.valueOf(UUID.randomUUID()));
-//        vacGetVaccine.setRequestNo("requestNo");
-//        vacGetVaccine.setWorkbenchName("接种台4");
-//        vacGetVaccine.setWorkbenchNo("69");
-//        vacGetVaccine.setWorkbenchNum(r.nextInt(1,3));
-////        vacGetVaccine.setWorkbenchNum(3);
-//        dispensingFunction.addDrugList(vacGetVaccine);
+        vacGetVaccine.setWorkbenchNum(r.nextInt(1,3));
+
+        dispensingFunction.addDrugList(vacGetVaccine);
+
+        VacMachine vacMachine5 = vacMachineService.testDrop(4);
+        if(vacMachine5==null){
+            return Result.fail("没有可发药的药仓");
+        }
+
+        BeanUtils.copyProperties(vacMachine5,vacGetVaccine);
+        vacGetVaccine.setTaskId(String.valueOf(UUID.randomUUID()));
+        vacGetVaccine.setRequestNo("requestNo");
+        vacGetVaccine.setWorkbenchName("接种台5");
+        vacGetVaccine.setWorkbenchNo("69");
+//        vacGetVaccine.setWorkbenchNum(2);
+        vacGetVaccine.setWorkbenchNum(r.nextInt(1,3));
+
+        dispensingFunction.addDrugList(vacGetVaccine);
+
+        VacMachine vacMachine4 = vacMachineService.testDrop(3);
+        if(vacMachine4==null){
+            return Result.fail("没有可发药的药仓");
+        }
+
+        BeanUtils.copyProperties(vacMachine4,vacGetVaccine);
+        vacGetVaccine.setTaskId(String.valueOf(UUID.randomUUID()));
+        vacGetVaccine.setRequestNo("requestNo");
+        vacGetVaccine.setWorkbenchName("接种台4");
+        vacGetVaccine.setWorkbenchNo("69");
+        vacGetVaccine.setWorkbenchNum(r.nextInt(1,3));
+//        vacGetVaccine.setWorkbenchNum(3);
+        dispensingFunction.addDrugList(vacGetVaccine);
 
         return Result.success();
         
@@ -145,10 +151,22 @@ public class TestController {
      * 测试距离
      * */
     @PostMapping("/distance")
-    public Result distance()  {
+    public Result distance() throws IOException, ExecutionException, InterruptedException {
+        ConfigData configData = configFunction.getAutoDrugConfigData();
+        DistanceServoData data =sendDrugFunction.distanceServoAll(configData);
+        return Result.success(data);
+    }
+
+
+    /**
+     * 测试距离
+     * */
+    @PostMapping("/sensor")
+    public Result sensor()  {
         DistanceServoData data =sendDrugFunction.getDistanceSensor();
         return Result.success(data);
     }
+
 
     /**
      * 测试距离
@@ -273,5 +291,17 @@ public class TestController {
         return Result.success();
     }
 
+    @GetMapping("/upload")
+    public Result uploadFile() throws Exception {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+        String logFileName = LocalDateTime.now().format(formatter) + ".log";
+        String path = "D:\\yiwan\\backend\\logs\\"+logFileName;
+//        uploadController.exportAndUpload("拱宸桥","log", null, null, null, path, true);
+//        uploadController.exportAndUpload("拱宸桥","db", "vaccine_dispenser_gongchenqiao", "root", "gcq123", null, true);
+
+        uploadController.exportAndUpload(hospitalName,"log", null, null, null, path, true);
+        uploadController.exportAndUpload(hospitalName,"db", databaseName, "root", password, null, true);
+        return Result.success();
+    }
 
 }

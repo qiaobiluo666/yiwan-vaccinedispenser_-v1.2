@@ -49,3 +49,8 @@ netty:
 pdf:
   fontPath: D:/yiwan/backend/config/fonts/simsun.ttf
 
+upload:
+  hospitalName: 拱宸桥
+  uploadPath: http://47.97.48.26:5080/upload
+  databaseName: vaccine_dispenser_gongchenqiao
+  password: gcq123

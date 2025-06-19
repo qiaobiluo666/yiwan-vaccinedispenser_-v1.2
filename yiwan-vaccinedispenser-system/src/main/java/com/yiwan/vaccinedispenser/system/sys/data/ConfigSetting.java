@@ -19,16 +19,29 @@ public class ConfigSetting {
     //B柜自动上药参数
     private String bFindX;
 
-
     //C柜挡片早上开启时间
     private String cBlankOpenMorning;
+
     //C柜挡片早上关闭时间
     private String cBlankCloseMorning;
+
     //C柜挡片下午开启时间
     private String cBlankOpenAfternoon;
+
     //C柜挡片关闭开启时间
     private String cBlankCloseAfternoon;
 
+    //库存盘点传感器误差值
+    private Integer inventoryCountValue;
+
+    //库存盘点传感器初始距离
+    private Integer inventoryCountLen;
+
+    //库存盘点数据是否更新
+    private  Boolean inventoryUpdate;
+
+    //库存盘点功能是否开启
+    private Boolean inventoryStart;
 
 
 }

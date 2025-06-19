@@ -191,7 +191,6 @@ public class SendDrugFunction {
     }
 
 
-
     /**
      * 自动上药总流程
      */
@@ -394,6 +393,8 @@ public class SendDrugFunction {
             if((configData.getHandLen()-longs-configData.getEarly())>0){
                 int earlyDis = configData.getHandLen()-longs-configData.getEarly();
                 cabinetAStepPosition(CabinetConstants.CabinetAStepMode.CLAMP,earlyDis);
+            }else {
+                cabinetAStepPosition(CabinetConstants.CabinetAStepMode.CLAMP,0);
             }
 
             //移动到掉药区域
@@ -482,6 +483,7 @@ public class SendDrugFunction {
                 valueOperations.set(RedisKeyConstant.HANDLE_IS_DROP,"true");
                 log.info("=================================上药结束==========================");
             });
+
             thread.start();
 
             long timeoutInit = System.currentTimeMillis();
@@ -1647,6 +1649,7 @@ public class SendDrugFunction {
         data.setServoZ(configData.getDropZ()-distanceServoData.getVaccineHigh()*100);
         log.info("掉药区域位置：{}",data);
         return moveScanServo(data,1);
+
     }
 
 
@@ -1656,8 +1659,13 @@ public class SendDrugFunction {
     public DrugRecordRequest findBox(DistanceServoData distanceServoData ,DrugRecordRequest request){
 
         //计算一个仓位最多能存储多少只药品  误差要加 5mm
-        int num = getDrugNum(distanceServoData.getVaccineLong());
-        log.info("药品：{}，最大支持几只：{}",request.getProductNo(),num);
+        int num = getDrugNum(distanceServoData.getVaccineLong(), request);
+
+
+
+
+
+
         //确定是什么型号的仓柜
         List<VacBoxSpec> vacBoxSpecList = vacBoxSpecService.findVacBoxSpec(distanceServoData.getVaccineWide());
 
@@ -1691,13 +1699,27 @@ public class SendDrugFunction {
     }
 
     //获取板子的长度
-    public int getDrugNum(int vacLong){
+    public int getDrugNum(int vacLong,DrugRecordRequest request){
         ConfigData configData = configFunction.getAutoDrugConfigData();
         int num = configData.getLineLong()/(vacLong+5);
         if(5*num>vacLong*1.5){
             num = num+1;
         }
+
+        //查询疫苗最大存储数量
+        VacDrug vacDrug = vacDrugService.vacDrugGetByproductNo(request.getProductNo());
+        Integer maxNum = vacDrug.getMaxNum();
+
+        //取最小值
+        if(maxNum!=null){
+            log.info("疫苗：{},最大限制数量：{}",request.getProductName(),maxNum);
+            num = Math.min(num, maxNum);
+        }
+
+        log.info("药品：{}，最大支持几只：{}",request.getProductNo(),num);
+
         return num;
+
     }
 
 

@@ -23,9 +23,7 @@ import java.util.concurrent.ExecutionException;
  **/
 public interface VacMachineService extends IService<VacMachine>{
 
-    /**
-     * 仓柜列表查询
-     */
+
     List<VacMachine> getVacMachineListByProductNo(String getProductName);
 
     Result vacMachineList();

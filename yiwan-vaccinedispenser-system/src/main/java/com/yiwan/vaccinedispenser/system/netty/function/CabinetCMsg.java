@@ -77,7 +77,7 @@ public class CabinetCMsg {
 
         ConfigSetting configSetting = configFunction.getSettingConfigData();
 
-        int address = Integer.parseInt(bytesStr[9], 16);
+        int address = Integer.parseInt(bytesStr[11], 16);
         log.info("收到C柜{}指令:{}", CabinetConstants.CabinetCType.SEND_DRUG.desc, NettyUtils.StringListToString(bytesStr));
 
         switch (bytesStr[7]) {
@@ -88,7 +88,7 @@ public class CabinetCMsg {
                         switch (bytesStr[12]){
                             case "01" ->{
                                 valueOperations.set(RedisKeyConstant.CABINET_C_WORK,"true");
-                                log.info("=====================================================第{}工作台发药结束======================================",address);
+
                                 //拿到redis 发药函数，顺利完成
                                 String drugStr = listOps.index(RedisKeyConstant.SEND_LIST,0);
                                 if (drugStr!=null){

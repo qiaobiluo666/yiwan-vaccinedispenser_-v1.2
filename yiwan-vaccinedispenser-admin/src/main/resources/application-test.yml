@@ -53,3 +53,9 @@ cabinetB:
   isX: true
 pdf:
   fontPath: ./yiwan-vaccinedispenser-admin/src/main/resources/fonts/simsun.ttf
+
+upload:
+  hospitalName: 拱宸桥
+  uploadPath: http://47.97.48.26:5080/upload
+  databaseName: vaccine_dispenser_gongchenqiao
+  password: gcq123

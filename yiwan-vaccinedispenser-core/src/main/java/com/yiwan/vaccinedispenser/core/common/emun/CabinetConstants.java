@@ -1156,7 +1156,8 @@ public class CabinetConstants {
         SPEED(0x02,2,"0x02 速度模式"),
 
         ZERO(0x03,3,"0x03 原点模式"),
-        PAUSE(0x04,4,"0x04 暂停模式");
+        PAUSE(0x04,4,"0x04 暂停模式"),
+        RELATIVE(0x05,5,"0x05 相对位置模式");
 
         CabinetCServoCommand(int code,Integer num, String desc) {
             this.code = code;

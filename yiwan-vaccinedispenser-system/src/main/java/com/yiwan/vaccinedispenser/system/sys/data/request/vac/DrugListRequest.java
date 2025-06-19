@@ -126,7 +126,10 @@ public class DrugListRequest implements Serializable {
 
     private String vaccineCode;
 
-
+    /**
+     * 单仓最大存储
+     */
+    private Integer maxNum;
 
     /**
      * 当前页

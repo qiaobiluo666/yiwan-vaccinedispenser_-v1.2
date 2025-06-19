@@ -133,6 +133,11 @@ public class VacDrug extends Model<VacDrug> {
     private String vaccineCode;
 
 
+    /**
+     * 单仓存储最大数量
+     */
+
+    private Integer maxNum;
 
     private LocalDateTime createTime;
 
