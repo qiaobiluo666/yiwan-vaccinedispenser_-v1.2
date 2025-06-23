@@ -327,31 +327,7 @@ public class DispensingFunction {
                 if("true".equals(configSetting.getCBlank())){
                     //开启挡片
                     Thread thread = new Thread(() -> {
-                        String isQuery = valueOperations.get(RedisKeyConstant.CABINET_C_BLOCK_STATUS_QUERY);
-
-                        if(isQuery==null) {
-                            isQuery = "false";
-                        }
-
-                        if("false".equals(isQuery)){
-                            valueOperations.set(RedisKeyConstant.CABINET_C_BLOCK_STATUS_QUERY,"true");
-                            //查询C柜挡片状态 如果关闭则 打开C柜挡片
-                            moveBlock(CabinetConstants.CabinetCSendDrugBlockStatus.QUERY);
-                            VacUntil.sleep(200);
-                            String isOpen = valueOperations.get(RedisKeyConstant.CABINET_C_BLOCK_STATUS);
-                            long timeouts = System.currentTimeMillis();
-                            while ((System.currentTimeMillis() - timeouts) < SettingConstants.WAIT_BLOCK_TIME){
-                                if("close".equals(isOpen)){
-                                    moveBlock(CabinetConstants.CabinetCSendDrugBlockStatus.OPEN);
-                                    break;
-                                }else if("open".equals(isOpen)){
-                                    break;
-                                }
-                                moveBlock(CabinetConstants.CabinetCSendDrugBlockStatus.QUERY);
-                                VacUntil.sleep(200);
-                            }
-                            valueOperations.set(RedisKeyConstant.CABINET_C_BLOCK_STATUS_QUERY,"false");
-                        }
+                        //TODO 挡片开启
 
                     });
                     thread.start();
@@ -524,16 +500,19 @@ public class DispensingFunction {
         //等待C柜斜坡皮带停止
         while ((System.currentTimeMillis() - timeout) < SettingConstants.FIND_BELT_STOP_WAIT_TIME) {
             //查询皮带状态
-            moveFind();
+            moveFind(drugListData.getWorkbenchNum());
             String isBlankOpen;
             VacUntil.sleep(200);
             String isStop = valueOperations.get(RedisKeyConstant.CABINET_C_BELT_STOP);
 
         //C柜是否有挡片
         if("true".equals(configSetting.getCBlank())){
-            //查询挡片状态
-            moveBlock(CabinetConstants.CabinetCSendDrugBlockStatus.QUERY);
-            VacUntil.sleep(50);
+
+            //TODO 挡片开启
+
+
+
+
             isBlankOpen = valueOperations.get(RedisKeyConstant.CABINET_C_BLOCK_STATUS);
             //如果挡片打开 和 皮带停止
             if("true".equals(isStop)&&"open".equals(isBlankOpen)){
@@ -543,13 +522,7 @@ public class DispensingFunction {
                 break;
             }
 
-            if("close".equals(isBlankOpen)){
-                log.info("正在打开C柜挡片！");
-                moveBlock(CabinetConstants.CabinetCSendDrugBlockStatus.OPEN);
-            }
-
             VacUntil.sleep(100);
-
 
         }else {
             if("true".equals(isStop)){
@@ -724,21 +697,11 @@ public class DispensingFunction {
     }
 
     //查询C柜斜坡皮带状态
-    private void  moveFind(){
+    private void  moveFind(Integer mode){
         CabinetCSendDrugRequest cabinetCSendDrugRequest = new CabinetCSendDrugRequest();
         cabinetCSendDrugRequest.setWorkMode(CabinetConstants.Cabinet.CAB_C);
         cabinetCSendDrugRequest.setCommand(CabinetConstants.CabinetCSendDrugCommand.FIND);
-        cabinetCService.sendDrug(cabinetCSendDrugRequest);
-    }
-
-
-
-    //挡片控制
-    public void  moveBlock(CabinetConstants.CabinetCSendDrugBlockStatus status){
-        CabinetCSendDrugRequest cabinetCSendDrugRequest = new CabinetCSendDrugRequest();
-        cabinetCSendDrugRequest.setWorkMode(CabinetConstants.Cabinet.CAB_C);
-        cabinetCSendDrugRequest.setCommand(CabinetConstants.CabinetCSendDrugCommand.BLOCK);
-        cabinetCSendDrugRequest.setStatus(status);
+        cabinetCSendDrugRequest.setMode(mode);
         cabinetCService.sendDrug(cabinetCSendDrugRequest);
     }
 
@@ -771,13 +734,28 @@ public class DispensingFunction {
 
     //根据层 走距离
     public void goToBelt(Integer beltNum,boolean goZero){
+        List<SysConfig> sysConfigList = sysConfigService.getSendDrugConfigData();
         Integer distance = null;
+
         if(goZero){
-            distance=0;
+            //获取需要走的distance
+            for(SysConfig sysConfig: sysConfigList) {
+                switch (beltNum) {
+                    case 1, 2, 3, 4 -> {
+                        if ("CABINET_C_2".equals(sysConfig.getConfigType())) {
+                            distance = Integer.parseInt(sysConfig.getConfigValue());
+                        }
+                    }
+                    case 5, 6 -> {
+                        if ("CABINET_C_1".equals(sysConfig.getConfigType())) {
+                            distance = Integer.parseInt(sysConfig.getConfigValue());
+                        }
+                    }
+                }
+            }
+
         }else {
 
-
-            List<SysConfig> sysConfigList = sysConfigService.getSendDrugConfigData();
             //获取需要走的distance
             for(SysConfig sysConfig: sysConfigList) {
                 switch (beltNum) {
@@ -808,7 +786,7 @@ public class DispensingFunction {
                     }
                 }
             }
-            
+
         }
         //伺服运动
         positionServo(SettingConstants.CABINET_A_MOVE_BELT_TO_RETURN_NUM,distance);
@@ -825,82 +803,29 @@ public class DispensingFunction {
 
     //打开挡片
     public void openBlank(){
-        long timeout = System.currentTimeMillis();
-        //等待C柜斜坡皮带停止
-        while ((System.currentTimeMillis() - timeout) < SettingConstants.FIND_BELT_STOP_WAIT_TIME) {
+        //TODO 挡片开启
 
-            String isBlankOpen;
-            //查询挡片状态
-            moveBlock(CabinetConstants.CabinetCSendDrugBlockStatus.QUERY);
-            VacUntil.sleep(200);
-            isBlankOpen = valueOperations.get(RedisKeyConstant.CABINET_C_BLOCK_STATUS);
-
-            if("open".equals(isBlankOpen)){
-                log.info("C柜挡片已经打开！");
-                break;
-            }
-
-            //如果挡片打开 和 皮带停止
-            if("close".equals(isBlankOpen)){
-                log.info("正在打开C柜挡片！");
-                moveBlock(CabinetConstants.CabinetCSendDrugBlockStatus.OPEN);
-            }
-
-            VacUntil.sleep(500);
-        }
     }
 
     //关闭挡片
     public void closeBlank(){
-        long timeout = System.currentTimeMillis();
-        //等待C柜斜坡皮带停止
-        while ((System.currentTimeMillis() - timeout) < SettingConstants.FIND_BELT_STOP_WAIT_TIME) {
-            String isBlankOpen;
-            //查询挡片状态
-            moveBlock(CabinetConstants.CabinetCSendDrugBlockStatus.QUERY);
-            VacUntil.sleep(200);
-
-            isBlankOpen = valueOperations.get(RedisKeyConstant.CABINET_C_BLOCK_STATUS);
-
-            if(("close").equals(isBlankOpen)){
-                log.info("C柜挡片已经关闭！");
-                break;
-            }
-
-            //如果挡片打开 和 皮带停止
-            if("open".equals(isBlankOpen)){
-                log.info("正在打开C柜挡片！");
-                moveBlock(CabinetConstants.CabinetCSendDrugBlockStatus.CLOSE);
-            }
-
-            VacUntil.sleep(500);
-
-        }
+        //TODO 挡片关闭
 
     }
 
 
+    //10分钟不发药自动关闭挡片
     public void  closeBlankMinute(){
-        moveBlock(CabinetConstants.CabinetCSendDrugBlockStatus.QUERY);
-
-        VacUntil.sleep(200);
-
-        String isBlankOpen = valueOperations.get(RedisKeyConstant.CABINET_C_BLOCK_STATUS);
-
         String timestampStr = valueOperations.get(RedisKeyConstant.CABINET_C_BLANK_OPEN_TIME);
+        if(timestampStr == null){
+            valueOperations.set(RedisKeyConstant.CABINET_C_BLANK_OPEN_TIME, LocalDateTime.now().toString());
 
-        //查询挡片状态
-        if("open".equals(isBlankOpen)){
-            if(timestampStr == null){
-                valueOperations.set(RedisKeyConstant.CABINET_C_BLANK_OPEN_TIME, LocalDateTime.now().toString());
-
-            }else {
-                LocalDateTime lastTimestamp = LocalDateTime.parse(timestampStr);
-                long minutesElapsed = ChronoUnit.MINUTES.between(lastTimestamp, LocalDateTime.now());
-                if (minutesElapsed >= 10) {
-                    redisTemplate.delete(RedisKeyConstant.CABINET_C_BLANK_OPEN_TIME);
-                    closeBlank();
-                }
+        }else {
+            LocalDateTime lastTimestamp = LocalDateTime.parse(timestampStr);
+            long minutesElapsed = ChronoUnit.MINUTES.between(lastTimestamp, LocalDateTime.now());
+            if (minutesElapsed >= 10) {
+                redisTemplate.delete(RedisKeyConstant.CABINET_C_BLANK_OPEN_TIME);
+                closeBlank();
             }
         }
     }
