@@ -296,9 +296,6 @@ public class TestController {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
         String logFileName = LocalDateTime.now().format(formatter) + ".log";
         String path = "D:\\yiwan\\backend\\logs\\"+logFileName;
-//        uploadController.exportAndUpload("拱宸桥","log", null, null, null, path, true);
-//        uploadController.exportAndUpload("拱宸桥","db", "vaccine_dispenser_gongchenqiao", "root", "gcq123", null, true);
-
         uploadController.exportAndUpload(hospitalName,"log", null, null, null, path, true);
         uploadController.exportAndUpload(hospitalName,"db", databaseName, "root", password, null, true);
         return Result.success();

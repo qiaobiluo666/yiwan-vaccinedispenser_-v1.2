@@ -1091,6 +1091,7 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
                     vacMachineExceptionService.sendException(SettingConstants.MachineException.COUNTWARING.code,"",msg);
                 }
 
+
                 //如果是空仓  仓位上还有数据 清空仓位
                 record.setVaccineId(null);
                 record.setVaccineNum(null);
@@ -1316,7 +1317,6 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
 
             return Result.fail("正在发苗！不能退苗");
         }
-
 
 
     }
