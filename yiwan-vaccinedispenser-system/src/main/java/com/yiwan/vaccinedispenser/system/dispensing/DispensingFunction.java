@@ -804,12 +804,25 @@ public class DispensingFunction {
     //打开挡片
     public void openBlank(){
         //TODO 挡片开启
-
+        CabinetAServoRequest cabinetAServoRequest = new CabinetAServoRequest();
+        cabinetAServoRequest.setWorkMode(CabinetConstants.Cabinet.CAB_A);
+        cabinetAServoRequest.setCommand(CabinetConstants.CabinetAServoCommand.POSITION);
+        cabinetAServoRequest.setMode(10);
+        cabinetAServoRequest.setStatus(CabinetConstants.CabinetAServoStatus.ZERO);
+        cabinetAServoRequest.setDistance(0);
+        cabinetAService.servo(cabinetAServoRequest);
     }
 
     //关闭挡片
     public void closeBlank(){
         //TODO 挡片关闭
+        CabinetAServoRequest cabinetAServoRequest = new CabinetAServoRequest();
+        cabinetAServoRequest.setWorkMode(CabinetConstants.Cabinet.CAB_A);
+        cabinetAServoRequest.setCommand(CabinetConstants.CabinetAServoCommand.POSITION);
+        cabinetAServoRequest.setMode(10);
+        cabinetAServoRequest.setStatus(CabinetConstants.CabinetAServoStatus.ZERO);
+        cabinetAServoRequest.setDistance(180);
+        cabinetAService.servo(cabinetAServoRequest);
 
     }
 
