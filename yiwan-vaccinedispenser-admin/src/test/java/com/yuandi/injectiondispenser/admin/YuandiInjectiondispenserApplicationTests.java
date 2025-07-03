@@ -2,9 +2,7 @@ package com.yuandi.injectiondispenser.admin;
 
 import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yiwan.vaccinedispenser.YiwanVaccinedispenserApplication;
-import com.yiwan.vaccinedispenser.core.common.CommandEnums;
 import com.yiwan.vaccinedispenser.core.common.SettingConstants;
 import com.yiwan.vaccinedispenser.core.common.emun.CabinetConstants;
 import com.yiwan.vaccinedispenser.core.web.Result;
@@ -15,18 +13,13 @@ import com.yiwan.vaccinedispenser.system.com.ComService;
 import com.yiwan.vaccinedispenser.system.dispensing.ConfigFunction;
 import com.yiwan.vaccinedispenser.system.dispensing.DispensingFunction;
 import com.yiwan.vaccinedispenser.system.dispensing.SendDrugFunction;
-import com.yiwan.vaccinedispenser.system.domain.model.vac.VacDrug;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacGetVaccine;
-import com.yiwan.vaccinedispenser.system.domain.model.vac.VacMachine;
-import com.yiwan.vaccinedispenser.system.domain.model.vac.VacMachineDrug;
 import com.yiwan.vaccinedispenser.system.sys.dao.VacGetVaccineMapper;
 import com.yiwan.vaccinedispenser.system.sys.data.ConfigSetting;
 import com.yiwan.vaccinedispenser.system.sys.data.DistanceServoData;
 import com.yiwan.vaccinedispenser.system.sys.data.RedisDrugListData;
-import com.yiwan.vaccinedispenser.system.sys.data.SendBtnData;
 import com.yiwan.vaccinedispenser.system.sys.data.request.netty.DropRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.request.vac.DrugRecordRequest;
-import com.yiwan.vaccinedispenser.system.sys.data.zyc.InventoryReportData;
 import com.yiwan.vaccinedispenser.system.sys.data.zyc.SendVaccineResultData;
 import com.yiwan.vaccinedispenser.system.sys.data.zyc.SendVaccineResultRequest;
 import com.yiwan.vaccinedispenser.system.sys.service.netty.CabinetAService;
@@ -34,7 +27,6 @@ import com.yiwan.vaccinedispenser.system.sys.service.netty.CabinetBService;
 import com.yiwan.vaccinedispenser.system.sys.service.vac.*;
 import com.yiwan.vaccinedispenser.system.test.UploadController;
 import com.yiwan.vaccinedispenser.system.until.NettyUtils;
-import com.yiwan.vaccinedispenser.system.until.VacUntil;
 import com.yiwan.vaccinedispenser.system.zyc.ZcyFunction;
 import com.yiwan.vaccinedispenser.system.zyc.ZcyRequestBuilder;
 import lombok.extern.slf4j.Slf4j;
@@ -46,9 +38,7 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.annotation.Resource;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @SpringBootTest(classes = YiwanVaccinedispenserApplication.class)
@@ -261,6 +251,7 @@ class YuandiInjectiondispenserApplicationTests {
 
 	@Test
 	void test13() {
+
 		Integer sensorNum =1;
 		Integer ioNum =3;
 
@@ -348,12 +339,8 @@ class YuandiInjectiondispenserApplicationTests {
 
 	@Test
 		void test20() throws  Exception{
-
-
-
-
-
-
+		DrugRecordRequest drugRecordRequest = uploadController.getZcyCode("81905360040864463519");
+		log.info(JSON.toJSONString(drugRecordRequest));
 	}
 
 }

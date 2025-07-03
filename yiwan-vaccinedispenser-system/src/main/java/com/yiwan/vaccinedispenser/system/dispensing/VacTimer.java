@@ -6,6 +6,7 @@ import com.yiwan.vaccinedispenser.core.common.emun.CabinetConstants;
 import com.yiwan.vaccinedispenser.core.common.emun.RedisKeyConstant;
 import com.yiwan.vaccinedispenser.system.sys.data.ConfigSetting;
 import com.yiwan.vaccinedispenser.system.sys.data.request.vac.DrugRecordRequest;
+import com.yiwan.vaccinedispenser.system.test.UploadController;
 import com.yiwan.vaccinedispenser.system.until.VacUntil;
 import com.yiwan.vaccinedispenser.system.zyc.ZcyFunction;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +51,8 @@ public class VacTimer {
 
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
+    @Autowired
+    private UploadController uploadController;
 
     /**
      * 一分钟轮询 挡片开启时长超过10min 自动关闭
@@ -155,5 +158,14 @@ public class VacTimer {
        log.error("未知异常：",e);
         }
     }
+    @Scheduled(fixedDelay = 2000)
+    public void getVaccineMsg() throws Exception {
+        ConfigSetting configSetting = configFunction.getSettingConfigData();
+        if("true".equals(configSetting.getZcySend())){
+            uploadController.getZycVaccineMsg();
+        }
+    }
+
+
 
 }

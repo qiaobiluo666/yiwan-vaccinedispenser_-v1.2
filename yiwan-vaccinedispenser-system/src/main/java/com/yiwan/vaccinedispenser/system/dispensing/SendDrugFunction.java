@@ -1431,6 +1431,7 @@ public class SendDrugFunction {
         cameraSendMsg.sendCommandToSideCamera();
         scanCodeData = getSideCamera(scanCodeData);
 
+
         //下方扫码线程
         Thread belowScan = new Thread(() -> {
             long timeout = System.currentTimeMillis();
@@ -1660,11 +1661,6 @@ public class SendDrugFunction {
 
         //计算一个仓位最多能存储多少只药品  误差要加 5mm
         int num = getDrugNum(distanceServoData.getVaccineLong(), request);
-
-
-
-
-
 
         //确定是什么型号的仓柜
         List<VacBoxSpec> vacBoxSpecList = vacBoxSpecService.findVacBoxSpec(distanceServoData.getVaccineWide());

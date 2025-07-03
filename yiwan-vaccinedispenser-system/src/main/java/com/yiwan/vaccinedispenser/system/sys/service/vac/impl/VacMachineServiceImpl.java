@@ -1039,7 +1039,6 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
         ConfigSetting configSetting = configFunction.getSettingConfigData();
         boolean isUpdate  = configSetting.getInventoryUpdate();
         boolean isStart  = configSetting.getInventoryStart();
-
         int bank = configSetting.getInventoryCountLen();
 
         if(!isStart){
@@ -1067,7 +1066,7 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
             //机械手走测距位置
             sendDrugFunction.moveHandServo(record.getCountX(),record.getCountZ());
 
-            VacUntil.sleep(1000);
+            VacUntil.sleep(2000);
             //测距
             Integer disNum =sendDrugFunction.getDistanceCount();
 
@@ -1086,37 +1085,37 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
             disNum = disNum-configSetting.getInventoryCountValue();
             //距离大于这个值 则为空仓
             if(disNum>bank){
-                if(record.getProductNo()!=null){
-                     msg = String.format("仓位：%s , 疫苗:%s ,设置为空仓",record.getBoxNo(),record.getProductName());
+                //距离大于这个值  而且机器数据为1只药 设为空仓
+                if(record.getProductNo()!=null && record.getVaccineNum()<2){
+
+                    msg = String.format("仓位：%s , 疫苗:%s ,原来数量：%s 设置为空仓 测试距离：%s",record.getBoxNo(),record.getProductName(),record.getVaccineNum(),disNum);
                     vacMachineExceptionService.sendException(SettingConstants.MachineException.COUNTWARING.code,"",msg);
+                    //如果是空仓  仓位上还有数据 清空仓位
+                    record.setVaccineId(null);
+                    record.setVaccineNum(null);
+                    record.setVaccineUseNum(null);
+                    record.setProductName(null);
+                    record.setProductNo(null);
+                    record.setExpiredAt(null);
+                    log.info("仓位：{} 为空仓",record.getBoxNo());
+                    if(isUpdate){
+                        vacMachineMapper.updateNullById(record);
+                    }
+
                 }
-
-
-                //如果是空仓  仓位上还有数据 清空仓位
-                record.setVaccineId(null);
-                record.setVaccineNum(null);
-                record.setVaccineUseNum(null);
-                record.setProductName(null);
-                record.setProductNo(null);
-                record.setExpiredAt(null);
-                log.info("仓位：{} 为空仓",record.getBoxNo());
-                if(isUpdate){
-                    vacMachineMapper.updateNullById(record);
-                }
-
                 continue;
-
             }
 
             //如果不是空仓 仓位上没数据   找到最近的那条数据 对比长度  如果长度相差不大 则 恢复原来的数据 如果长度相差过大 则 禁掉该仓位
             if(record.getProductNo()==null){
+
                 log.info(String.valueOf(record.getId()));
                 //拿到最近的一条数据
                 VacDrugRecord vacDrugRecord = vacDrugRecordService.getLastByMachineId(record.getId());
                 if(disNum<800){
                     msg = String.format("仓位号：%s,空仓！传感器读取误差，读取距离为：%s",record.getBoxNo(),disNum);
                     log.warn(msg);
-                    vacMachineExceptionService.sendException(SettingConstants.MachineException.COUNTWARING.code,"",msg);
+//                    vacMachineExceptionService.sendException(SettingConstants.MachineException.COUNTWARING.code,"",msg);
                     continue;
                 }
 
@@ -1133,14 +1132,13 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
                 //比较长度的差距 如果长度超过药盒的1/2
                 int vacLong = vacDrug.getVaccineLong();
                 if((bank-disNum)>(vacLong/2) ){
-
                    int num = (bank-disNum)/vacLong;
                    int mode = (bank-disNum)%vacLong;
+
                    //计算出的余量大于药盒3/4 药盒+1
                    if(mode>(vacLong/4*3)){
                        num=num+1;
                    }
-
                    record.setVaccineId(vacDrug.getId());
                    record.setVaccineNum(num);
                    record.setVaccineUseNum(num);
@@ -1165,6 +1163,7 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
                 }
 
             }else {
+
                 VacDrug vacDrug = vacDrugService.vacDrugGetByproductNo(record.getProductNo());
                 int vacLong = vacDrug.getVaccineLong();
                 log.info("疫苗长度：{}",vacDrug.getVaccineLong());

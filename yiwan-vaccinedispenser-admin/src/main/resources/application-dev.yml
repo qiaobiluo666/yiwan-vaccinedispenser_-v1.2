@@ -51,6 +51,6 @@ pdf:
 
 upload:
   hospitalName: 拱宸桥
-  uploadPath: http://47.97.48.26:5080/upload
+  uploadPath: http://47.97.48.26:5080
   databaseName: vaccine_dispenser_gongchenqiao
   password: gcq123

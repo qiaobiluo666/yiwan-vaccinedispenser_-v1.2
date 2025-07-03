@@ -72,6 +72,8 @@ public class DrugRecordRequest implements Serializable {
     //信息
     private String msg;
 
+    //UUid
+    private String uuid;
 
     //led位置
     private Integer ledNum;
@@ -103,7 +105,6 @@ public class DrugRecordRequest implements Serializable {
      * 是否删除  true/已删除  false/未删除
      */
     private int deleted;
-
 
 
 }

@@ -34,6 +34,7 @@ public class CameraBelowServiceImpl implements NettyReceiveCameraService {
             String lastCode = valueOperations.get(RedisKeyConstant.scanCode.LAST_BELOW);
             if (!"NoRead".equals(lastCode)) {
                 //如果上一次的扫码值跟这次的相等 说明重复扫码  不相等 则是扫到新码
+                assert lastCode != null;
                 if (!lastCode.equals(msg)) {
                     valueOperations.set(RedisKeyConstant.scanCode.LAST_BELOW, msg);
                     valueOperations.set(RedisKeyConstant.scanCode.BELOW, msg);
