@@ -117,7 +117,6 @@ public class SendDrugFunction {
             log.info("开始测距");
             //重置滑台信号
             valueOperations.set(RedisKeyConstant.sensor.TABLE_SENSOR_COUNT,"1");
-
             valueOperations.set(RedisKeyConstant.CABINET_B_TEST_RUN,"false");
 
             // 设置开始测距 判断滑台是否还有药盒 为false
@@ -129,7 +128,6 @@ public class SendDrugFunction {
             aboveCamera();
             //打开3个距离传感器 计算距离
             DistanceServoData distanceServoData =distanceServoAll(configData);
-
             //判断药盒形态
             if(distanceServoData.getIsReturn()) {
                 tableReturn();
@@ -137,6 +135,7 @@ public class SendDrugFunction {
             }
 
             String result = valueOperations.get(RedisKeyConstant.scanCode.ABOVE);
+
             if("NoRead".equals(result)){
                 aboveCamera();
                 VacUntil.sleep(500);
@@ -173,7 +172,6 @@ public class SendDrugFunction {
 
             if(countStr==null){
 //                valueOperations.set(RedisKeyConstant.CABINET_B_COUNT,"1");
-
                 valueOperations.set(RedisKeyConstant.sensor.TABLE_SENSOR_COUNT,"1");
             }else {
                 int count = Integer.parseInt(countStr);

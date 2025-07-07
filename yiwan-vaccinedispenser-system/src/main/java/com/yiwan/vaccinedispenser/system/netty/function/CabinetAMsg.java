@@ -228,6 +228,19 @@ public class CabinetAMsg {
 
                     }
 
+                    case "0A" ->{
+                        switch (bytesStr[11]){
+                            case "01"->{
+                                valueOperations.set(RedisKeyConstant.handServo.Z,"true");
+                            }
+                        }
+
+                    }
+
+
+
+
+
                     default -> {
                         switch (bytesStr[11]){
                             case "01"->{

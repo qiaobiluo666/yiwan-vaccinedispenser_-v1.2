@@ -501,23 +501,15 @@ public class DispensingFunction {
         while ((System.currentTimeMillis() - timeout) < SettingConstants.FIND_BELT_STOP_WAIT_TIME) {
             //查询皮带状态
             moveFind(drugListData.getWorkbenchNum());
-            String isBlankOpen;
             VacUntil.sleep(200);
             String isStop = valueOperations.get(RedisKeyConstant.CABINET_C_BELT_STOP);
-
         //C柜是否有挡片
         if("true".equals(configSetting.getCBlank())){
-
             //TODO 挡片开启
-
-
-
-
-            isBlankOpen = valueOperations.get(RedisKeyConstant.CABINET_C_BLOCK_STATUS);
+            openBlank();
             //如果挡片打开 和 皮带停止
-            if("true".equals(isStop)&&"open".equals(isBlankOpen)){
+            if("true".equals(isStop)){
                 log.info("C柜皮带已经停止了！");
-                log.info("C柜挡片已经打开！");
                 flag = true;
                 break;
             }
@@ -725,11 +717,12 @@ public class DispensingFunction {
         //出药
         vacSendDrugRecordService.sendDrugRecordAdd(drugListData,status , desc);
 
-
         //多人份
         if(drugListData.getMachineStatus()==2){
             vacMachineDrugService.delMachineByCreatTime(drugListData.getMachineId());
         }
+
+
     }
 
     //根据层 走距离
@@ -809,9 +802,10 @@ public class DispensingFunction {
         cabinetAServoRequest.setCommand(CabinetConstants.CabinetAServoCommand.POSITION);
         cabinetAServoRequest.setMode(10);
         cabinetAServoRequest.setStatus(CabinetConstants.CabinetAServoStatus.ZERO);
-        cabinetAServoRequest.setDistance(0);
+        cabinetAServoRequest.setDistance(230);
         cabinetAService.servo(cabinetAServoRequest);
     }
+
 
     //关闭挡片
     public void closeBlank(){
@@ -821,9 +815,8 @@ public class DispensingFunction {
         cabinetAServoRequest.setCommand(CabinetConstants.CabinetAServoCommand.POSITION);
         cabinetAServoRequest.setMode(10);
         cabinetAServoRequest.setStatus(CabinetConstants.CabinetAServoStatus.ZERO);
-        cabinetAServoRequest.setDistance(180);
+        cabinetAServoRequest.setDistance(0);
         cabinetAService.servo(cabinetAServoRequest);
-
     }
 
 

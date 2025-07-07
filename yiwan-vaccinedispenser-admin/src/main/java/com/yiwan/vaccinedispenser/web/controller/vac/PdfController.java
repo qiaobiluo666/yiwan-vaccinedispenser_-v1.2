@@ -75,10 +75,6 @@ public class PdfController {
     }
 
 
-
-
-
-
     /**
      *上药记录导出
      */
@@ -106,9 +102,5 @@ public class PdfController {
         // 8. 返回 PDF 文件流
         return pdfService.getInventoryPdfDetail(productName);
     }
-
-
-
-
 
 }
