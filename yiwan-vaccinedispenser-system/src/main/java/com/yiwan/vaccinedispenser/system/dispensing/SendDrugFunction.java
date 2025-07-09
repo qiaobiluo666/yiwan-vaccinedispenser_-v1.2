@@ -575,6 +575,9 @@ public class SendDrugFunction {
             return false;
         }
 
+        //回原
+        cabinetAStepPosition(CabinetConstants.CabinetAStepMode.CLAMP,0);
+        waitCabinetAStepEnd(1);
         return  true;
 
     }

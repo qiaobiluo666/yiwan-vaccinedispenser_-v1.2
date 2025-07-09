@@ -823,6 +823,7 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
                 }
 
                 if(flag){
+
                     //掉药
                     int clampDis = configData.getHandLen()-wide-configData.getGap();
                     int dropDis = configData.getHandLen()-wide;
