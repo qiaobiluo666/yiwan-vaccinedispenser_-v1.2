@@ -28,12 +28,14 @@ import com.yiwan.vaccinedispenser.system.sys.data.RedisDrugListData;
 import com.yiwan.vaccinedispenser.system.sys.data.SendBtnData;
 import com.yiwan.vaccinedispenser.system.sys.data.request.IdListRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.request.OtherRequest;
+import com.yiwan.vaccinedispenser.system.sys.data.request.netty.CabinetCServoRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.request.netty.DropRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.request.vac.DrugRecordRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.request.vac.MachineListRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.request.vac.VacMachineRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.response.vac.InventoryResponse;
 import com.yiwan.vaccinedispenser.system.sys.service.netty.CabinetAService;
+import com.yiwan.vaccinedispenser.system.sys.service.netty.CabinetCService;
 import com.yiwan.vaccinedispenser.system.sys.service.vac.*;
 import com.yiwan.vaccinedispenser.system.until.VacUntil;
 import com.yiwan.vaccinedispenser.system.zyc.ZcyFunction;
@@ -86,6 +88,9 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
 
     @Autowired
     private CabinetAService cabinetAService;
+
+    @Autowired
+    private CabinetCService cabinetCService;
 
     @Value("${app.sendIsOpen}")
     private  String isSendOpen;
@@ -1450,6 +1455,56 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
         vacGetVaccine.setRequestNo(userBean.getUserName());
         dispensingFunction.addDrugList(vacGetVaccine);
     }
+
+    @Override
+    public void test1() {
+
+        CabinetCServoRequest request = new CabinetCServoRequest();
+        request.setWorkMode(CabinetConstants.Cabinet.CAB_C);
+        request.setCommand(CabinetConstants.CabinetCServoCommand.POSITION);
+        request.setStatus(CabinetConstants.CabinetCServoStatus.ZERO);
+        while (true){
+            //C柜伺服控制
+
+            request.setDistance(0);
+            request.setMode(5);
+            cabinetCService.servo(request);
+            VacUntil.sleep(100);
+
+            request.setMode(6);
+            cabinetCService.servo(request);
+            VacUntil.sleep(100);
+
+            request.setMode(7);
+            cabinetCService.servo(request);
+            VacUntil.sleep(100);
+
+            VacUntil.sleep(5000);
+
+            request.setMode(5);
+            request.setDistance(2512);
+            cabinetCService.servo(request);
+            VacUntil.sleep(100);
+
+            request.setMode(6);
+            request.setDistance(2480);
+            cabinetCService.servo(request);
+            VacUntil.sleep(100);
+
+            request.setMode(7);
+            request.setDistance(12000);
+            cabinetCService.servo(request);
+            VacUntil.sleep(100);
+
+            VacUntil.sleep(5000);
+        }
+
+
+
+
+
+    }
+
     //有效期一致的苗仓
     private  List<VacMachine> getExpiredAtBoxNoBatchNo(List<Long> boxSepcIds, Integer num, Date expiredAt, String productNo , String batchNo){
         LambdaQueryWrapper<VacMachine> queryWrapper = new LambdaQueryWrapper<>();

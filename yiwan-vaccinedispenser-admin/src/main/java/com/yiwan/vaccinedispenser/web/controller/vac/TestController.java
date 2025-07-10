@@ -301,4 +301,18 @@ public class TestController {
         return Result.success();
     }
 
+
+
+    @PostMapping("/test")
+    public Result  test1() {
+
+        vacMachineService.test1();
+
+
+
+        return Result.success();
+    }
+
+
+
 }

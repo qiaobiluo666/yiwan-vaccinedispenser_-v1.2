@@ -128,4 +128,8 @@ public interface VacMachineService extends IService<VacMachine>{
 
     void machineSendDrugAlone(VacGetVaccine vacGetVaccine ,UserBean userBean) throws Exception;
 
+
+    //C柜老化测试
+    void   test1();
+
 }
