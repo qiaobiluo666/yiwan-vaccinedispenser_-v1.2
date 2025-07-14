@@ -24,6 +24,7 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -79,7 +80,11 @@ public class CabinetCMsg {
 
         int address = Integer.parseInt(bytesStr[11], 16);
         log.info("收到C柜{}指令:{}", CabinetConstants.CabinetCType.SEND_DRUG.desc, NettyUtils.StringListToString(bytesStr));
-
+            //获取当前距离
+        if("01".equals(bytesStr[10])){
+                BigInteger distance = NettyUtils.parseHexStringArray(bytesStr, 11,4);
+                valueOperations.set(RedisKeyConstant.servoGetDistance.CABINET_C, String.valueOf(distance));
+            }
         switch (bytesStr[7]) {
             case "01" ->  {
                 switch (bytesStr[8]){

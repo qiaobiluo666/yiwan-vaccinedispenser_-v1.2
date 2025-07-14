@@ -97,7 +97,7 @@ public class CabinetCServiceImpl implements CabinetCService {
 
         int status = request.getStatus().num;
         StringBuilder stringBuilder = new StringBuilder();
-        if(command==1){
+        if(command==1 || command==5){
             //获取请求头、数据长度
             stringBuilder.append(NettyUtils.toHandler(CabinetConstants.CabinetDataLength.SERVO_POSITION.dataLength)) ;
         }else if(command==2) {
@@ -113,7 +113,7 @@ public class CabinetCServiceImpl implements CabinetCService {
         stringBuilder.append(NettyUtils.intToHexString(mode,1));
         stringBuilder.append(NettyUtils.intToHexString(status,1));
         //位置模式
-        if(command==1){
+        if(command==1 || command==5){
             int distance = request.getDistance();
             //运动距离
             stringBuilder.append(NettyUtils.intToHexString(distance,4));

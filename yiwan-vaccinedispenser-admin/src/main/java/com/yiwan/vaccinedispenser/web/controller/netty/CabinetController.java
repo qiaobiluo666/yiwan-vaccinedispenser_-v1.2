@@ -168,7 +168,13 @@ public class CabinetController {
     public Result servoC(@RequestBody @Validated CabinetCServoRequest request){
         log.info("入参-CabinetCServoRequest:{}",request);
         cabinetCService.servo(request);
-        return Result.success();
+        if(request.getStatus().num==1){
+            VacUntil.sleep(1000);
+            String data =valueOperations.get(RedisKeyConstant.servoGetDistance.CABINET_B);
+            return Result.success(data);
+        }else {
+            return Result.success();
+        }
     }
 
 
