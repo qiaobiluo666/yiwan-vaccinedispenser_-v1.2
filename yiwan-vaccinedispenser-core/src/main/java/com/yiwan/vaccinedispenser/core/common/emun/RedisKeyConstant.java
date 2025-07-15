@@ -13,6 +13,9 @@ public interface RedisKeyConstant {
     //五层皮带的掉药列表
     String DROP_LIST = "Dispensing:fiveDrop:%s";
 
+    //机械手掉药列表
+    String DROP_HAND_LIST = "Dispensing:handDrop";
+
     //运输皮带队列
     String BELT_LIST = "Dispensing:beltList";
 

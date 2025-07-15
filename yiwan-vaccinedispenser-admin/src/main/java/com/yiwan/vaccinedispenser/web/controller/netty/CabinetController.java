@@ -109,6 +109,19 @@ public class CabinetController {
         return Result.success();
     }
 
+    /**
+     * B柜步进电机
+     * */
+    @PostMapping("/A-hand")
+    public Result handMove(@RequestParam Integer X,@RequestParam Integer Z){
+        log.info("入参-X:{},Z:{}",X,Z);
+        sendDrugFunction.moveHandServo(X,Z);
+        return Result.success();
+    }
+
+
+
+
 
     /**
      * B柜上药

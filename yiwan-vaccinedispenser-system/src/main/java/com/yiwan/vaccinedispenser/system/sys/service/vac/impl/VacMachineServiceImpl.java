@@ -1059,6 +1059,7 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
             //判断是不是在发药中 如果发药中停止自动盘点
             String drugStr = listOps.index(RedisKeyConstant.SEND_LIST,0);
             if (drugStr!=null){
+
                 msg = "正在发药! 取消库存盘点！";
                 log.warn(msg);
                 vacMachineExceptionService.sendException(SettingConstants.MachineException.COUNTWARING.code,"",msg);
@@ -1067,6 +1068,7 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
                 commandData.put("data", msg);
                 websocketService.sendInfo(CommandEnums.MACHINE_STATUS_COMMAND.getCode(),commandData);
                 throw new ServiceException(msg);
+
             }
 
             //机械手走测距位置

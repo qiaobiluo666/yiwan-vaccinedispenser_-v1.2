@@ -355,6 +355,37 @@ public class CabinetAServiceImpl implements CabinetAService {
     }
 
     @Override
+    public void handGetDrug(CabinetAHandRequest request) {
+        //当前帧号
+        Integer frameNumberNow = FrameNumberConfig.getFrameNumber();
+        // 选择什么柜子
+        int cabinet = CabinetConstants.Cabinet.CAB_A.num;
+
+        // 0x08 A柜下药
+        int type = CabinetConstants.CabinetAType.HAND.num;
+        //获取请求头、数据长度
+        StringBuilder stringBuilder =NettyUtils.toHandler(CabinetConstants.CabinetDataLength.HAND.dataLength);
+        stringBuilder.append(NettyUtils.intToHexString(frameNumberNow,2));
+        stringBuilder.append(NettyUtils.intToHexString(cabinet,1));
+        stringBuilder.append(NettyUtils.intToHexString(type,1));
+        stringBuilder.append(NettyUtils.intToHexString(request.getServoX(),1));
+        stringBuilder.append(NettyUtils.intToHexString(request.getDistanceX(),4));
+        stringBuilder.append(NettyUtils.intToHexString(request.getServoZ(),1));
+        stringBuilder.append(NettyUtils.intToHexString(request.getDistanceZ(),4));
+        stringBuilder.append(NettyUtils.intToHexString(request.getUpDistance(),4));
+
+        stringBuilder.append(CRC16Modbus.calculateCRC( stringBuilder.substring(8)));
+        //包尾
+        stringBuilder.append(Integer.toHexString(CabinetConstants.SUFFIX_INSTRUCTION));
+        //stringBuilder 转化为byte
+        byte[] bytes = HexUtil.decodeHex(stringBuilder.toString().toUpperCase());
+
+        log.info("{}柜-{}：{}", CabinetConstants.Cabinet.CAB_A.desc, CabinetConstants.CabinetAType.HAND.desc,HexUtil.format(stringBuilder.toString().toUpperCase()));
+        //给A控制板 发送消息
+        nettySendService.sendMsg(request.getWorkMode(),bytes,frameNumberNow);
+    }
+
+    @Override
     public Map<String,String> getInputAll() {
         //发送A柜查询所有传感器状态
         InPutRequest request = new InPutRequest();

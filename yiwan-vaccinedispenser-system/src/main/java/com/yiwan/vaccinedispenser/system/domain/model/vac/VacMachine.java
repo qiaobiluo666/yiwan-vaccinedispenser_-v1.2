@@ -155,7 +155,17 @@ public class VacMachine extends Model<VacMachine> {
     private Integer countZ;
 
 
+    /**
+     * 机械手掉药X
+     */
 
+    private Integer dropX;
+
+    /**
+     * 机械手掉药Z
+     */
+
+    private Integer dropZ;
 
 
 

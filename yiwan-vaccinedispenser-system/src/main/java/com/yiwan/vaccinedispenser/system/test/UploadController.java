@@ -77,7 +77,8 @@ public class UploadController {
 
         String boundary = "----WebKitFormBoundary" ;
 //        URL url = new URL("http://127.0.0.1:5080/upload");
-        URL url = new URL(String.format(uploadPath,"/upload"));
+        URL url = new URL(uploadPath+"/upload");
+        log.info(uploadPath+"/upload");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
         conn.setDoOutput(true);

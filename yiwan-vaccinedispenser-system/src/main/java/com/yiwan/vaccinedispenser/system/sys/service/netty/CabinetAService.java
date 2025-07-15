@@ -63,6 +63,9 @@ public interface CabinetAService {
     void getDistance(CabinetAGetDistanceRequest request);
 
 
+
+    void handGetDrug(CabinetAHandRequest request);
+
     //获取A、B、C柜的所有传感器状态
     Map<String,String> getInputAll();
 

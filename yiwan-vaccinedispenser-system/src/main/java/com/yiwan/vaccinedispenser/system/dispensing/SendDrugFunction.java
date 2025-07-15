@@ -1132,6 +1132,7 @@ public class SendDrugFunction {
     }
 
     public Integer getDistanceCount(){
+
         distanceCount();
 
         int count=1;
@@ -1145,6 +1146,7 @@ public class SendDrugFunction {
             }
             count++;
         }
+
         return null;
     }
 

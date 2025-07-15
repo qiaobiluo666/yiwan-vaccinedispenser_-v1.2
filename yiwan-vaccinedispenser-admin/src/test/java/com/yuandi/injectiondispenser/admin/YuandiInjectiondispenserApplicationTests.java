@@ -18,6 +18,7 @@ import com.yiwan.vaccinedispenser.system.sys.dao.VacGetVaccineMapper;
 import com.yiwan.vaccinedispenser.system.sys.data.ConfigSetting;
 import com.yiwan.vaccinedispenser.system.sys.data.DistanceServoData;
 import com.yiwan.vaccinedispenser.system.sys.data.RedisDrugListData;
+import com.yiwan.vaccinedispenser.system.sys.data.request.netty.CabinetAHandRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.request.netty.DropRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.request.vac.DrugRecordRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.zyc.SendVaccineResultData;
@@ -343,4 +344,15 @@ class YuandiInjectiondispenserApplicationTests {
 		log.info(JSON.toJSONString(drugRecordRequest));
 	}
 
+	@Test
+	void test21(){
+		CabinetAHandRequest request = new CabinetAHandRequest();
+		request.setWorkMode(CabinetConstants.Cabinet.CAB_A);
+		request.setServoX(11);
+		request.setDistanceX(747776);
+		request.setServoZ(12);
+		request.setDistanceZ(7244);
+		request.setUpDistance(1200);
+		cabinetAService.handGetDrug(request);
+	}
 }

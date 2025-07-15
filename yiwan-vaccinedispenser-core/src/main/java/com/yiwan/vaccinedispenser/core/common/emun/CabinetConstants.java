@@ -70,6 +70,9 @@ public class CabinetConstants {
         //IO
         DROP(14, "0x01-输入输出控制数据透传"),
 
+
+        HAND(20,"0x08-A柜下药"),
+
         DROP_AUTO(12, "0x01-输入输出控制数据透传"),
         //灯板
         LED(11,"0x02-led灯板"),
@@ -142,6 +145,8 @@ public class CabinetConstants {
         INPUT(0x06,6, "0x06 输入检测"),
 
         DISTANCE(0x07,7, "0x07 距离传感器"),
+
+        HAND(0x08,8, "0x08 A柜下药"),
 
         REPORT(0xFF,255,"0xFF 主动上报");
 

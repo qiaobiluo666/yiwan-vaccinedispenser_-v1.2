@@ -126,11 +126,6 @@ public class DispensingThreadManager {
     }
 
 
-
-
-
-
-
     //移动皮带
     public void moveBelt() {
         taskExecutor.execute(() -> {
@@ -262,14 +257,7 @@ public class DispensingThreadManager {
         //TODO 数据库的可用库存和真实库存相等
         vacMachineService.vaccineNunEqualsUserNum();
 
-
-
-
-
         //TODO 查看A、B、C柜子的传感器状态
-
-
-
     }
 
     //判断挡片
@@ -290,5 +278,8 @@ public class DispensingThreadManager {
             }
         });
     }
+
+
+
 
 }
