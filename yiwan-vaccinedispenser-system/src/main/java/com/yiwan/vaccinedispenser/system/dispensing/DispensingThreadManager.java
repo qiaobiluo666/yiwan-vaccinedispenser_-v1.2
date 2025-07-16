@@ -3,6 +3,7 @@ package com.yiwan.vaccinedispenser.system.dispensing;
 
 import com.yiwan.vaccinedispenser.core.common.emun.RedisKeyConstant;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacMachine;
+import com.yiwan.vaccinedispenser.system.sys.data.ConfigSendData;
 import com.yiwan.vaccinedispenser.system.sys.data.ConfigSetting;
 import com.yiwan.vaccinedispenser.system.sys.service.sys.SysConfigService;
 import com.yiwan.vaccinedispenser.system.sys.service.vac.VacMachineService;
@@ -81,7 +82,8 @@ public class DispensingThreadManager {
                 boolean shouldDrop = checkDropLayersInRedis();
                 if(shouldDrop){
 
-                    Integer ioTime = sysConfigService.getSendDrugConfigDataIOTime();
+                    ConfigSendData configSendData = configFunction.getSendDrugConfigData();
+                    Integer ioTime = configSendData.getIoWaitTime();
 
                     CountDownLatch latch = new CountDownLatch(5);
                     //开始正式掉药

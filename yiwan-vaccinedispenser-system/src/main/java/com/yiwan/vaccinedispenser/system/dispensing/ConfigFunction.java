@@ -3,6 +3,7 @@ package com.yiwan.vaccinedispenser.system.dispensing;
 import com.alibaba.fastjson.JSON;
 import com.yiwan.vaccinedispenser.system.domain.model.system.SysConfig;
 import com.yiwan.vaccinedispenser.system.sys.data.ConfigData;
+import com.yiwan.vaccinedispenser.system.sys.data.ConfigSendData;
 import com.yiwan.vaccinedispenser.system.sys.data.ConfigSetting;
 import com.yiwan.vaccinedispenser.system.sys.service.sys.SysConfigService;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,9 @@ import java.util.List;
 
 
 
+/**
+ * @author 78671
+ */
 @Component
 @Slf4j
 public class ConfigFunction {
@@ -143,10 +147,63 @@ public class ConfigFunction {
 
                 case "INVENTORY_START" ->  configSetting.setInventoryStart(Boolean.parseBoolean(sysConfig.getConfigValue()));
 
+                case "HOSPITAL_NAME" ->  configSetting.setHospitalName(sysConfig.getConfigValue());
+
+
             }
         }
 
         return configSetting;
     }
+
+
+    public ConfigSendData getSendDrugConfigData(){
+        ConfigSendData configSendData = new ConfigSendData();
+        List<SysConfig> sysConfigList = sysConfigService.getSendDrugConfigData();
+        //如果数据库有 那就使用数据库的
+        for(SysConfig sysConfig: sysConfigList){
+            switch (sysConfig.getConfigType()){
+
+
+                //激光传感器到中心 的偏移量
+                case "BELT_1"->configSendData.setBelt1(Integer.parseInt(sysConfig.getConfigValue()));
+
+                case "BELT_2"->configSendData.setBelt2(Integer.parseInt(sysConfig.getConfigValue()));
+
+                case "BELT_3"->configSendData.setBelt3(Integer.parseInt(sysConfig.getConfigValue()));
+
+                case "BELT_4"->configSendData.setBelt4(Integer.parseInt(sysConfig.getConfigValue()));
+
+                case "BELT_5"->configSendData.setBelt5(Integer.parseInt(sysConfig.getConfigValue()));
+
+
+                case "CABINET_C_1"->configSendData.setCabinetC1(Integer.parseInt(sysConfig.getConfigValue()));
+
+                case "CABINET_C_2"->configSendData.setCabinetC2(Integer.parseInt(sysConfig.getConfigValue()));
+
+                case "CABINET_C_3"->configSendData.setCabinetC3(Integer.parseInt(sysConfig.getConfigValue()));
+
+                case "CABINET_C_4"->configSendData.setCabinetC4(Integer.parseInt(sysConfig.getConfigValue()));
+
+                case "CABINET_C_5"->configSendData.setCabinetC5(Integer.parseInt(sysConfig.getConfigValue()));
+
+                case "CABINET_C_6"->configSendData.setCabinetC6(Integer.parseInt(sysConfig.getConfigValue()));
+
+
+
+                case "IO_WAIT_TIME"->configSendData.setIoWaitTime(Integer.parseInt(sysConfig.getConfigValue()));
+
+                case "HAND_UP_DISTANCE"->configSendData.setHandUpDistance(Integer.parseInt(sysConfig.getConfigValue()));
+
+                case "RETURN_WORKNUM"->configSendData.setReturnWorkNum(Integer.parseInt(sysConfig.getConfigValue()));
+
+            }
+        }
+
+
+
+        return configSendData;
+    }
+
 
 }

@@ -17,6 +17,7 @@ import com.yiwan.vaccinedispenser.system.sys.dao.VacMachineExceptionMapper;
 import com.yiwan.vaccinedispenser.system.sys.dao.VacMachineMapper;
 import com.yiwan.vaccinedispenser.system.sys.data.ConfigSetting;
 import com.yiwan.vaccinedispenser.system.sys.data.RedisDrugListData;
+import com.yiwan.vaccinedispenser.system.sys.data.request.netty.CabinetAHandRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.request.netty.CabinetCSendDrugRequest;
 import com.yiwan.vaccinedispenser.system.sys.service.netty.CabinetAService;
 import com.yiwan.vaccinedispenser.system.sys.service.netty.CabinetCService;
@@ -345,13 +346,11 @@ public class DispensingHandFunction {
         String drugStr = listOps.index(RedisKeyConstant.DROP_HAND_LIST, 0);
         if (drugStr != null) {
             RedisDrugListData drugListData = JSON.parseObject(drugStr, RedisDrugListData.class);
+            //发送拿药指令
+            boolean isDrop = dropServo(drugListData);
+            //去除队列
 
-
-
-
-
-
-
+            //移动到C柜
 
 
         }
@@ -376,8 +375,19 @@ public class DispensingHandFunction {
 
     }
 
+    //取药
+    public boolean dropServo(RedisDrugListData drugListData ){
 
+        CabinetAHandRequest request = new CabinetAHandRequest();
+        request.setWorkMode(CabinetConstants.Cabinet.CAB_A);
+        request.setServoX(11);
+        request.setDistanceX(drugListData.getDropX());
+        request.setServoZ(12);
+        request.setDistanceZ(drugListData.getDropZ());
+        request.setUpDistance(1000);
 
+        return true;
+    }
 
 
 

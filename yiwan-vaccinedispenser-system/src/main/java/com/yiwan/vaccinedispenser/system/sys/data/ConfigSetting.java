@@ -43,5 +43,8 @@ public class ConfigSetting {
     //库存盘点功能是否开启
     private Boolean inventoryStart;
 
+    //医院名称
+    private String hospitalName;
+
 
 }

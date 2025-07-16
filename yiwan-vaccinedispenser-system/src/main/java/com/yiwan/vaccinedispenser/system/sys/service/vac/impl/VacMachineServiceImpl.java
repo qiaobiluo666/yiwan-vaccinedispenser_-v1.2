@@ -1260,8 +1260,8 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
                     dispensingFunction.dropDrug(data.getLineNum(),data.getPositionNum(),SettingConstants.IO_DROP_WAIT_TIME);
                     //动皮带 到传感器接收到
 
-                    //抬升去当前皮带
-                    dispensingFunction.goToBelt(beltNum,false);
+                    //抬升去当前皮带 工作台默认为1
+                    dispensingFunction.returnDrugGoToBelt(beltNum,false);
 
                     //发送小皮带运动 直到传感器触发 再暂停 指令
                     dispensingFunction.speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.SPEED,CabinetConstants.CabinetAServoStatus.BELT_STOP,50);
@@ -1296,7 +1296,7 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
                     VacUntil.sleep(200);
 
                     //传送小皮带回原位
-                    dispensingFunction.goToBelt(beltNum,true);
+                    dispensingFunction.returnDrugGoToBelt(beltNum,true);
 
                     //运动伺服 使疫苗落到运输皮带上
                     dispensingFunction.speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.SPEED,CabinetConstants.CabinetAServoStatus.COROTATION,150);
