@@ -149,6 +149,8 @@ public class ConfigFunction {
 
                 case "HOSPITAL_NAME" ->  configSetting.setHospitalName(sysConfig.getConfigValue());
 
+                case "IS_IO_DROP" ->  configSetting.setIsIoDrop(sysConfig.getConfigValue());
+
 
             }
         }
@@ -196,6 +198,12 @@ public class ConfigFunction {
                 case "HAND_UP_DISTANCE"->configSendData.setHandUpDistance(Integer.parseInt(sysConfig.getConfigValue()));
 
                 case "RETURN_WORKNUM"->configSendData.setReturnWorkNum(Integer.parseInt(sysConfig.getConfigValue()));
+
+                case "HAND_MOVE_C_X"->configSendData.setHandMoveCX(Integer.parseInt(sysConfig.getConfigValue()));
+
+                case "HAND_MOVE_C_Z"->configSendData.setHandMoveCZ(Integer.parseInt(sysConfig.getConfigValue()));
+
+                case "HAND_MOVE_C_STEP"->configSendData.setHandMoveCStepDis(Integer.parseInt(sysConfig.getConfigValue()));
 
             }
         }

@@ -11,19 +11,19 @@ import lombok.Data;
 @Data
 public class VaccineData {
     //疫苗名称
-    String productName;
+    private String productName;
 
     //数据库的长宽高
-    Integer drugWide;
-    Integer drugHigh;
-    Integer drugLong;
+    private Integer drugWide;
+    private Integer drugHigh;
+    private Integer drugLong;
 
     //实际的长宽高
-    Integer realWide;
-    Integer realHigh;
-    Integer realLong;
+    private Integer realWide;
+    private Integer realHigh;
+    private Integer realLong;
 
     //是否符合
-    Boolean isRight;
+    private Boolean isRight;
 
 }

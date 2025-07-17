@@ -16,7 +16,7 @@ public class InventoryResponse {
     //药品id
     private Long vaccineId;
     //有多少个仓位
-    private int productCount;
+    private Integer productCount;
     //最新上药时间
     private LocalDate latestUpdateTime;
     //产品名称
@@ -26,10 +26,10 @@ public class InventoryResponse {
     private String productNo;
 
     //药品总数量
-    private int totalVaccineNum;
+    private Integer totalVaccineNum;
 
     //机器状态 1 正常 2 多人份
-    private int status;
+    private Integer status;
 
 
 

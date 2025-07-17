@@ -46,5 +46,7 @@ public class ConfigSetting {
     //医院名称
     private String hospitalName;
 
+    //是否是Io方案
+    private String isIoDrop;
 
 }

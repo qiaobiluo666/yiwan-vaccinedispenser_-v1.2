@@ -131,5 +131,6 @@ public interface VacMachineService extends IService<VacMachine>{
 
     //C柜老化测试
     void   test1();
-
+    //抬升伺服老化
+    void test2();
 }

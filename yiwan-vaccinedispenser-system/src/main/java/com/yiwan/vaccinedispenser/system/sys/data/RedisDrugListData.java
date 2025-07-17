@@ -63,11 +63,11 @@ public class RedisDrugListData {
 
 
     //机器状态 1 正常 2 多人份
-    private int machineStatus;
+    private Integer machineStatus;
 
-    private  int dropX;
+    private  Integer dropX;
 
-    private int dropZ;
+    private Integer dropZ;
 
 
 

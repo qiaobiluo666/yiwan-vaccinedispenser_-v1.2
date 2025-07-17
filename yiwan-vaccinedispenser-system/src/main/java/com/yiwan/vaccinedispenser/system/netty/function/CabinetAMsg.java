@@ -123,6 +123,12 @@ public class CabinetAMsg {
                 receiveDistance(bytesStr);
             }
 
+            //A柜下药状态
+            case "08"->  receiveHandleDrop(bytesStr);
+
+            //A柜送药到C柜状态
+            case "09"->  receiveHandleMoveC(bytesStr);
+
             //设置系统参数
             case "80" -> {
                 log.info("收到A柜{}:{}",CabinetConstants.CabinetSettingType.SET_SETTING.desc,NettyUtils.StringListToString(bytesStr));
@@ -201,8 +207,6 @@ public class CabinetAMsg {
         }
 
 
-
-
         switch (bytesStr[8]){
             //位置模式
             case "01"->{
@@ -229,6 +233,7 @@ public class CabinetAMsg {
                     }
 
                     default -> {
+
                         switch (bytesStr[11]){
                             case "01"->{
                                 log.info("A柜第{}伺服运动完毕",address);
@@ -242,14 +247,6 @@ public class CabinetAMsg {
             }
 
         }
-
-
-
-
-
-
-
-
 
     }
 
@@ -329,9 +326,6 @@ public class CabinetAMsg {
     }
 
 
-
-
-
     /**
      *
      * @param bytesStr
@@ -409,6 +403,42 @@ public class CabinetAMsg {
     }
 
 
+    /**
+     * 机械手下药反馈
+     */
+    public void receiveHandleDrop(String[] bytesStr){
+        switch (bytesStr[9]){
+            case "01"->{
+                valueOperations.set(RedisKeyConstant.handMachine.HAND_DROP_STATUS,"success");
+            }
+            case "02"->{
+                valueOperations.set(RedisKeyConstant.handMachine.HAND_DROP_STATUS,"empty");
+            }
+        }
+    }
+
+
+    /**
+     * 机械手掉药位置反馈
+     */
+    public void receiveHandleMoveC(String[] bytesStr){
+
+        switch (bytesStr[9]){
+            case "01"->{
+                valueOperations.set(RedisKeyConstant.handMachine.HAND_MOVE_STATUS,"true");
+            }
+            case "02"->{
+                valueOperations.set(RedisKeyConstant.handMachine.HAND_MOVE_STATUS,"error");
+            }
+        }
+    }
+
+
+
+
+
+
+
 
     /**
      *
@@ -426,6 +456,7 @@ public class CabinetAMsg {
                 switch (bytesStr[9]){
                     //盘存距离传感器
                     case "01"->{
+
                         log.info("收到A柜{}:盘存距离传感器:{}",CabinetConstants.CabinetAType.DISTANCE.desc,NettyUtils.StringListToString(bytesStr));
                         valueOperations.set(RedisKeyConstant.distance.COUNT, String.valueOf(distance));
                         log.info(String.valueOf(distance));

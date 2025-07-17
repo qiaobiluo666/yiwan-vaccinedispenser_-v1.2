@@ -2,6 +2,7 @@ package com.yiwan.vaccinedispenser.system.sys.service.netty;
 
 
 import com.yiwan.vaccinedispenser.system.sys.data.request.netty.*;
+import com.yiwan.vaccinedispenser.system.sys.data.request.vac.VacMachineRequest;
 
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,12 @@ public interface CabinetAService {
      *掉药控制指令
      */
     void dropCommand(DropRequest request);
+
+
+    /**
+     *掉药控制指令
+     */
+    void handleDropCommand(VacMachineRequest request);
 
     /**
      *
@@ -63,8 +70,10 @@ public interface CabinetAService {
     void getDistance(CabinetAGetDistanceRequest request);
 
 
-
+    //A柜接药、下药
     void handGetDrug(CabinetAHandRequest request);
+
+
 
     //获取A、B、C柜的所有传感器状态
     Map<String,String> getInputAll();

@@ -72,6 +72,8 @@
             auto_z = #{vacMachine.autoZ},
             count_x = #{vacMachine.countX},
             count_z = #{vacMachine.countZ},
+            drop_X = #{vacMachine.dropX},
+            drop_Z = #{vacMachine.dropZ},
             update_by = #{vacMachine.updateBy},
             deleted = #{vacMachine.deleted}
         </set>

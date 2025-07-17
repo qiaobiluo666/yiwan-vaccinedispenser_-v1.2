@@ -352,7 +352,7 @@ class YuandiInjectiondispenserApplicationTests {
 		request.setDistanceX(747776);
 		request.setServoZ(12);
 		request.setDistanceZ(7244);
-		request.setUpDistance(1200);
+		request.setDistance(1200);
 		cabinetAService.handGetDrug(request);
 	}
 }

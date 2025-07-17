@@ -108,14 +108,6 @@ public class CabinetSettingController {
     }
 
 
-
-
-
-
-
-
-
-
     /**
      * 获取所有系统参数指令
      * */

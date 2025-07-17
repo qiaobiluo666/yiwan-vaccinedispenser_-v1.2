@@ -1,11 +1,13 @@
 package com.yiwan.vaccinedispenser.system.sys.service.netty.impl;
 
 import cn.hutool.core.util.HexUtil;
+import com.yiwan.vaccinedispenser.core.common.SettingConstants;
 import com.yiwan.vaccinedispenser.core.common.emun.CabinetConstants;
 import com.yiwan.vaccinedispenser.core.common.emun.RedisKeyConstant;
 import com.yiwan.vaccinedispenser.core.config.FrameNumberConfig;
 import com.yiwan.vaccinedispenser.system.netty.msg.NettySendService;
 import com.yiwan.vaccinedispenser.system.sys.data.request.netty.*;
+import com.yiwan.vaccinedispenser.system.sys.data.request.vac.VacMachineRequest;
 import com.yiwan.vaccinedispenser.system.sys.service.netty.CabinetAService;
 import com.yiwan.vaccinedispenser.system.until.CRC16Modbus;
 import com.yiwan.vaccinedispenser.system.until.NettyUtils;
@@ -35,6 +37,7 @@ public class CabinetAServiceImpl implements CabinetAService {
 
     @Resource(name = "redisTemplate")
     private ValueOperations<String, String> valueOperations;
+
 
 
 
@@ -88,6 +91,43 @@ public class CabinetAServiceImpl implements CabinetAService {
         log.info("{}柜-{}：{}", CabinetConstants.Cabinet.CAB_A.desc, CabinetConstants.CabinetAType.DROP.desc,HexUtil.format(stringBuilder.toString().toUpperCase()));
         //给A控制板 发送消息
         nettySendService.sendMsg(request.getWorkMode(),bytes,frameNumberNow);
+
+    }
+
+    @Override
+    public void handleDropCommand(VacMachineRequest request) {
+        if(request.getUpDistance()==0){
+            //伺服移动到当前位置
+            CabinetAServoRequest servoRequest = new CabinetAServoRequest();
+            servoRequest.setWorkMode(CabinetConstants.Cabinet.CAB_A);
+            servoRequest.setCommand(CabinetConstants.CabinetAServoCommand.POSITION);
+            servoRequest.setStatus(CabinetConstants.CabinetAServoStatus.ZERO);
+            servoRequest.setMode(11);
+            servoRequest.setDistance(request.getDropX());
+            servo(servoRequest);
+            VacUntil.sleep(200);
+            servoRequest.setMode(12);
+            servoRequest.setDistance(request.getDropZ());
+            servo(servoRequest);
+        }else {
+            CabinetAHandRequest cabinetAHandRequest = new CabinetAHandRequest();
+            cabinetAHandRequest.setWorkMode(CabinetConstants.Cabinet.CAB_A);
+            cabinetAHandRequest.setCommand(CabinetConstants.CabinetAHandCommand.FIND);
+            cabinetAHandRequest.setServoX(SettingConstants.CABINET_A_HANDLE_SERVO_X);
+            cabinetAHandRequest.setDistanceX(request.getDropX());
+            cabinetAHandRequest.setServoZ(SettingConstants.CABINET_A_HANDLE_SERVO_Z);
+            cabinetAHandRequest.setDistanceZ(request.getDropZ());
+            cabinetAHandRequest.setDistance(request.getUpDistance());
+            handGetDrug(cabinetAHandRequest);
+
+        }
+
+
+
+
+
+
+
 
     }
 
@@ -360,6 +400,7 @@ public class CabinetAServiceImpl implements CabinetAService {
         Integer frameNumberNow = FrameNumberConfig.getFrameNumber();
         // 选择什么柜子
         int cabinet = CabinetConstants.Cabinet.CAB_A.num;
+        int command = request.getCommand().num;
 
         // 0x08 A柜下药
         int type = CabinetConstants.CabinetAType.HAND.num;
@@ -368,11 +409,13 @@ public class CabinetAServiceImpl implements CabinetAService {
         stringBuilder.append(NettyUtils.intToHexString(frameNumberNow,2));
         stringBuilder.append(NettyUtils.intToHexString(cabinet,1));
         stringBuilder.append(NettyUtils.intToHexString(type,1));
+        stringBuilder.append(NettyUtils.intToHexString(command,1));
+
         stringBuilder.append(NettyUtils.intToHexString(request.getServoX(),1));
         stringBuilder.append(NettyUtils.intToHexString(request.getDistanceX(),4));
         stringBuilder.append(NettyUtils.intToHexString(request.getServoZ(),1));
         stringBuilder.append(NettyUtils.intToHexString(request.getDistanceZ(),4));
-        stringBuilder.append(NettyUtils.intToHexString(request.getUpDistance(),4));
+        stringBuilder.append(NettyUtils.intToHexString(request.getDistance(),4));
 
         stringBuilder.append(CRC16Modbus.calculateCRC( stringBuilder.substring(8)));
         //包尾
@@ -380,7 +423,7 @@ public class CabinetAServiceImpl implements CabinetAService {
         //stringBuilder 转化为byte
         byte[] bytes = HexUtil.decodeHex(stringBuilder.toString().toUpperCase());
 
-        log.info("{}柜-{}：{}", CabinetConstants.Cabinet.CAB_A.desc, CabinetConstants.CabinetAType.HAND.desc,HexUtil.format(stringBuilder.toString().toUpperCase()));
+        log.info("{}柜-{}：{}", CabinetConstants.Cabinet.CAB_A.desc, request.getCommand().desc,HexUtil.format(stringBuilder.toString().toUpperCase()));
         //给A控制板 发送消息
         nettySendService.sendMsg(request.getWorkMode(),bytes,frameNumberNow);
     }

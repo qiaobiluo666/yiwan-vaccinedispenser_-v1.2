@@ -6,6 +6,7 @@ import com.yiwan.vaccinedispenser.core.common.emun.RedisKeyConstant;
 import com.yiwan.vaccinedispenser.core.web.Result;
 import com.yiwan.vaccinedispenser.system.dispensing.SendDrugFunction;
 import com.yiwan.vaccinedispenser.system.sys.data.request.netty.*;
+import com.yiwan.vaccinedispenser.system.sys.data.request.vac.VacMachineRequest;
 import com.yiwan.vaccinedispenser.system.sys.service.netty.CabinetAService;
 import com.yiwan.vaccinedispenser.system.sys.service.netty.CabinetBService;
 import com.yiwan.vaccinedispenser.system.sys.service.netty.CabinetCService;
@@ -54,6 +55,16 @@ public class CabinetController {
     public Result dropA(@RequestBody @Validated DropRequest request){
         log.info("入参-DropRequest:{}",request);
         cabinetAService.dropCommand(request);
+        return Result.success();
+    }
+
+    /**
+     * 机械手掉药控制指令
+     * */
+    @PostMapping("/A-handle-drop")
+    public Result dropHandleA(@RequestBody @Validated VacMachineRequest request){
+        log.info("入参-VacMachineRequest:{}",request);
+        cabinetAService.handleDropCommand(request);
         return Result.success();
     }
 

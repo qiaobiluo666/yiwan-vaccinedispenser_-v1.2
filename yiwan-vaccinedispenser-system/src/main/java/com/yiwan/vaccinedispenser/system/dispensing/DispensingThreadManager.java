@@ -46,6 +46,8 @@ public class DispensingThreadManager {
 
     @Autowired
     private DispensingFunction dispensingFunction;
+    @Autowired
+    private DispensingHandFunction dispensingHandFunction;
 
     private final TaskExecutor taskExecutor;
 
@@ -67,8 +69,16 @@ public class DispensingThreadManager {
     @PostConstruct
     public void init() {
         redisInit();
-        drop();
-        moveBelt();
+        ConfigSetting configSetting = configFunction.getSettingConfigData();
+        if("true".equals(configSetting.getIsIoDrop())){
+            log.info("电磁铁模式");
+            drop();
+            moveBelt();
+        }else {
+            log.info("机械手模式");
+            handDrop();
+        }
+
         blankStatus();
     }
 
@@ -169,6 +179,61 @@ public class DispensingThreadManager {
             }
         });
     }
+
+
+    //机械手掉药线程
+    public void handDrop(){
+        taskExecutor.execute(() -> {
+            while (running) {
+                //判断发药队列到底有没有数据
+                boolean shouldDrop = checkHandLayersInRedis();
+                if(shouldDrop){
+                    CountDownLatch latch = new CountDownLatch(1);
+                    //开始正式动皮带
+                    taskExecutor.execute(() -> {
+                        try {
+                            dispensingHandFunction.dropHandDrugs();
+                        }catch (Exception e){
+                            log.error(String.valueOf(e));
+                            log.error("机械手掉药模块");
+                        }finally {
+                            latch.countDown(); // 任务完成后递减锁存器的计数
+                        }
+                    });
+
+
+                    try {
+                        // 等待所有线程完成或超时
+                        boolean completed = latch.await(90, TimeUnit.SECONDS); // 例如，超时时间为60秒
+                        if (!completed) {
+                            // 超时后的处理
+                            log.warn("超时：机械手掉药任务未在指定时间内完成。");
+                        }else {
+                            VacUntil.sleep(500);
+                        }
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt(); // 重新设置中断状态
+                        log.error("掉药任务被中断", e);
+                        break;
+                    }
+                }
+
+
+            }
+        });
+    }
+
+    //判断掉药list是否有数据
+    private boolean checkHandLayersInRedis() {
+
+    String key = RedisKeyConstant.DROP_HAND_LIST;
+    Long  size = listOps.size(key);
+        // 如果任何一层有数据，则执行掉药操作
+        return size != null && size > 0;
+
+    }
+
+
 
 
     //停止线程

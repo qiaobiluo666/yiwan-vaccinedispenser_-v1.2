@@ -4,9 +4,12 @@ import cn.gov.zcy.open.sdk.http.ResponseResult;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.yiwan.vaccinedispenser.system.dispensing.ConfigFunction;
 import com.yiwan.vaccinedispenser.system.dispensing.DispensingFunction;
+import com.yiwan.vaccinedispenser.system.dispensing.DispensingHandFunction;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacDrug;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacGetVaccine;
+import com.yiwan.vaccinedispenser.system.sys.data.ConfigSetting;
 import com.yiwan.vaccinedispenser.system.sys.data.RedisDrugListData;
 import com.yiwan.vaccinedispenser.system.sys.data.request.vac.DrugRecordRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.zyc.CmdListData;
@@ -45,6 +48,12 @@ public class ZcyFunction {
 
     @Autowired
     private DispensingFunction dispensingFunction;
+
+    @Autowired
+    private DispensingHandFunction dispensingHandFunction;
+
+    @Autowired
+    private ConfigFunction configFunction;
 
     @Autowired
     private VacDrugRecordService vacDrugRecordService;
@@ -136,8 +145,15 @@ public class ZcyFunction {
                     if(vacGetVaccine!=null){
                         //如果数据库中处方数据为待发苗  则给出发药指令  将状态改为0
                         if("-1".equals(vacGetVaccine.getStatus())){
-                            //进入发药处方
-                            dispensingFunction.addDrugList(vacGetVaccine);
+//                            //进入发药处方
+//                            dispensingFunction.addDrugList(vacGetVaccine);
+                            ConfigSetting configSetting = configFunction.getSettingConfigData();
+                            if("true".equals(configSetting.getIsIoDrop())){
+                                dispensingFunction.addDrugList(vacGetVaccine);
+                            }else {
+                                dispensingHandFunction.dropHandDrugs();
+                            }
+
                             //修改发药状态
                             vacGetVaccineService.updateById(vacGetVaccine.getId());
                         }
@@ -151,10 +167,12 @@ public class ZcyFunction {
                         VacGetVaccine vacGetVaccine1 = vacGetVaccineService.insertMsg(vacGetVaccineData, cmdListData.getProductNos());
                         if(vacGetVaccine1!=null){
                             log.info("发苗数据：{}",JSON.toJSONString(vacGetVaccine1));
-                            //进入发药处方
-                            dispensingFunction.addDrugList(vacGetVaccine1);
-
-                        }else {
+                            ConfigSetting configSetting = configFunction.getSettingConfigData();
+                            if("true".equals(configSetting.getIsIoDrop())){
+                                dispensingFunction.addDrugList(vacGetVaccine);
+                            }else {
+                                dispensingHandFunction.dropHandDrugs();
+                            }
 
                         }
                     }

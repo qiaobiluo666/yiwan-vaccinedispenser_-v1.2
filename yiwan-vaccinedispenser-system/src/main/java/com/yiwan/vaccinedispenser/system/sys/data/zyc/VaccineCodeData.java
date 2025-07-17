@@ -13,9 +13,9 @@ import java.util.List;
 @Data
 public class VaccineCodeData {
     //监管码
-    List<String> result;
+    private List<String> result;
     //是否成功
-    Boolean success;
+    private Boolean success;
     //报错信息
-    String  msg;
+    private String  msg;
 }

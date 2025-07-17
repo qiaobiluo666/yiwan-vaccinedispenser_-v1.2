@@ -144,6 +144,18 @@ public interface RedisKeyConstant {
 
     String DRUG_RUN_START = "Machine:drugRunStart";
 
+    interface handMachine{
+        //取药状态
+        String  HAND_DROP_STATUS = "handMachine:handDrop:status";
+        //
+        String HAND_MOVE_STATUS = "handMachine:handMove:status";
+    }
+
+
+
+
+
+
     //手动上药状态
     interface handDrugStatus{
         String HAND_START_STATUS = "Machine:handleDrug:start";

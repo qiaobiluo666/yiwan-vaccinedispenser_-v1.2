@@ -1,6 +1,7 @@
 package com.yiwan.vaccinedispenser.system.dispensing;
 
 
+import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -15,6 +16,7 @@ import com.yiwan.vaccinedispenser.system.domain.model.vac.VacMachine;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacMachineException;
 import com.yiwan.vaccinedispenser.system.sys.dao.VacMachineExceptionMapper;
 import com.yiwan.vaccinedispenser.system.sys.dao.VacMachineMapper;
+import com.yiwan.vaccinedispenser.system.sys.data.ConfigSendData;
 import com.yiwan.vaccinedispenser.system.sys.data.ConfigSetting;
 import com.yiwan.vaccinedispenser.system.sys.data.RedisDrugListData;
 import com.yiwan.vaccinedispenser.system.sys.data.request.netty.CabinetAHandRequest;
@@ -96,7 +98,8 @@ public class DispensingHandFunction {
     @Autowired
     private VacDrugRecordService vacDrugRecordService;
 
-
+    @Autowired
+    private DispensingFunction dispensingFunction;
 
 
 
@@ -121,7 +124,7 @@ public class DispensingHandFunction {
         //抬升装置版本的C柜 如果复位按钮没有复位则 发不出来药
         if("true".equals(configSetting.getCLifting())){
             int workNum = vacGetVaccine.getWorkbenchNum();
-            findCabinetReset(workNum);
+            dispensingFunction.findCabinetReset(workNum);
             VacUntil.sleep(200);
             String isReset = valueOperations.get(String.format(RedisKeyConstant.CABINET_C_RESET,workNum));
             if("true".equals(isReset)){
@@ -299,34 +302,7 @@ public class DispensingHandFunction {
             //机器配有挡片 则检查挡片是否开启
             if("true".equals(configSetting.getCBlank())){
                 //开启挡片
-                Thread thread = new Thread(() -> {
-                    String isQuery = valueOperations.get(RedisKeyConstant.CABINET_C_BLOCK_STATUS_QUERY);
-
-                    if(isQuery==null) {
-                        isQuery = "false";
-                    }
-
-                    if("false".equals(isQuery)){
-                        valueOperations.set(RedisKeyConstant.CABINET_C_BLOCK_STATUS_QUERY,"true");
-                        //查询C柜挡片状态 如果关闭则 打开C柜挡片
-                        moveBlock(CabinetConstants.CabinetCSendDrugBlockStatus.QUERY);
-                        VacUntil.sleep(200);
-                        String isOpen = valueOperations.get(RedisKeyConstant.CABINET_C_BLOCK_STATUS);
-                        long timeouts = System.currentTimeMillis();
-                        while ((System.currentTimeMillis() - timeouts) < SettingConstants.WAIT_BLOCK_TIME){
-                            if("close".equals(isOpen)){
-                                moveBlock(CabinetConstants.CabinetCSendDrugBlockStatus.OPEN);
-                                break;
-                            }else if("open".equals(isOpen)){
-                                break;
-                            }
-                            moveBlock(CabinetConstants.CabinetCSendDrugBlockStatus.QUERY);
-                            VacUntil.sleep(200);
-                        }
-                        valueOperations.set(RedisKeyConstant.CABINET_C_BLOCK_STATUS_QUERY,"false");
-                    }
-
-                });
+                Thread thread = new Thread(() -> dispensingFunction.openBlank());
                 thread.start();
             }
             log.info("添加发药处方：{}",JSON.toJSONStringWithDateFormat(
@@ -341,74 +317,133 @@ public class DispensingHandFunction {
 
 
     //机械手掉药
-    public void dropHandDrugs(){
+    public void dropHandDrugs() throws Exception {
         //获取list
         String drugStr = listOps.index(RedisKeyConstant.DROP_HAND_LIST, 0);
         if (drugStr != null) {
             RedisDrugListData drugListData = JSON.parseObject(drugStr, RedisDrugListData.class);
             //发送拿药指令
-            boolean isDrop = dropServo(drugListData);
+            String isDrop = dropServo(drugListData);
             //去除队列
-
-            //移动到C柜
-
+            if("empty".equals(isDrop)){
+                //重新发药
+                String errorMsg =  String.format("仓位：%s 疫苗名称：%s  未检测到药品，重新发药", drugListData.getBoxNo(),drugListData.getProductName());
+                log.error(errorMsg);
+                vacMachineExceptionService.dropException(SettingConstants.MachineException.SENDWARING.code,drugListData,errorMsg);
+                //重新发药
+                addHandleDrugAgain(drugListData);
+            }else if ("success".equals(isDrop)){
+                //掉药到C柜
+                dispensingFunction.dropRecordAndMachine(drugListData,1,"发药正常");
+                moveToC(drugListData);
+            }
 
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
 
-    //取药
-    public boolean dropServo(RedisDrugListData drugListData ){
+    public void handServo(CabinetConstants.CabinetAHandCommand command,Integer servoX,Integer servoZ,Integer distance ){
 
         CabinetAHandRequest request = new CabinetAHandRequest();
         request.setWorkMode(CabinetConstants.Cabinet.CAB_A);
-        request.setServoX(11);
-        request.setDistanceX(drugListData.getDropX());
-        request.setServoZ(12);
-        request.setDistanceZ(drugListData.getDropZ());
-        request.setUpDistance(1000);
-
-        return true;
+        request.setCommand(command);
+        request.setServoX(SettingConstants.CABINET_A_HANDLE_SERVO_X);
+        request.setDistanceX(servoX);
+        request.setServoZ(SettingConstants.CABINET_A_HANDLE_SERVO_Z);
+        request.setDistanceZ(servoZ);
+        request.setDistance(distance);
+        cabinetAService.handGetDrug(request);
     }
 
 
+    //取药
+    public String dropServo(RedisDrugListData drugListData ) throws Exception {
+        ConfigSendData configSendData = configFunction.getSendDrugConfigData();
+        valueOperations.set(RedisKeyConstant.handMachine.HAND_DROP_STATUS,"false");
+        //运动伺服
+        handServo(CabinetConstants.CabinetAHandCommand.FIND,drugListData.getDropX(),drugListData.getDropZ(),configSendData.getHandUpDistance());
 
+        long timeout = System.currentTimeMillis();
+        //等待A柜下药动作反馈
+        while ((System.currentTimeMillis() - timeout) < SettingConstants.HAND_DROP_WAIT_TIMEOUT) {
+                if("success".equals(valueOperations.get(RedisKeyConstant.handMachine.HAND_DROP_STATUS))){
+                    return "success";
+                }else if("empty".equals(valueOperations.get(RedisKeyConstant.handMachine.HAND_DROP_STATUS))){
 
-    //挡片控制
-    public void  moveBlock(CabinetConstants.CabinetCSendDrugBlockStatus status){
-        CabinetCSendDrugRequest cabinetCSendDrugRequest = new CabinetCSendDrugRequest();
-        cabinetCSendDrugRequest.setWorkMode(CabinetConstants.Cabinet.CAB_C);
-        cabinetCSendDrugRequest.setCommand(CabinetConstants.CabinetCSendDrugCommand.BLOCK);
-        cabinetCSendDrugRequest.setStatus(status);
-        cabinetCService.sendDrug(cabinetCSendDrugRequest);
+                    return "empty";
+                }else if ("error".equals(valueOperations.get(RedisKeyConstant.handMachine.HAND_DROP_STATUS))){
+                    return "error";
+                }
+                VacUntil.sleep(100);
+        }
+
+        return "timout";
     }
 
 
-    //查询C柜复位按钮有没有按下
-    public void findCabinetReset(int workNum){
-        CabinetCSendDrugRequest request = new CabinetCSendDrugRequest();
-        request.setWorkMode(CabinetConstants.Cabinet.CAB_C);
-        request.setCommand(CabinetConstants.CabinetCSendDrugCommand.RESET);
-        request.setMode(workNum);
-        cabinetCService.sendDrug(request);
+    //取药
+    public void moveToC(RedisDrugListData drugListData ){
+        valueOperations.set(RedisKeyConstant.handMachine.HAND_MOVE_STATUS,"false");
+        ConfigSendData configSendData = configFunction.getSendDrugConfigData();
+        ConfigSetting configSetting = configFunction.getSettingConfigData();
+        handServo(CabinetConstants.CabinetAHandCommand.DROP,configSendData.getHandMoveCX(),configSendData.getHandMoveCZ(),configSendData.getHandMoveCStepDis());
+        long timeout = System.currentTimeMillis();
+        String result = "false";
+        //等待A柜下药动作反馈
+        while ((System.currentTimeMillis() - timeout) < SettingConstants.HAND_DROP_WAIT_TIMEOUT) {
+            result = valueOperations.get(RedisKeyConstant.handMachine.HAND_MOVE_STATUS);
+            if(!"false".equals(result)){
+                break;
+            }
+            VacUntil.sleep(100);
+        }
+
+//        //发药成功
+//        if("success".equals(result)){
+//            dispensingFunction.moveBeltToC(drugListData,configSetting);
+//        }
+
     }
 
+
+    //数据清空 重新发药
+    public void addHandleDrugAgain(RedisDrugListData drugDataList) throws Exception {
+        //清除传送带redis 状态  之前还在的队列 正常发药
+        boolean flag = true;
+        List<String> sendDataList = listOps.range(RedisKeyConstant.SEND_LIST,0,-1);
+        assert sendDataList != null;
+        for(String data : sendDataList){
+            //当队列到达这个处方时
+            RedisDrugListData drugListData = JSON.parseObject(data, RedisDrugListData.class);
+            //俩个uuid相同
+            if(ObjectUtil.equals(drugListData.getUuid(),drugDataList.getUuid())){
+                flag =false;
+            }
+            //后续这个仓位的发药list 全部清空
+            if(Objects.equals(drugListData.getPositionNum(), drugDataList.getPositionNum())&&Objects.equals(drugListData.getLineNum(),drugDataList.getLineNum())&&!flag){
+                listOps.remove(RedisKeyConstant.SEND_LIST,1,data);
+            }
+
+        }
+
+        //先将该仓位的掉药列表数据清楚
+        //后续如果还有这个仓位发药 则重新发
+        List<String> beltDataList = listOps.range(RedisKeyConstant.DROP_HAND_LIST,0,-1);
+
+        if(beltDataList != null){
+            for(String beltData : beltDataList){
+                RedisDrugListData drugData = JSON.parseObject(beltData, RedisDrugListData.class);
+                //后续还有这个仓位的掉药记录删除
+                if(Objects.equals(drugData.getPositionNum(), drugDataList.getPositionNum())&&Objects.equals(drugData.getLineNum(),drugDataList.getLineNum())){
+                    listOps.remove(RedisKeyConstant.DROP_HAND_LIST,1,beltData);
+                    VacGetVaccine vacGetVaccine = new VacGetVaccine();
+                    BeanUtils.copyProperties(drugData,vacGetVaccine);
+                    //重新发药
+                    addDrugList(vacGetVaccine);
+                }
+            }
+        }
+
+
+    }
 }

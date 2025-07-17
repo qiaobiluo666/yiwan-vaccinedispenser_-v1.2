@@ -71,7 +71,7 @@ public class CabinetConstants {
         DROP(14, "0x01-输入输出控制数据透传"),
 
 
-        HAND(20,"0x08-A柜下药"),
+        HAND(21,"0x08-A柜下药"),
 
         DROP_AUTO(12, "0x01-输入输出控制数据透传"),
         //灯板
@@ -693,7 +693,36 @@ public class CabinetConstants {
 
     }
 
+    //A柜伺服命令
+    public enum CabinetAHandCommand {
 
+        FIND(0x01, 1,"0x01-接药"),
+
+        DROP(0x02,2,"0x02-下药");
+        CabinetAHandCommand(int code,Integer num, String desc) {
+            this.code = code;
+            this.num = num;
+            this.desc = desc;
+        }
+
+        public final Integer code;
+
+        public final Integer num;
+
+        public final String desc;
+
+        //反序列化
+        @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
+        public static CabinetAHandCommand codeOf(Integer num) {
+            for (CabinetAHandCommand type : CabinetAHandCommand.values()) {
+                if (type.num.equals(num)) {
+                    return type;
+                }
+            }
+            return null;
+        }
+
+    }
 
 
 

@@ -589,7 +589,7 @@ public class CabinetSettingServiceImpl implements CabinetSettingService {
         }
 
         //获取伺服电机
-        for(int i=1; i<11;i++){
+        for(int i=1; i<21;i++){
             //获取伺服
             ServoSettingData data = new ServoSettingData();
             data.setWorkMode(workMode);

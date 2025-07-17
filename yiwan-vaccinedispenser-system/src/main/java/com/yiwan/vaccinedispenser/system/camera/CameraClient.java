@@ -43,7 +43,7 @@ public class CameraClient {
 	private String name;
 
 	private String host;
-	private int port;
+	private Integer port;
 
 	private String data;
 
@@ -56,7 +56,7 @@ public class CameraClient {
 	//判断是否连接
 	private boolean isConnecting = false;
 
-	public CameraClient(String host, int port, String name,NettyReceiveCameraService nettyReceiveCameraService) {
+	public CameraClient(String host, Integer port, String name,NettyReceiveCameraService nettyReceiveCameraService) {
 		this.host = host;
 		this.port = port;
 		this.name = name;

@@ -18,16 +18,15 @@ import com.yiwan.vaccinedispenser.core.web.Result;
 import com.yiwan.vaccinedispenser.core.websocket.WebsocketService;
 import com.yiwan.vaccinedispenser.system.dispensing.ConfigFunction;
 import com.yiwan.vaccinedispenser.system.dispensing.DispensingFunction;
+import com.yiwan.vaccinedispenser.system.dispensing.DispensingHandFunction;
 import com.yiwan.vaccinedispenser.system.dispensing.SendDrugFunction;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.*;
 import com.yiwan.vaccinedispenser.system.sys.dao.VacBoxSpecMapper;
 import com.yiwan.vaccinedispenser.system.sys.dao.VacMachineMapper;
-import com.yiwan.vaccinedispenser.system.sys.data.ConfigData;
-import com.yiwan.vaccinedispenser.system.sys.data.ConfigSetting;
-import com.yiwan.vaccinedispenser.system.sys.data.RedisDrugListData;
-import com.yiwan.vaccinedispenser.system.sys.data.SendBtnData;
+import com.yiwan.vaccinedispenser.system.sys.data.*;
 import com.yiwan.vaccinedispenser.system.sys.data.request.IdListRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.request.OtherRequest;
+import com.yiwan.vaccinedispenser.system.sys.data.request.netty.CabinetAServoRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.request.netty.CabinetCServoRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.request.netty.DropRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.request.vac.DrugRecordRequest;
@@ -53,6 +52,7 @@ import java.text.Collator;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 /**
  * @author
@@ -81,6 +81,9 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
 
     @Autowired
     private DispensingFunction dispensingFunction;
+
+    @Autowired
+    private DispensingHandFunction dispensingHandFunction;
 
     @Autowired
     private ZcyFunction zcyFunction;
@@ -145,9 +148,21 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
 
     @Override
     public Result  vacMachineList() {
+        ConfigSetting configSetting = configFunction.getSettingConfigData();
+        ConfigSendData configSendData = configFunction.getSendDrugConfigData();
         List<VacMachine> vacMachineList = vacMachineMapper.selectList( new LambdaQueryWrapper<VacMachine>()
                 .eq(VacMachine::getDeleted,0));
-        return Result.success(vacMachineList);
+        List<VacMachineRequest> vacMachineRequests = vacMachineList.stream()
+                .map(vacMachine -> {
+                    VacMachineRequest request = new VacMachineRequest(); // using copy constructor
+                    BeanUtils.copyProperties(vacMachine,request);
+                    request.setIsIO(configSetting.getIsIoDrop());
+                    request.setUpDistance(configSendData.getHandUpDistance());
+                    return request;
+                })
+                .collect(Collectors.toList());
+
+        return Result.success(vacMachineRequests);
     }
 
     @Override
@@ -1270,7 +1285,6 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
                     //速度模式将药从皮带掉到光栅传感器
                     dispensingFunction.speedServo(beltNum,CabinetConstants.CabinetAServoCommand.SPEED,CabinetConstants.CabinetAServoStatus.COROTATION,500);
 
-
                     String sensorIsPut;
                     //等待掉药时间
                     long timeout = System.currentTimeMillis();
@@ -1310,6 +1324,7 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
                     drugListData.setMachineId(data.getId());
                     drugListData.setWorkbenchNum(1);
                     drugListData.setProductNo(data.getProductNo());
+                    drugListData.setMachineStatus(data.getStatus());
                     dispensingFunction.dropRecordAndMachine(drugListData,2,"疫苗退药");
                 }
                 else {
@@ -1455,7 +1470,13 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
         vacGetVaccine.setTaskId(String.valueOf(UUID.randomUUID()));
         //请求发起人
         vacGetVaccine.setRequestNo(userBean.getUserName());
-        dispensingFunction.addDrugList(vacGetVaccine);
+        ConfigSetting configSetting = configFunction.getSettingConfigData();
+        if("true".equals(configSetting.getIsIoDrop())){
+            dispensingFunction.addDrugList(vacGetVaccine);
+        }else {
+            dispensingHandFunction.dropHandDrugs();
+        }
+
     }
 
     @Override
@@ -1506,6 +1527,25 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
 
 
     }
+
+
+    @Override
+    public void test2() {
+        CabinetAServoRequest request = new CabinetAServoRequest();
+        request.setWorkMode(CabinetConstants.Cabinet.CAB_A);
+        request.setCommand(CabinetConstants.CabinetAServoCommand.POSITION);
+        request.setStatus(CabinetConstants.CabinetAServoStatus.ZERO);
+        request.setMode(9);
+
+        while (true){
+            request.setDistance(0);
+            cabinetAService.servo(request);
+            VacUntil.sleep(5000);
+            request.setDistance(21800);
+            VacUntil.sleep(5000);
+        }
+    }
+
 
     //有效期一致的苗仓
     private  List<VacMachine> getExpiredAtBoxNoBatchNo(List<Long> boxSepcIds, Integer num, Date expiredAt, String productNo , String batchNo){

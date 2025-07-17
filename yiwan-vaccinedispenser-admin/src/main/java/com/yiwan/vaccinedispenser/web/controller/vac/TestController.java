@@ -11,6 +11,7 @@ import com.yiwan.vaccinedispenser.system.dispensing.*;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacGetVaccine;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacMachine;
 import com.yiwan.vaccinedispenser.system.sys.data.ConfigData;
+import com.yiwan.vaccinedispenser.system.sys.data.ConfigSetting;
 import com.yiwan.vaccinedispenser.system.sys.data.DistanceServoData;
 import com.yiwan.vaccinedispenser.system.sys.data.request.OtherRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.request.netty.DropRequest;
@@ -70,6 +71,9 @@ public class TestController {
     private ConfigFunction configFunction;
 
     @Autowired
+    private DispensingHandFunction dispensingHandFunction;
+
+    @Autowired
     private ZcyFunction zcyFunction;
 
     @Autowired
@@ -94,6 +98,8 @@ public class TestController {
     @PostMapping("/add-drug")
     public Result machineList() throws Exception {
 
+        ConfigSetting configSetting = configFunction.getSettingConfigData();
+
 
         Random r = new Random();
         VacGetVaccine vacGetVaccine =new VacGetVaccine();
@@ -107,11 +113,14 @@ public class TestController {
         vacGetVaccine.setRequestNo("requestNo");
         vacGetVaccine.setWorkbenchName("接种台6");
         vacGetVaccine.setWorkbenchNo("69");
-//        vacGetVaccine.setWorkbenchNum(1);
 
-        vacGetVaccine.setWorkbenchNum(r.nextInt(1,3));
+        vacGetVaccine.setWorkbenchNum(r.nextInt(1,7));
+        if("true".equals(configSetting.getIsIoDrop())){
+            dispensingFunction.addDrugList(vacGetVaccine);
+        }else {
+            dispensingHandFunction.addDrugList(vacGetVaccine);
+        }
 
-        dispensingFunction.addDrugList(vacGetVaccine);
 
         VacMachine vacMachine5 = vacMachineService.testDrop(4);
         if(vacMachine5==null){
@@ -123,10 +132,14 @@ public class TestController {
         vacGetVaccine.setRequestNo("requestNo");
         vacGetVaccine.setWorkbenchName("接种台5");
         vacGetVaccine.setWorkbenchNo("69");
-//        vacGetVaccine.setWorkbenchNum(2);
-        vacGetVaccine.setWorkbenchNum(r.nextInt(1,3));
 
-        dispensingFunction.addDrugList(vacGetVaccine);
+        vacGetVaccine.setWorkbenchNum(r.nextInt(1,7));
+
+        if("true".equals(configSetting.getIsIoDrop())){
+            dispensingFunction.addDrugList(vacGetVaccine);
+        }else {
+            dispensingHandFunction.addDrugList(vacGetVaccine);
+        }
 
         VacMachine vacMachine4 = vacMachineService.testDrop(3);
         if(vacMachine4==null){
@@ -138,9 +151,13 @@ public class TestController {
         vacGetVaccine.setRequestNo("requestNo");
         vacGetVaccine.setWorkbenchName("接种台4");
         vacGetVaccine.setWorkbenchNo("69");
-        vacGetVaccine.setWorkbenchNum(r.nextInt(1,3));
+        vacGetVaccine.setWorkbenchNum(r.nextInt(1,7));
 //        vacGetVaccine.setWorkbenchNum(3);
-        dispensingFunction.addDrugList(vacGetVaccine);
+        if("true".equals(configSetting.getIsIoDrop())){
+            dispensingFunction.addDrugList(vacGetVaccine);
+        }else {
+            dispensingHandFunction.addDrugList(vacGetVaccine);
+        }
 
         return Result.success();
         
@@ -307,10 +324,7 @@ public class TestController {
     @PostMapping("/test")
     public Result  test1() {
 
-        vacMachineService.test1();
-
-
-
+        vacMachineService.test2();
         return Result.success();
     }
 

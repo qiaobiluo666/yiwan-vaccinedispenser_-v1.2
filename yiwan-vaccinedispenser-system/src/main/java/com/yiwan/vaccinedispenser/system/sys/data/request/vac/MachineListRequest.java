@@ -71,6 +71,12 @@ public class MachineListRequest implements Serializable {
     //自动盘点Z
     private Integer countZ;
 
+    private Integer dropX;
+
+    private Integer dropZ;
+
+
+
     //批量增加的数量
     private Integer addNum;
     //当前页

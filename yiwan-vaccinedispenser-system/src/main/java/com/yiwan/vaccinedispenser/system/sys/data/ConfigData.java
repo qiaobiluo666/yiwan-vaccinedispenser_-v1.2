@@ -12,108 +12,108 @@ import lombok.Data;
 @Data
 public class ConfigData {
     //激光传感器偏移量
-    private int sensorDistanceX;
-    private int sensorDistanceY;
-    private int sensorDistanceZ;
+    private Integer sensorDistanceX;
+    private Integer sensorDistanceY;
+    private Integer sensorDistanceZ;
 
 
 
     //左边距离传感器初始距离
-    private int  leftConstants;
+    private Integer  leftConstants;
     //右边距离传感器初始距离
-    private int  rightConstants;
+    private Integer  rightConstants;
     //上方距离传感器初始距离
-    private int heightConstants;
+    private Integer heightConstants;
 
 
     //直角点位角度
     private double  tableAngle;
     //直角点位Y坐标
-    private int tableX;
+    private Integer tableX;
     //直角点位X坐标
-    private int tableY;
+    private Integer tableY;
     //Z轴零位到皮带的距离
-    private int tableZ;
+    private Integer tableZ;
 
 
     //激光传感器X
-    private int lenDistanceX;
+    private Integer lenDistanceX;
     //激光传感器Y
-    private int lenDistanceY;
+    private Integer lenDistanceY;
     // 激光传感器Z
-    private int lenDistanceZ;
+    private Integer lenDistanceZ;
 
 
     //上方扫码X
-    private int aboveScanX;
+    private Integer aboveScanX;
     //上方扫码Y
-    private int aboveScanY;
+    private Integer aboveScanY;
     //上方扫码Z
-    private int aboveScanZ;
+    private Integer aboveScanZ;
 
 
     //侧边扫码X
-    private int sideScanX;
+    private Integer sideScanX;
     //侧边扫码Y
-    private int sideScanY;
+    private Integer sideScanY;
     //侧边扫码Z
-    private int sideScanZ;
+    private Integer sideScanZ;
 
 
     //下方扫码X
-    private int belowScanX;
+    private Integer belowScanX;
     //下方扫码Y
-    private int belowScanY;
+    private Integer belowScanY;
     //下方扫码Z
-    private int belowScanZ;
+    private Integer belowScanZ;
 
     //掉药距离X
-    private int dropX;
+    private Integer dropX;
     //掉药距离Y
-    private int dropY;
+    private Integer dropY;
     //掉药距离Z皮带传感器发生异常皮带传感器发生异常
-    private int dropZ;
+    private Integer dropZ;
 
     //废药距离X
-    private int wasteX;
+    private Integer wasteX;
     //废药距离Y
-    private int wasteY;
+    private Integer wasteY;
     //废药距离Z
-    private int wasteZ;
+    private Integer wasteZ;
 
     //机械手总宽度
-    private int handLen;
+    private Integer handLen;
 
     //夹药空隙
-    private int gap;
+    private Integer gap;
 
     //提前夹药空隙
-    private int early;
+    private Integer early;
 
     //机械手回原位X
-    private int handInitX;
+    private Integer handInitX;
     //机械手回原位Z
-    private int handInitZ;
+    private Integer handInitZ;
 
     //小皮带走的距离
-    private int smallBeltDistance;
+    private Integer smallBeltDistance;
 
     //手动上药 机械手就绪位置X
-    private int handDrugX;
+    private Integer handDrugX;
 
     //手动上药  机械手就绪位置Z
-    private int handDrugZ;
+    private Integer handDrugZ;
 
     //自动上药 掉药区域位置是加还是减
     private String dropXAdd;
 
     //10层板板长
-    private  int   lineLong;
+    private  Integer   lineLong;
 
     //右边旋转角度
-    private int rightAngle;
+    private Integer rightAngle;
 
     //左边旋转角度
-    private int leftAngle;
+    private Integer leftAngle;
 
 }

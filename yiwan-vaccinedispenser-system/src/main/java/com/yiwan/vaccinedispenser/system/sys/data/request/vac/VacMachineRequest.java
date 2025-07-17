@@ -12,6 +12,7 @@ import java.util.Date;
 public class VacMachineRequest {
 
     private Long id;
+
     //疫苗是否全部退回
     private Boolean backAll;
     // 层数
@@ -75,6 +76,9 @@ public class VacMachineRequest {
     private Integer autoZ;
 
 
+
+
+
     //库存盘点X
 
 
@@ -82,6 +86,16 @@ public class VacMachineRequest {
 
     //库存盘点Z
     private Integer countZ;
+
+
+    private Integer dropX;
+
+    private Integer dropZ;
+
+    private String isIO;
+
+    //向上抬升距离
+    private Integer upDistance;
 
     private LocalDateTime createTime;
 
