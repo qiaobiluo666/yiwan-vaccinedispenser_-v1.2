@@ -58,6 +58,20 @@ public class CabinetController {
         return Result.success();
     }
 
+
+
+
+    /**
+     * 机械手伸出步进控制
+     * */
+    @GetMapping("/A-handle-step")
+    public Result handSetpA(@RequestParam Boolean isStep){
+        log.info("入参-isStep:{}",isStep);
+        cabinetAService.handleStepA(isStep);
+        return Result.success();
+    }
+
+
     /**
      * 机械手掉药控制指令
      * */

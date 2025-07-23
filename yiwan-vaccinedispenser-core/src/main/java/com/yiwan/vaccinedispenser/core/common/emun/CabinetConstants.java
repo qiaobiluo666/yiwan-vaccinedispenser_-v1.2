@@ -71,7 +71,9 @@ public class CabinetConstants {
         DROP(14, "0x01-输入输出控制数据透传"),
 
 
-        HAND(21,"0x08-A柜下药"),
+        HAND_GET(25,"0x08-A柜取药"),
+
+        HAND_DROP(21,"0x08-A柜下药"),
 
         DROP_AUTO(12, "0x01-输入输出控制数据透传"),
         //灯板
@@ -629,9 +631,17 @@ public class CabinetConstants {
     public enum CabinetAStepMode {
         CLAMP(0x01, 1,"0x01-夹爪步进"),
 
-        BLOCK(0x02,2,"0x02 挡片步进");
+        BLOCK(0x02,2,"0x02 挡片步进"),
 
 
+        THREE(0x03,3,"0x03 步进3"),
+
+        HAND(0x04,4,"0x04 伸出步进"),
+
+        RETURN(0x05,5,"0x04 机械手回原步进"),
+
+        SIX(0x06,6,"0x06 步进6"),
+        ;
 
 
         CabinetAStepMode(int code,Integer num, String desc) {

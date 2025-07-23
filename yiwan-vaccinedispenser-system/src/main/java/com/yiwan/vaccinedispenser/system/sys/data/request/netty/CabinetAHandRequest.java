@@ -22,7 +22,6 @@ public class CabinetAHandRequest implements Serializable {
     @NotNull(message = "工作模式-对应的ab板子")
     private CabinetConstants.Cabinet workMode;
 
-
     @NotNull(message = "请选择第几个伺服电机")
     private CabinetConstants.CabinetAHandCommand command;
 
@@ -41,10 +40,11 @@ public class CabinetAHandRequest implements Serializable {
     //运动距离
     private Integer distanceZ;
 
-    //向上抬升距离 或者步进电机走的距离
+    //向上抬升距离
     private Integer distance;
 
-
+    //步进电机走的距离
+    private Integer stepDistance;
 
 
 }

@@ -149,6 +149,7 @@ public class ZcyFunction {
 //                            dispensingFunction.addDrugList(vacGetVaccine);
                             ConfigSetting configSetting = configFunction.getSettingConfigData();
                             if("true".equals(configSetting.getIsIoDrop())){
+
                                 dispensingFunction.addDrugList(vacGetVaccine);
                             }else {
                                 dispensingHandFunction.dropHandDrugs();
@@ -169,8 +170,10 @@ public class ZcyFunction {
                             log.info("发苗数据：{}",JSON.toJSONString(vacGetVaccine1));
                             ConfigSetting configSetting = configFunction.getSettingConfigData();
                             if("true".equals(configSetting.getIsIoDrop())){
+                                log.info("电磁铁发苗");
                                 dispensingFunction.addDrugList(vacGetVaccine);
                             }else {
+                                log.info("机械手发苗");
                                 dispensingHandFunction.dropHandDrugs();
                             }
 

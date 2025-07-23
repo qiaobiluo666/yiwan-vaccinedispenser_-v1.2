@@ -50,7 +50,7 @@ public class SettingConstants {
      */
 
     //机械手方案掉药等待最大时间
-    public static final int HAND_DROP_WAIT_TIMEOUT = 10000;
+    public static final int HAND_DROP_WAIT_TIMEOUT = 30000;
 
     //发送命令最大等待超时时间 3s
     public static final int COMMAND_WAIT_TIMEOUT = 1000;
@@ -122,10 +122,12 @@ public class SettingConstants {
      * 传感器编号、输出位置编号
      */
 
-    //机械手下药伺服Z ID
-    public static final  int CABINET_A_HANDLE_SERVO_Z = 11;
     //机械手下药伺服X ID
-    public static final  int CABINET_A_HANDLE_SERVO_X = 12;
+    public static final  int CABINET_A_HANDLE_SERVO_X = 11;
+
+    //机械手下药伺服Z ID
+    public static final  int CABINET_A_HANDLE_SERVO_Z = 12;
+
 
 
 

@@ -38,7 +38,4 @@ public interface VacBoxSpecService extends IService<VacBoxSpec>{
     List<VacBoxSpec> findVacBoxSpec(Integer length);
 
 
-
-
-
 }

@@ -22,9 +22,17 @@ public interface CabinetAService {
 
 
     /**
-     *掉药控制指令
+     *机械手掉药控制指令
      */
     void handleDropCommand(VacMachineRequest request);
+
+
+    /**
+     *机械手步进伸出控制指令
+     */
+    void handleStepA(Boolean isStep);
+
+
 
     /**
      *

@@ -382,8 +382,8 @@ public class DispensingFunction {
         String sensorIsPut = valueOperations.get(RedisKeyConstant.sensor.BELT_SENSOR);
         if(sensorIsPut == null){
 
-           //设置光栅信号 状态为不触发
-            valueOperations.set(RedisKeyConstant.sensor.BELT_SENSOR,CabinetConstants.SensorStatus.RESET.code);
+       //设置光栅信号 状态为不触发
+        valueOperations.set(RedisKeyConstant.sensor.BELT_SENSOR,CabinetConstants.SensorStatus.RESET.code);
 
        }else if(sensorIsPut.equals(CabinetConstants.SensorStatus.RESET.code)){
 
@@ -516,7 +516,7 @@ public class DispensingFunction {
             }else {
                 //查询挡片状态
                 moveBlock(CabinetConstants.CabinetCSendDrugBlockStatus.QUERY);
-                VacUntil.sleep(50);
+                VacUntil.sleep(200);
                 isBlankOpen = valueOperations.get(RedisKeyConstant.CABINET_C_BLOCK_STATUS);
                 //如果挡片打开 和 皮带停止
                 if("true".equals(isStop)&&"open".equals(isBlankOpen)){
@@ -548,7 +548,7 @@ public class DispensingFunction {
             log.error("斜坡皮带一直未停止，超时发送命令！");
 
         }
-
+        log.info("将苗发到接种台！！！！");
         //电磁铁版本
         if ("true".equals(configSetting.getIsIoDrop())){
 
@@ -584,8 +584,12 @@ public class DispensingFunction {
             valueOperations.set(RedisKeyConstant.CABINET_A_GS_BELT_HAVE_DRUG,"false");
             //将该发药队列移除
             listOps.leftPop(RedisKeyConstant.BELT_LIST);
+            //将药发送到工作台
+            moveWork(drugListData.getWorkbenchNum());
 
         }else {
+
+
             //机械手版本
             //将药发送到工作台
             moveWork(drugListData.getWorkbenchNum());

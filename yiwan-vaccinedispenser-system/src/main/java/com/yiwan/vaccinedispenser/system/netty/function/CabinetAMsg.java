@@ -6,6 +6,7 @@ import com.yiwan.vaccinedispenser.system.dispensing.SendDrugThreadManager;
 import com.yiwan.vaccinedispenser.system.sys.service.vac.VacMachineExceptionService;
 import com.yiwan.vaccinedispenser.system.until.NettyUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.formula.atp.Switch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
@@ -124,10 +125,12 @@ public class CabinetAMsg {
             }
 
             //A柜下药状态
-            case "08"->  receiveHandleDrop(bytesStr);
+            case "08"->  {
+                log.info("收到A柜{}:{}",CabinetConstants.CabinetAType.HAND.desc,NettyUtils.StringListToString(bytesStr));
+                receiveHandleDrop(bytesStr);
+            }
 
-            //A柜送药到C柜状态
-            case "09"->  receiveHandleMoveC(bytesStr);
+
 
             //设置系统参数
             case "80" -> {
@@ -407,35 +410,32 @@ public class CabinetAMsg {
      * 机械手下药反馈
      */
     public void receiveHandleDrop(String[] bytesStr){
-        switch (bytesStr[9]){
+        switch (bytesStr[8]){
             case "01"->{
-                valueOperations.set(RedisKeyConstant.handMachine.HAND_DROP_STATUS,"success");
+                switch (bytesStr[9]){
+                    case "01"->{
+                        valueOperations.set(RedisKeyConstant.handMachine.HAND_DROP_STATUS,"success");
+                    }
+                    case "02"->{
+                        valueOperations.set(RedisKeyConstant.handMachine.HAND_DROP_STATUS,"empty");
+                    }
+                }
             }
+
+
             case "02"->{
-                valueOperations.set(RedisKeyConstant.handMachine.HAND_DROP_STATUS,"empty");
+                switch (bytesStr[9]){
+                    case "01"->{
+                        valueOperations.set(RedisKeyConstant.handMachine.HAND_MOVE_STATUS,"true");
+                    }
+                    case "02"->{
+                        valueOperations.set(RedisKeyConstant.handMachine.HAND_MOVE_STATUS,"error");
+                    }
+                }
             }
         }
+
     }
-
-
-    /**
-     * 机械手掉药位置反馈
-     */
-    public void receiveHandleMoveC(String[] bytesStr){
-
-        switch (bytesStr[9]){
-            case "01"->{
-                valueOperations.set(RedisKeyConstant.handMachine.HAND_MOVE_STATUS,"true");
-            }
-            case "02"->{
-                valueOperations.set(RedisKeyConstant.handMachine.HAND_MOVE_STATUS,"error");
-            }
-        }
-    }
-
-
-
-
 
 
 

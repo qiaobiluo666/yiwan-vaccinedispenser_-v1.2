@@ -99,7 +99,9 @@ public class TestController {
     public Result machineList() throws Exception {
 
         ConfigSetting configSetting = configFunction.getSettingConfigData();
+//        int[] nums = {1, 2, 3, 4, 6};
 
+        int[] nums = {1, 2, 3};
 
         Random r = new Random();
         VacGetVaccine vacGetVaccine =new VacGetVaccine();
@@ -114,7 +116,7 @@ public class TestController {
         vacGetVaccine.setWorkbenchName("接种台6");
         vacGetVaccine.setWorkbenchNo("69");
 
-        vacGetVaccine.setWorkbenchNum(r.nextInt(1,7));
+        vacGetVaccine.setWorkbenchNum(nums[ThreadLocalRandom.current().nextInt(nums.length)]);
         if("true".equals(configSetting.getIsIoDrop())){
             dispensingFunction.addDrugList(vacGetVaccine);
         }else {
@@ -133,7 +135,7 @@ public class TestController {
         vacGetVaccine.setWorkbenchName("接种台5");
         vacGetVaccine.setWorkbenchNo("69");
 
-        vacGetVaccine.setWorkbenchNum(r.nextInt(1,7));
+        vacGetVaccine.setWorkbenchNum(nums[ThreadLocalRandom.current().nextInt(nums.length)]);
 
         if("true".equals(configSetting.getIsIoDrop())){
             dispensingFunction.addDrugList(vacGetVaccine);
@@ -151,7 +153,7 @@ public class TestController {
         vacGetVaccine.setRequestNo("requestNo");
         vacGetVaccine.setWorkbenchName("接种台4");
         vacGetVaccine.setWorkbenchNo("69");
-        vacGetVaccine.setWorkbenchNum(r.nextInt(1,7));
+        vacGetVaccine.setWorkbenchNum(nums[ThreadLocalRandom.current().nextInt(nums.length)]);
 //        vacGetVaccine.setWorkbenchNum(3);
         if("true".equals(configSetting.getIsIoDrop())){
             dispensingFunction.addDrugList(vacGetVaccine);
@@ -323,8 +325,7 @@ public class TestController {
 
     @PostMapping("/test")
     public Result  test1() {
-
-        vacMachineService.test2();
+        vacMachineService.test1();
         return Result.success();
     }
 

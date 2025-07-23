@@ -38,6 +38,11 @@ public class ConfigSendData {
     //机械收下药步进距离
     private  Integer handMoveCStepDis;
 
+
+    //取药步进伸出距离
+    private Integer handDropStepDis;
+
+
     //退苗退回的工作台
     private Integer returnWorkNum;
 

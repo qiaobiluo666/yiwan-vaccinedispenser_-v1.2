@@ -1502,7 +1502,7 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
             cabinetCService.servo(request);
             VacUntil.sleep(100);
 
-            VacUntil.sleep(5000);
+            VacUntil.sleep(4000);
 
             request.setMode(5);
             request.setDistance(2512);
@@ -1519,7 +1519,7 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
             cabinetCService.servo(request);
             VacUntil.sleep(100);
 
-            VacUntil.sleep(5000);
+            VacUntil.sleep(4000);
         }
 
 

@@ -320,30 +320,40 @@ public class DispensingHandFunction {
     public void dropHandDrugs() throws Exception {
         //获取list
         String drugStr = listOps.index(RedisKeyConstant.DROP_HAND_LIST, 0);
+        String dropStart = valueOperations.get(RedisKeyConstant.handMachine.HAND_DROP_START);
         if (drugStr != null) {
-            RedisDrugListData drugListData = JSON.parseObject(drugStr, RedisDrugListData.class);
-            //发送拿药指令
-            String isDrop = dropServo(drugListData);
-            //去除队列
-            if("empty".equals(isDrop)){
-                //重新发药
-                String errorMsg =  String.format("仓位：%s 疫苗名称：%s  未检测到药品，重新发药", drugListData.getBoxNo(),drugListData.getProductName());
-                log.error(errorMsg);
-                vacMachineExceptionService.dropException(SettingConstants.MachineException.SENDWARING.code,drugListData,errorMsg);
-                //重新发药
-                addHandleDrugAgain(drugListData);
-            }else if ("success".equals(isDrop)){
-                //掉药到C柜
-                dispensingFunction.dropRecordAndMachine(drugListData,1,"发药正常");
-                moveToC(drugListData);
-            }
+            assert dropStart != null;
+            if ("true".equals(dropStart)) {
 
+                valueOperations.set(RedisKeyConstant.handMachine.HAND_DROP_START,"false");
+                RedisDrugListData drugListData = JSON.parseObject(drugStr, RedisDrugListData.class);
+                //发送拿药指令
+                String isDrop = dropServo(drugListData);
+                //去除队列
+                if ("empty".equals(isDrop)) {
+                    //重新发药
+                    String errorMsg = String.format("仓位：%s 疫苗名称：%s  未检测到药品，重新发药", drugListData.getBoxNo(), drugListData.getProductName());
+                    log.error(errorMsg);
+                    vacMachineExceptionService.dropException(SettingConstants.MachineException.SENDWARING.code, drugListData, errorMsg);
+                    //禁用该仓位
+                    vacMachineService.vacMachineIOById(drugListData.getMachineId(), 0);
+                    //重新发药
+                    addHandleDrugAgain(drugListData);
+                    valueOperations.set(RedisKeyConstant.handMachine.HAND_DROP_START,"true");
+                } else if ("success".equals(isDrop)) {
+                    //掉药到C柜
+                    dispensingFunction.dropRecordAndMachine(drugListData, 1, "发药正常");
+                    moveToC(drugListData);
+                }
+
+            }
         }
 
     }
 
     public void handServo(CabinetConstants.CabinetAHandCommand command,Integer servoX,Integer servoZ,Integer distance ){
 
+        ConfigSendData configSendData = configFunction.getSendDrugConfigData();
         CabinetAHandRequest request = new CabinetAHandRequest();
         request.setWorkMode(CabinetConstants.Cabinet.CAB_A);
         request.setCommand(command);
@@ -352,7 +362,13 @@ public class DispensingHandFunction {
         request.setServoZ(SettingConstants.CABINET_A_HANDLE_SERVO_Z);
         request.setDistanceZ(servoZ);
         request.setDistance(distance);
+
+        if(command.num==1){
+            request.setStepDistance(configSendData.getHandDropStepDis());
+        }
+
         cabinetAService.handGetDrug(request);
+
     }
 
 
@@ -366,12 +382,16 @@ public class DispensingHandFunction {
         long timeout = System.currentTimeMillis();
         //等待A柜下药动作反馈
         while ((System.currentTimeMillis() - timeout) < SettingConstants.HAND_DROP_WAIT_TIMEOUT) {
-                if("success".equals(valueOperations.get(RedisKeyConstant.handMachine.HAND_DROP_STATUS))){
+            String status = valueOperations.get(RedisKeyConstant.handMachine.HAND_DROP_STATUS);
+            log.info("掉药状态：{}",status);
+                if("success".equals(status)){
+                    log.info("下药成功");
                     return "success";
-                }else if("empty".equals(valueOperations.get(RedisKeyConstant.handMachine.HAND_DROP_STATUS))){
-
+                }else if("empty".equals(status)){
+                    log.warn("空仓");
                     return "empty";
-                }else if ("error".equals(valueOperations.get(RedisKeyConstant.handMachine.HAND_DROP_STATUS))){
+                }else if ("error".equals(status)){
+                    log.error("设备故障");
                     return "error";
                 }
                 VacUntil.sleep(100);
@@ -388,16 +408,19 @@ public class DispensingHandFunction {
         ConfigSetting configSetting = configFunction.getSettingConfigData();
         handServo(CabinetConstants.CabinetAHandCommand.DROP,configSendData.getHandMoveCX(),configSendData.getHandMoveCZ(),configSendData.getHandMoveCStepDis());
         long timeout = System.currentTimeMillis();
-        String result = "false";
+        String result ;
         //等待A柜下药动作反馈
         while ((System.currentTimeMillis() - timeout) < SettingConstants.HAND_DROP_WAIT_TIMEOUT) {
             result = valueOperations.get(RedisKeyConstant.handMachine.HAND_MOVE_STATUS);
             if(!"false".equals(result)){
+                log.info(result);
                 break;
             }
             VacUntil.sleep(100);
         }
 
+        listOps.leftPop(RedisKeyConstant.DROP_HAND_LIST);
+        valueOperations.set(RedisKeyConstant.handMachine.HAND_DROP_START,"true");
 //        //发药成功
 //        if("success".equals(result)){
 //            dispensingFunction.moveBeltToC(drugListData,configSetting);

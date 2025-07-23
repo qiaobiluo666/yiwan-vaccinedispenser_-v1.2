@@ -269,7 +269,7 @@ public class CabinetBMsg {
         }
 
         //B柜伺服报警 自动上药停止
-        if (("03".equals(bytesStr[11])&&"03".equals(bytesStr[7])&&"0A".equals(bytesStr[6]))|| ("02".equals(bytesStr[11])&&"0D".equals(bytesStr[12]))){
+        if (("03".equals(bytesStr[11])&&"03".equals(bytesStr[7])&&"0B".equals(bytesStr[6]))|| ("02".equals(bytesStr[11])&&"0D".equals(bytesStr[12]))){
             valueOperations.set(RedisKeyConstant.CABINET_B_SERVO_ERROR,"true");
             String msg = "自动上药伺服报警，结束自动上药";
             log.error(msg);

@@ -1703,6 +1703,7 @@ public class SendDrugFunction {
     public int getDrugNum(int vacLong,DrugRecordRequest request){
         ConfigData configData = configFunction.getAutoDrugConfigData();
         int num = configData.getLineLong()/(vacLong+5);
+
         if(5*num>vacLong*1.5){
             num = num+1;
         }

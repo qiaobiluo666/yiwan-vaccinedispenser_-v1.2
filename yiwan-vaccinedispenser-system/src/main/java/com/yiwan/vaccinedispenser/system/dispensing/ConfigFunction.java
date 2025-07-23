@@ -205,6 +205,7 @@ public class ConfigFunction {
 
                 case "HAND_MOVE_C_STEP"->configSendData.setHandMoveCStepDis(Integer.parseInt(sysConfig.getConfigValue()));
 
+                case "HAND_DROP_STEP"->configSendData.setHandDropStepDis(Integer.parseInt(sysConfig.getConfigValue()));
             }
         }
 

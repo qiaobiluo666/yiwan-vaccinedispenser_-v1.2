@@ -5,7 +5,9 @@ import com.yiwan.vaccinedispenser.core.common.SettingConstants;
 import com.yiwan.vaccinedispenser.core.common.emun.CabinetConstants;
 import com.yiwan.vaccinedispenser.core.common.emun.RedisKeyConstant;
 import com.yiwan.vaccinedispenser.core.config.FrameNumberConfig;
+import com.yiwan.vaccinedispenser.system.dispensing.ConfigFunction;
 import com.yiwan.vaccinedispenser.system.netty.msg.NettySendService;
+import com.yiwan.vaccinedispenser.system.sys.data.ConfigSendData;
 import com.yiwan.vaccinedispenser.system.sys.data.request.netty.*;
 import com.yiwan.vaccinedispenser.system.sys.data.request.vac.VacMachineRequest;
 import com.yiwan.vaccinedispenser.system.sys.service.netty.CabinetAService;
@@ -18,6 +20,7 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +41,8 @@ public class CabinetAServiceImpl implements CabinetAService {
     @Resource(name = "redisTemplate")
     private ValueOperations<String, String> valueOperations;
 
+    @Autowired
+    private ConfigFunction configFunction;
 
 
 
@@ -102,14 +107,15 @@ public class CabinetAServiceImpl implements CabinetAService {
             servoRequest.setWorkMode(CabinetConstants.Cabinet.CAB_A);
             servoRequest.setCommand(CabinetConstants.CabinetAServoCommand.POSITION);
             servoRequest.setStatus(CabinetConstants.CabinetAServoStatus.ZERO);
-            servoRequest.setMode(11);
+            servoRequest.setMode(SettingConstants.CABINET_A_HANDLE_SERVO_X);
             servoRequest.setDistance(request.getDropX());
             servo(servoRequest);
             VacUntil.sleep(200);
-            servoRequest.setMode(12);
+            servoRequest.setMode(SettingConstants.CABINET_A_HANDLE_SERVO_Z);
             servoRequest.setDistance(request.getDropZ());
             servo(servoRequest);
         }else {
+            ConfigSendData configSendData = configFunction.getSendDrugConfigData();
             CabinetAHandRequest cabinetAHandRequest = new CabinetAHandRequest();
             cabinetAHandRequest.setWorkMode(CabinetConstants.Cabinet.CAB_A);
             cabinetAHandRequest.setCommand(CabinetConstants.CabinetAHandCommand.FIND);
@@ -118,6 +124,7 @@ public class CabinetAServiceImpl implements CabinetAService {
             cabinetAHandRequest.setServoZ(SettingConstants.CABINET_A_HANDLE_SERVO_Z);
             cabinetAHandRequest.setDistanceZ(request.getDropZ());
             cabinetAHandRequest.setDistance(request.getUpDistance());
+            cabinetAHandRequest.setStepDistance(configSendData.getHandDropStepDis());
             handGetDrug(cabinetAHandRequest);
 
         }
@@ -126,6 +133,29 @@ public class CabinetAServiceImpl implements CabinetAService {
 
 
 
+
+
+
+    }
+
+    @Override
+    public void handleStepA(Boolean isStep) {
+        CabinetAStepRequest request = new CabinetAStepRequest();
+        request.setWorkMode(CabinetConstants.Cabinet.CAB_A);
+        request.setMode(CabinetConstants.CabinetAStepMode.HAND);
+
+        if(isStep){
+            ConfigSendData configSendData =configFunction.getSendDrugConfigData();
+            request.setCommand(CabinetConstants.CabinetAStepCommand.POSITION);
+            request.setStatus(CabinetConstants.CabinetAStepStatus.ZERO);
+            request.setDistance(configSendData.getHandDropStepDis());
+        }else {
+            //步进回原
+            request.setCommand(CabinetConstants.CabinetAStepCommand.ZERO);
+            request.setStatus(CabinetConstants.CabinetAStepStatus.ZERO);
+
+        }
+        step(request);
 
 
 
@@ -396,16 +426,25 @@ public class CabinetAServiceImpl implements CabinetAService {
 
     @Override
     public void handGetDrug(CabinetAHandRequest request) {
+
         //当前帧号
         Integer frameNumberNow = FrameNumberConfig.getFrameNumber();
         // 选择什么柜子
         int cabinet = CabinetConstants.Cabinet.CAB_A.num;
-        int command = request.getCommand().num;
-
         // 0x08 A柜下药
         int type = CabinetConstants.CabinetAType.HAND.num;
-        //获取请求头、数据长度
-        StringBuilder stringBuilder =NettyUtils.toHandler(CabinetConstants.CabinetDataLength.HAND.dataLength);
+        int command = request.getCommand().num;
+
+
+        StringBuilder stringBuilder;
+
+        if(command==1){
+            //获取请求头、数据长度
+             stringBuilder =NettyUtils.toHandler(CabinetConstants.CabinetDataLength.HAND_GET.dataLength);
+        }else {
+            stringBuilder =NettyUtils.toHandler(CabinetConstants.CabinetDataLength.HAND_DROP.dataLength);
+        }
+
         stringBuilder.append(NettyUtils.intToHexString(frameNumberNow,2));
         stringBuilder.append(NettyUtils.intToHexString(cabinet,1));
         stringBuilder.append(NettyUtils.intToHexString(type,1));
@@ -416,7 +455,9 @@ public class CabinetAServiceImpl implements CabinetAService {
         stringBuilder.append(NettyUtils.intToHexString(request.getServoZ(),1));
         stringBuilder.append(NettyUtils.intToHexString(request.getDistanceZ(),4));
         stringBuilder.append(NettyUtils.intToHexString(request.getDistance(),4));
-
+        if(command==1){
+            stringBuilder.append(NettyUtils.intToHexString(request.getStepDistance(),4));
+        }
         stringBuilder.append(CRC16Modbus.calculateCRC( stringBuilder.substring(8)));
         //包尾
         stringBuilder.append(Integer.toHexString(CabinetConstants.SUFFIX_INSTRUCTION));
@@ -430,6 +471,12 @@ public class CabinetAServiceImpl implements CabinetAService {
 
     @Override
     public Map<String,String> getInputAll() {
+        List<Integer> list = Collections.nCopies(28, -1);
+        valueOperations.set(RedisKeyConstant.sensor.SENSOR_CABINET_A, list.toString());
+        valueOperations.set(RedisKeyConstant.sensor.SENSOR_CABINET_B, list.toString());
+        valueOperations.set(RedisKeyConstant.sensor.SENSOR_CABINET_C, list.toString());
+
+
         //发送A柜查询所有传感器状态
         InPutRequest request = new InPutRequest();
         request.setCommand(CabinetConstants.InPutCommand.QUERY);

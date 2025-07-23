@@ -195,6 +195,7 @@ public class DispensingThreadManager {
                             dispensingHandFunction.dropHandDrugs();
                         }catch (Exception e){
                             log.error(String.valueOf(e));
+                            valueOperations.set(RedisKeyConstant.handMachine.HAND_DROP_START,"true");
                             log.error("机械手掉药模块");
                         }finally {
                             latch.countDown(); // 任务完成后递减锁存器的计数
@@ -325,6 +326,9 @@ public class DispensingThreadManager {
         vacMachineService.vaccineNunEqualsUserNum();
 
         //TODO 查看A、B、C柜子的传感器状态
+
+        //机械手是否可以开始
+        valueOperations.set(RedisKeyConstant.handMachine.HAND_DROP_START,"true");
     }
 
     //判断挡片
