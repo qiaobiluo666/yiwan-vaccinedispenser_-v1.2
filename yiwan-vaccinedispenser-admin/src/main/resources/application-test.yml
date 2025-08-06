@@ -38,7 +38,7 @@ netty:
   enable: true
 
 app:
-  apiKey: 176891037
+  apiKey: 905121470
   privateKeyPath: ./yiwan-vaccinedispenser-admin/src/main/resources/private_key.pem
   #发药政采云接口
   isOpen: false

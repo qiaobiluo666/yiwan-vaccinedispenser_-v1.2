@@ -4,6 +4,7 @@ import lombok.Data;
 
 import javax.validation.constraints.Min;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * @author slh
@@ -13,6 +14,9 @@ import java.time.LocalDateTime;
  */
 @Data
 public class MachineExceptionRequest {
+
+    private List<Integer> codeList;
+
     //id
     private Long id;
     //异常码    1 IO超时 2 皮带超时 3 伺服报警 4 自动上药报警

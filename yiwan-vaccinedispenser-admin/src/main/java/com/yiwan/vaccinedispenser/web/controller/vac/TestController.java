@@ -137,11 +137,11 @@ public class TestController {
 
         vacGetVaccine.setWorkbenchNum(nums[ThreadLocalRandom.current().nextInt(nums.length)]);
 
-        if("true".equals(configSetting.getIsIoDrop())){
-            dispensingFunction.addDrugList(vacGetVaccine);
-        }else {
-            dispensingHandFunction.addDrugList(vacGetVaccine);
-        }
+//        if("true".equals(configSetting.getIsIoDrop())){
+//            dispensingFunction.addDrugList(vacGetVaccine);
+//        }else {
+//            dispensingHandFunction.addDrugList(vacGetVaccine);
+//        }
 
         VacMachine vacMachine4 = vacMachineService.testDrop(3);
         if(vacMachine4==null){
@@ -155,11 +155,11 @@ public class TestController {
         vacGetVaccine.setWorkbenchNo("69");
         vacGetVaccine.setWorkbenchNum(nums[ThreadLocalRandom.current().nextInt(nums.length)]);
 //        vacGetVaccine.setWorkbenchNum(3);
-        if("true".equals(configSetting.getIsIoDrop())){
-            dispensingFunction.addDrugList(vacGetVaccine);
-        }else {
-            dispensingHandFunction.addDrugList(vacGetVaccine);
-        }
+//        if("true".equals(configSetting.getIsIoDrop())){
+//            dispensingFunction.addDrugList(vacGetVaccine);
+//        }else {
+//            dispensingHandFunction.addDrugList(vacGetVaccine);
+//        }
 
         return Result.success();
         
@@ -193,7 +193,7 @@ public class TestController {
     @PostMapping("/distanceXY")
     public Result distanceXY() throws ExecutionException, InterruptedException, IOException {
         ConfigData configData = configFunction.getAutoDrugConfigData();
-        DistanceServoData data =sendDrugFunction.DistanceSerVoGetXY(configData);
+        DistanceServoData data =sendDrugFunction.distanceSerVoGetXY(configData);
         return Result.success(data);
     }
 

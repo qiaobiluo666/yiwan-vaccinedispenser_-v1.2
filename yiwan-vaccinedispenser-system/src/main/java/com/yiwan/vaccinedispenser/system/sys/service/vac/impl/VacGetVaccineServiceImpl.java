@@ -9,6 +9,7 @@ import com.yiwan.vaccinedispenser.core.websocket.WebsocketService;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacDrug;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacGetVaccine;
 import com.yiwan.vaccinedispenser.system.sys.dao.VacGetVaccineMapper;
+import com.yiwan.vaccinedispenser.system.sys.data.RedisDrugListData;
 import com.yiwan.vaccinedispenser.system.sys.service.vac.VacDrugService;
 import com.yiwan.vaccinedispenser.system.sys.service.vac.VacGetVaccineService;
 import com.yiwan.vaccinedispenser.system.sys.service.vac.VacMachineExceptionService;
@@ -75,9 +76,9 @@ public class VacGetVaccineServiceImpl extends ServiceImpl<VacGetVaccineMapper, V
             if(vacGetVaccineList.isEmpty()){
 
                 //机器没有库存 查看药品名称 厂家
-                VacDrug vacDrug = vacDrugService.vacDrugGetByproductNo(vacGetVaccine.getProductNo());
-
-
+                VacDrug vacDrug = vacDrugService.vacDrugGetByproductNo(productNoList.get(0));
+                RedisDrugListData redisDrugListData = new RedisDrugListData();
+                redisDrugListData.setProductName(vacDrug.getProductName());
                 //返回没有药品
 //                zcyFunction.sendResult(vacGetVaccine);
                 Map<String, Object> commandData = new HashMap<>();
@@ -87,14 +88,14 @@ public class VacGetVaccineServiceImpl extends ServiceImpl<VacGetVaccineMapper, V
 
                 String msg;
                 if(vacDrug==null){
-                    msg= String.format("机器没有库存！未知药品编号：%s",vacGetVaccine.getProductNo());
+                    msg= String.format("机器没有库存！未知药品编号：%s",productNoList.get(0));
                 }else {
                     msg= String.format("机器没有库存：药品：%s 厂家：%s   药品编号：%s",vacDrug.getProductName(),vacDrug.getManufacturerName(),vacDrug.getProductNo());
                 }
 
                 //如果机器上没有药 直接返回机器上无药
                 log.error(msg);
-                vacMachineExceptionService.dropException(SettingConstants.MachineException.SENDWARING.code,null,msg);
+                vacMachineExceptionService.dropException(SettingConstants.MachineException.SENDWARING.code,redisDrugListData,msg);
                 zcyFunction.sendResult(vacGetVaccine,"机器没有库存");
                 return null;
             }else {

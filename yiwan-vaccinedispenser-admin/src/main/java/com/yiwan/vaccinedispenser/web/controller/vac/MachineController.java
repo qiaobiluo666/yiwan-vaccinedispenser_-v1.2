@@ -2,7 +2,6 @@ package com.yiwan.vaccinedispenser.web.controller.vac;
 
 import com.yiwan.vaccinedispenser.core.security.CurrentUser;
 import com.yiwan.vaccinedispenser.core.security.UserBean;
-import com.yiwan.vaccinedispenser.core.web.ErrorCode;
 import com.yiwan.vaccinedispenser.core.web.Result;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacGetVaccine;
 import com.yiwan.vaccinedispenser.system.sys.data.request.IdListRequest;
@@ -37,7 +36,13 @@ public class MachineController {
         return vacMachineService.vacMachineList();
     }
 
-
+    /**
+     * 疫苗列表
+     * */
+    @PostMapping("/lockerList")
+    public Result machineLockerList(){
+        return vacMachineService.vacMachineLockerList();
+    }
     /**
      * 添加疫苗信息
      * */
@@ -97,13 +102,22 @@ public class MachineController {
         return Result.success(vacMachineService.vacMachineInventoryDetail(productNo,status,page,size));
     }
 
+    /**
+     * 库存盘点
+     */
+    @GetMapping("/machine-stop")
+    public Result machineStop(@RequestParam Integer type) throws Exception {
+        return  vacMachineService.machineStop(type);
+    }
+
 
     /**
      * 库存盘点
      */
     @GetMapping("/inventory/count")
     public Result machineInventoryCount() throws Exception {
-        vacMachineService.machineInventoryCount();
+//        vacMachineService.machineInventoryCount(null);
+        vacMachineService.machineInventoryCount(null);
         return Result.success();
     }
 
@@ -125,5 +139,15 @@ public class MachineController {
         vacMachineService.machineSendDrugAlone(request,user);
         return Result.success();
     }
+
+    /**
+     * 一键清苗
+     */
+    @PostMapping("/clean")
+    public Result machineClean(@RequestBody    @Validated IdListRequest request){
+        log.info("收到一键清苗的list指令：{}",request);
+        return  vacMachineService.machineClean(request);
+    }
+
 
 }

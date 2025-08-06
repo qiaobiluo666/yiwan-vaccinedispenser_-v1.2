@@ -183,7 +183,6 @@ public class SendDrugFunction {
                     valueOperations.set(RedisKeyConstant.sensor.TABLE_SENSOR_COUNT,"1");
                 }
 
-
             }
 
     }
@@ -446,7 +445,9 @@ public class SendDrugFunction {
                 if(errorCount<=3){
                     valueOperations.set(RedisKeyConstant.CABINET_B_COUNT,String.valueOf(errorCount+1));
                 }else {
-                    log.error("药没掉入机械手3次！自动上药停止");
+                    String msg = "药没掉入机械手3次！自动上药停止";
+                    log.error(msg);
+                    vacMachineExceptionService.sendException(SettingConstants.MachineException.SEND.code,null,msg);
                     sendDrugThreadManager.stop();
                 }
                 return;
@@ -583,7 +584,6 @@ public class SendDrugFunction {
     }
 
 
-
     //A柜步进电机位置模式
     public void cabinetAStepPosition(CabinetConstants.CabinetAStepMode mode , int distance){
         CabinetAStepRequest stepRequests = new CabinetAStepRequest();
@@ -642,7 +642,7 @@ public class SendDrugFunction {
 
 
 
-    //移动扫码伺服
+    //移动A柜上药伺服
     public void moveHandServo(int x,int z){
 
         //设置3个伺服都为未运动完成状态
@@ -673,7 +673,7 @@ public class SendDrugFunction {
         }
     }
 
-    //机械手回零
+    //A柜机械手回零
     public void moveHandServoInit(ConfigData configData){
 
         valueOperations.set(RedisKeyConstant.handServo.X,"false");
@@ -686,14 +686,6 @@ public class SendDrugFunction {
         request.setStatus(CabinetConstants.CabinetAServoStatus.ZERO);
         request.setDistance(configData.getHandInitZ());
         cabinetAService.servo(request);
-        
-//        long timeout = System.currentTimeMillis();
-//        while ((System.currentTimeMillis() - timeout) < SettingConstants.SCAN_SERVO_WAIT_TIME) {
-//            if("true".equals(valueOperations.get(RedisKeyConstant.handServo.Z))){
-//                break;
-//            }
-//            VacUntil.sleep(200);
-//        }
 
         VacUntil.sleep(50);
         request.setDistance(configData.getHandInitX());
@@ -711,6 +703,120 @@ public class SendDrugFunction {
 
     }
 
+    //移动扫码伺服 1 Z轴最后走
+    public boolean moveScanServo(DistanceServoData data,int type) throws IOException {
+        boolean servoNormalFlag = true;
+        //1 Z最后走 2 Z轴先走
+        valueOperations.set(RedisKeyConstant.scanServo.X, "false");
+        valueOperations.set(RedisKeyConstant.scanServo.Y, "false");
+        valueOperations.set(RedisKeyConstant.scanServo.Z, "false");
+        Integer distanceX = data.getServoX();
+        Integer distanceY = data.getServoY();
+        Integer distanceZ = data.getServoZ();
+        CabinetBServoRequest request = new CabinetBServoRequest();
+        request.setWorkMode(CabinetConstants.Cabinet.CAB_B);
+        request.setCommand(CabinetConstants.CabinetBServoCommand.POSITION);
+        request.setStatus(CabinetConstants.CabinetBServoStatus.ZERO);
+
+        //Z轴最后走
+        if (type == 1) {
+            request.setMode(CabinetConstants.CabinetBServoMode.SCAN_SERVO_X.num);
+            request.setDistance(distanceX);
+            cabinetBService.servo(request);
+            VacUntil.sleep(50);
+            request.setDistance(distanceY);
+            request.setMode(CabinetConstants.CabinetBServoMode.SCAN_SERVO_Y.num);
+            cabinetBService.servo(request);
+            VacUntil.sleep(50);
+            long timeout = System.currentTimeMillis();
+            while ((System.currentTimeMillis() - timeout) < SettingConstants.SCAN_SERVO_WAIT_TIME) {
+
+                if ("true".equals(valueOperations.get(RedisKeyConstant.scanServo.X)) && "true".equals(valueOperations.get(RedisKeyConstant.scanServo.Y))) {
+                    break;
+                }
+                VacUntil.sleep(100);
+
+                if("true".equals(valueOperations.get(RedisKeyConstant.CABINET_B_SERVO_ERROR))){
+                    log.error("B柜伺服已经报警！终止自动上药程序！");
+                    servoNormalFlag = false;
+                    sendDrugThreadManager.stop();
+                    break;
+                }
+
+                VacUntil.sleep(100);
+
+            }
+
+            //如果伺服没有报警 则继续运动
+            if(servoNormalFlag){
+                request.setDistance(distanceZ);
+                request.setMode(CabinetConstants.CabinetBServoMode.SCAN_SERVO_Z.num);
+                cabinetBService.servo(request);
+
+                timeout = System.currentTimeMillis();
+                while ((System.currentTimeMillis() - timeout) < SettingConstants.SCAN_SERVO_WAIT_TIME) {
+
+                    if ("true".equals(valueOperations.get(RedisKeyConstant.scanServo.Z))) {
+                        break;
+                    }
+                    VacUntil.sleep(200);
+                }
+            }
+
+        } else {
+            //Z轴先走
+            request.setDistance(distanceZ);
+            request.setMode(CabinetConstants.CabinetBServoMode.SCAN_SERVO_Z.num);
+            cabinetBService.servo(request);
+            long timeout = System.currentTimeMillis();
+            while ((System.currentTimeMillis() - timeout) < SettingConstants.SCAN_SERVO_WAIT_TIME) {
+                if ("true".equals(valueOperations.get(RedisKeyConstant.scanServo.Z))) {
+                    break;
+                }
+                VacUntil.sleep(100);
+
+                if("true".equals(valueOperations.get(RedisKeyConstant.CABINET_B_SERVO_ERROR))){
+                    log.error("B柜伺服已经报警！终止自动上药程序！");
+                    sendDrugThreadManager.stop();
+                    servoNormalFlag = false;
+                    break;
+                }
+
+                VacUntil.sleep(100);
+            }
+
+            if(servoNormalFlag){
+                request.setMode(CabinetConstants.CabinetBServoMode.SCAN_SERVO_X.num);
+                request.setDistance(distanceX);
+                cabinetBService.servo(request);
+                VacUntil.sleep(50);
+                request.setDistance(distanceY);
+                request.setMode(CabinetConstants.CabinetBServoMode.SCAN_SERVO_Y.num);
+                cabinetBService.servo(request);
+                VacUntil.sleep(50);
+
+                timeout = System.currentTimeMillis();
+                while ((System.currentTimeMillis() - timeout) < SettingConstants.SCAN_SERVO_WAIT_TIME) {
+
+                    if ("true".equals(valueOperations.get(RedisKeyConstant.scanServo.X)) && "true".equals(valueOperations.get(RedisKeyConstant.scanServo.Y))) {
+                        break;
+                    }
+                    VacUntil.sleep(200);
+                }
+            }
+        }
+
+        //如果伺服报警 则显示3轴运动失败  true 运动正常 false 运动异常
+        return servoNormalFlag;
+
+    }
+
+
+
+
+
+
+
     //A点步进电机回原
     public void cabinetAStepInit(CabinetConstants.CabinetAStepMode mode){
         CabinetAStepRequest stepRequest = new CabinetAStepRequest();
@@ -720,8 +826,6 @@ public class SendDrugFunction {
         stepRequest.setStatus(CabinetConstants.CabinetAStepStatus.ZERO);
         cabinetAService.step(stepRequest);
     }
-
-
 
     //开始发药指令
     public void autoDrug(CabinetConstants.CabinetBApplyCommand command, CabinetConstants.CabinetBApplyMode mode, CabinetConstants.CabinetBApplyStatus status){
@@ -750,8 +854,6 @@ public class SendDrugFunction {
         cabinetBServoInit();
 
     }
-
-
 
 
     //3个距离传感器计算距离
@@ -812,15 +914,6 @@ public class SendDrugFunction {
 
         moveY = data.getServoY()+configData.getSensorDistanceY();
 
-//        if("true".equals(isX)){
-//            //计算中心点的XY走的距离
-//            data = VacUntil.findRectangleCenterX(left, right, configData.getTableAngle(), configData.getTableX(), configData.getTableY());
-//            moveX= data.getServoX()-configData.getSensorDistanceX();
-//        }else {
-//            data = VacUntil.findRectangleCenterY(left, right, configData.getTableAngle(), configData.getTableX(), configData.getTableY());
-//            moveX= data.getServoX()+configData.getSensorDistanceX();
-//        }
-//        moveY = data.getServoY()+configData.getSensorDistanceY();
 
         log.info(JSON.toJSONString(data));
         distanceServoData.setServoX(moveX);
@@ -852,6 +945,13 @@ public class SendDrugFunction {
         //上方距离多少
         int high = configData.getHeightConstants()-resultHigh/1000;
         log.info("上边距离：{}",high);
+
+        //判断一下 药盒上方的高度 防止传感器误差导致将药盒夹碎
+        if(high<=15){
+            log.error("药盒没有低于15mm的高度 传感器有误差 药盒退回！");
+            data.setIsReturn(true);
+            return data;
+        }
 
         //走的高
         data.setServoZ(configData.getTableZ()-high*100);
@@ -912,7 +1012,7 @@ public class SendDrugFunction {
 
     }
 
-    public DistanceServoData  DistanceSerVoGetXY(ConfigData configData)throws ExecutionException, InterruptedException, IOException {
+    public DistanceServoData distanceSerVoGetXY(ConfigData configData)throws ExecutionException, InterruptedException, IOException {
         log.info("开始测距离");
         ConfigSetting configSetting = configFunction.getSettingConfigData();
         DistanceServoData data =new DistanceServoData();
@@ -1226,141 +1326,6 @@ public class SendDrugFunction {
 
 
 
-
-
-    //B柜Z轴回原点
-    public  void  moveServoZZero(){
-
-        valueOperations.set(RedisKeyConstant.scanServo.Z, "false");
-
-        CabinetBServoRequest request = new CabinetBServoRequest();
-        request.setWorkMode(CabinetConstants.Cabinet.CAB_B);
-        request.setCommand(CabinetConstants.CabinetBServoCommand.POSITION);
-        request.setStatus(CabinetConstants.CabinetBServoStatus.ZERO);
-        request.setMode(CabinetConstants.CabinetBServoMode.SCAN_SERVO_Z.num);
-        request.setDistance(0);
-        cabinetBService.servo(request);
-
-        long timeout = System.currentTimeMillis();
-        while ((System.currentTimeMillis() - timeout) < SettingConstants.SCAN_SERVO_WAIT_TIME) {
-           
-            if ("true".equals(valueOperations.get(RedisKeyConstant.scanServo.Z)) ) {
-                break;
-            }
-            VacUntil.sleep(200);
-        }
-
-    }
-
-
-
-    //移动扫码伺服 1 Z轴最后走
-    public boolean moveScanServo(DistanceServoData data,int type) throws IOException {
-        boolean servoNormalFlag = true;
-        //1 Z最后走 2 Z轴先走
-        valueOperations.set(RedisKeyConstant.scanServo.X, "false");
-        valueOperations.set(RedisKeyConstant.scanServo.Y, "false");
-        valueOperations.set(RedisKeyConstant.scanServo.Z, "false");
-        Integer distanceX = data.getServoX();
-        Integer distanceY = data.getServoY();
-        Integer distanceZ = data.getServoZ();
-        CabinetBServoRequest request = new CabinetBServoRequest();
-        request.setWorkMode(CabinetConstants.Cabinet.CAB_B);
-        request.setCommand(CabinetConstants.CabinetBServoCommand.POSITION);
-        request.setStatus(CabinetConstants.CabinetBServoStatus.ZERO);
-
-        //Z轴最后走
-        if (type == 1) {
-            request.setMode(CabinetConstants.CabinetBServoMode.SCAN_SERVO_X.num);
-            request.setDistance(distanceX);
-            cabinetBService.servo(request);
-            VacUntil.sleep(50);
-            request.setDistance(distanceY);
-            request.setMode(CabinetConstants.CabinetBServoMode.SCAN_SERVO_Y.num);
-            cabinetBService.servo(request);
-            VacUntil.sleep(50);
-            long timeout = System.currentTimeMillis();
-            while ((System.currentTimeMillis() - timeout) < SettingConstants.SCAN_SERVO_WAIT_TIME) {
-               
-                if ("true".equals(valueOperations.get(RedisKeyConstant.scanServo.X)) && "true".equals(valueOperations.get(RedisKeyConstant.scanServo.Y))) {
-                    break;
-                }
-                VacUntil.sleep(100);
-
-                if("true".equals(valueOperations.get(RedisKeyConstant.CABINET_B_SERVO_ERROR))){
-                    log.error("B柜伺服已经报警！终止自动上药程序！");
-                    servoNormalFlag = false;
-                    sendDrugThreadManager.stop();
-                    break;
-                }
-
-                VacUntil.sleep(100);
-
-            }
-
-            //如果伺服没有报警 则继续运动
-            if(servoNormalFlag){
-                request.setDistance(distanceZ);
-                request.setMode(CabinetConstants.CabinetBServoMode.SCAN_SERVO_Z.num);
-                cabinetBService.servo(request);
-
-                timeout = System.currentTimeMillis();
-                while ((System.currentTimeMillis() - timeout) < SettingConstants.SCAN_SERVO_WAIT_TIME) {
-
-                    if ("true".equals(valueOperations.get(RedisKeyConstant.scanServo.Z))) {
-                        break;
-                    }
-                    VacUntil.sleep(200);
-                }
-            }
-
-        } else {
-            //Z轴先走
-            request.setDistance(distanceZ);
-            request.setMode(CabinetConstants.CabinetBServoMode.SCAN_SERVO_Z.num);
-            cabinetBService.servo(request);
-            long timeout = System.currentTimeMillis();
-            while ((System.currentTimeMillis() - timeout) < SettingConstants.SCAN_SERVO_WAIT_TIME) {
-                if ("true".equals(valueOperations.get(RedisKeyConstant.scanServo.Z))) {
-                    break;
-                }
-                VacUntil.sleep(100);
-
-                if("true".equals(valueOperations.get(RedisKeyConstant.CABINET_B_SERVO_ERROR))){
-                    log.error("B柜伺服已经报警！终止自动上药程序！");
-                    sendDrugThreadManager.stop();
-                    servoNormalFlag = false;
-                    break;
-                }
-
-                VacUntil.sleep(100);
-            }
-
-            if(servoNormalFlag){
-                request.setMode(CabinetConstants.CabinetBServoMode.SCAN_SERVO_X.num);
-                request.setDistance(distanceX);
-                cabinetBService.servo(request);
-                VacUntil.sleep(50);
-                request.setDistance(distanceY);
-                request.setMode(CabinetConstants.CabinetBServoMode.SCAN_SERVO_Y.num);
-                cabinetBService.servo(request);
-                VacUntil.sleep(50);
-
-                timeout = System.currentTimeMillis();
-                while ((System.currentTimeMillis() - timeout) < SettingConstants.SCAN_SERVO_WAIT_TIME) {
-
-                    if ("true".equals(valueOperations.get(RedisKeyConstant.scanServo.X)) && "true".equals(valueOperations.get(RedisKeyConstant.scanServo.Y))) {
-                        break;
-                    }
-                    VacUntil.sleep(200);
-                }
-            }
-        }
-
-        //如果伺服报警 则显示3轴运动失败  true 运动正常 false 运动异常
-        return servoNormalFlag;
-
-    }
 
 
 

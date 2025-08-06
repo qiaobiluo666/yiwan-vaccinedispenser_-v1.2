@@ -20,7 +20,6 @@ import com.yiwan.vaccinedispenser.system.sys.data.ConfigSendData;
 import com.yiwan.vaccinedispenser.system.sys.data.ConfigSetting;
 import com.yiwan.vaccinedispenser.system.sys.data.RedisDrugListData;
 import com.yiwan.vaccinedispenser.system.sys.data.request.netty.CabinetAHandRequest;
-import com.yiwan.vaccinedispenser.system.sys.data.request.netty.CabinetCSendDrugRequest;
 import com.yiwan.vaccinedispenser.system.sys.service.netty.CabinetAService;
 import com.yiwan.vaccinedispenser.system.sys.service.netty.CabinetCService;
 import com.yiwan.vaccinedispenser.system.sys.service.sys.SysConfigService;
@@ -383,7 +382,6 @@ public class DispensingHandFunction {
         //等待A柜下药动作反馈
         while ((System.currentTimeMillis() - timeout) < SettingConstants.HAND_DROP_WAIT_TIMEOUT) {
             String status = valueOperations.get(RedisKeyConstant.handMachine.HAND_DROP_STATUS);
-            log.info("掉药状态：{}",status);
                 if("success".equals(status)){
                     log.info("下药成功");
                     return "success";
@@ -455,15 +453,20 @@ public class DispensingHandFunction {
 
         if(beltDataList != null){
             for(String beltData : beltDataList){
-                RedisDrugListData drugData = JSON.parseObject(beltData, RedisDrugListData.class);
-                //后续还有这个仓位的掉药记录删除
-                if(Objects.equals(drugData.getPositionNum(), drugDataList.getPositionNum())&&Objects.equals(drugData.getLineNum(),drugDataList.getLineNum())){
-                    listOps.remove(RedisKeyConstant.DROP_HAND_LIST,1,beltData);
-                    VacGetVaccine vacGetVaccine = new VacGetVaccine();
-                    BeanUtils.copyProperties(drugData,vacGetVaccine);
-                    //重新发药
-                    addDrugList(vacGetVaccine);
+                try {
+                    RedisDrugListData drugData = JSON.parseObject(beltData, RedisDrugListData.class);
+                    //后续还有这个仓位的掉药记录删除
+                    if(Objects.equals(drugData.getPositionNum(), drugDataList.getPositionNum())&&Objects.equals(drugData.getLineNum(),drugDataList.getLineNum())){
+                        listOps.remove(RedisKeyConstant.DROP_HAND_LIST,1,beltData);
+                        VacGetVaccine vacGetVaccine = new VacGetVaccine();
+                        BeanUtils.copyProperties(drugData,vacGetVaccine);
+                        //重新发药
+                        addDrugList(vacGetVaccine);
+                    }
+                }catch (Exception ignored){
+
                 }
+
             }
         }
 

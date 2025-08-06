@@ -104,6 +104,7 @@ public class DispensingFunction {
      * 条形码 扫码以后用政采云的数据 实现发药
      */
     public void addDrugList(VacGetVaccine vacGetVaccine) throws Exception {
+        log.info(JSON.toJSONString(vacGetVaccine));
 
         //最后一个发药结束10分钟后再关门
         valueOperations.set(RedisKeyConstant.CABINET_C_BLANK_OPEN_TIME, LocalDateTime.now().toString());
@@ -113,6 +114,12 @@ public class DispensingFunction {
         if("true".equals(valueOperations.get(RedisKeyConstant.DRUG_RETURN))){
             zcyFunction.sendResult(vacGetVaccine,"正在疫苗退回，无法发药！");
             throw new ServiceException("正在疫苗退回，无法发药！");
+        }
+
+        //机器正在疫苗退回 不发药
+        if("true".equals(valueOperations.get(RedisKeyConstant.DRUG_ERROR_START))){
+            zcyFunction.sendResult(vacGetVaccine,"正在异常清理，无法发药！");
+            throw new ServiceException("正在异常清理，无法发药！");
         }
 
 
@@ -127,8 +134,8 @@ public class DispensingFunction {
                 log.error(msg);
                 if("true".equals(configSetting.getZcySend())){
                     zcyFunction.sendResult(vacGetVaccine,"复位按钮还没有复原，请回原后重新发药!");
-                    vacMachineExceptionService.dropException(SettingConstants.MachineException.SENDWARING.code,null,msg);
                 }
+                vacMachineExceptionService.dropException(SettingConstants.MachineException.SENDWARING.code,null,msg);
                 throw new ServiceException(msg);
             }
         }
@@ -247,7 +254,6 @@ public class DispensingFunction {
                         if(batchNo!=null){
 
                             drugsWithNearestExpiry = nearestExpiryDrugList.stream()
-
                                     .filter(drug -> drug.getExpiredAt().equals(nearestExpiryDate))
                                     .filter(drug -> Objects.equals(drug.getBatchNo(), batchNo))
                                     .toList();
@@ -476,7 +482,9 @@ public class DispensingFunction {
                 intPut(CabinetConstants.InPutCommand.QUERY,SettingConstants.SENSOR_CABINET_A_MOVE_BELT_NUM);
             }
         }else {
-            log.error("传送小皮带上有药 有异常");
+            String msg = "传送小皮带上有药 有异常";
+            vacMachineExceptionService.dropException(SettingConstants.MachineException.SENDDRUG.code,null,msg);
+            log.error(msg);
 
         }
 
@@ -490,13 +498,20 @@ public class DispensingFunction {
         boolean pyFlag = false;
         boolean flag = false;
         long timeout = System.currentTimeMillis();
+        String isBlankOpen = null,isStop;
         //等待C柜斜坡皮带停止
         while ((System.currentTimeMillis() - timeout) < SettingConstants.FIND_BELT_STOP_WAIT_TIME) {
             //查询皮带状态
-            moveFind(drugListData.getWorkbenchNum());
-            String isBlankOpen;
+            if("杭州浦沿".equals(configSetting.getHospitalName())) {
+                moveFind(drugListData.getWorkbenchNum());
+
+            }else {
+                moveFindOld(0);
+            }
+
+
             VacUntil.sleep(200);
-            String isStop = valueOperations.get(RedisKeyConstant.CABINET_C_BELT_STOP);
+            isStop = valueOperations.get(RedisKeyConstant.CABINET_C_BELT_STOP);
 
         //C柜是否有挡片
         if("true".equals(configSetting.getCBlank())){
@@ -511,11 +526,10 @@ public class DispensingFunction {
                     break;
                 }
 
-
-
             }else {
                 //查询挡片状态
                 moveBlock(CabinetConstants.CabinetCSendDrugBlockStatus.QUERY);
+
                 VacUntil.sleep(200);
                 isBlankOpen = valueOperations.get(RedisKeyConstant.CABINET_C_BLOCK_STATUS);
                 //如果挡片打开 和 皮带停止
@@ -526,12 +540,12 @@ public class DispensingFunction {
                     break;
                 }
 
-                if("close".equals(isBlankOpen)){
+                if(!"open".equals(isBlankOpen)){
                     log.info("正在打开C柜挡片！");
                     moveBlock(CabinetConstants.CabinetCSendDrugBlockStatus.OPEN);
                 }
 
-                VacUntil.sleep(100);
+                VacUntil.sleep(200);
             }
 
         }else {
@@ -544,9 +558,14 @@ public class DispensingFunction {
         }
 
         if(!flag){
-
-            log.error("斜坡皮带一直未停止，超时发送命令！");
-
+            String msg;
+            if("false".equals(isBlankOpen)){
+                msg = "斜坡皮带一直未停止，超时发送命令！";
+            }else {
+                msg = "挡片一直没有开启！";
+            }
+            vacMachineExceptionService.dropException(SettingConstants.MachineException.SENDWARING.code,null,msg);
+            log.error("");
         }
         log.info("将苗发到接种台！！！！");
         //电磁铁版本
@@ -584,11 +603,8 @@ public class DispensingFunction {
             valueOperations.set(RedisKeyConstant.CABINET_A_GS_BELT_HAVE_DRUG,"false");
             //将该发药队列移除
             listOps.leftPop(RedisKeyConstant.BELT_LIST);
-            //将药发送到工作台
-            moveWork(drugListData.getWorkbenchNum());
 
         }else {
-
 
             //机械手版本
             //将药发送到工作台
@@ -640,15 +656,20 @@ public class DispensingFunction {
 
         if(beltDataList != null){
             for(String beltData : beltDataList){
-                RedisDrugListData drugData = JSON.parseObject(beltData, RedisDrugListData.class);
-                //后续还有这个仓位的掉药记录删除
-                if(Objects.equals(drugData.getPositionNum(), drugDataList.getPositionNum())&&Objects.equals(drugData.getLineNum(),drugDataList.getLineNum())){
-                    listOps.remove(RedisKeyConstant.BELT_LIST,1,beltData);
-                    VacGetVaccine vacGetVaccine = new VacGetVaccine();
-                    BeanUtils.copyProperties(drugData,vacGetVaccine);
-                    //重新发药
-                    addDrugList(vacGetVaccine);
+                try{
+                    RedisDrugListData drugData = JSON.parseObject(beltData, RedisDrugListData.class);
+                    //后续还有这个仓位的掉药记录删除
+                    if(Objects.equals(drugData.getPositionNum(), drugDataList.getPositionNum())&&Objects.equals(drugData.getLineNum(),drugDataList.getLineNum())){
+                        listOps.remove(RedisKeyConstant.BELT_LIST,1,beltData);
+                        VacGetVaccine vacGetVaccine = new VacGetVaccine();
+                        BeanUtils.copyProperties(drugData,vacGetVaccine);
+                        //重新发药
+                        addDrugList(vacGetVaccine);
+                    }
+                }catch (Exception ignored){
+
                 }
+
             }
         }
 
@@ -715,7 +736,7 @@ public class DispensingFunction {
     }
 
     //出药指令
-    private void  moveWork(int workNum){
+    public void  moveWork(int workNum){
         valueOperations.set(RedisKeyConstant.CABINET_C_WORK,"false");
         CabinetCSendDrugRequest cabinetCSendDrugRequest = new CabinetCSendDrugRequest();
         cabinetCSendDrugRequest.setWorkMode(CabinetConstants.Cabinet.CAB_C);
@@ -733,6 +754,14 @@ public class DispensingFunction {
         cabinetCService.sendDrug(cabinetCSendDrugRequest);
     }
 
+
+    //查询C柜斜坡皮带状态
+    private void  moveFindOld(Integer mode){
+        CabinetCSendDrugRequest cabinetCSendDrugRequest = new CabinetCSendDrugRequest();
+        cabinetCSendDrugRequest.setWorkMode(CabinetConstants.Cabinet.CAB_C);
+        cabinetCSendDrugRequest.setCommand(CabinetConstants.CabinetCSendDrugCommand.FIND);
+        cabinetCService.sendDrug(cabinetCSendDrugRequest);
+    }
 
 
     //挡片控制
@@ -954,5 +983,6 @@ public class DispensingFunction {
         cabinetAServoRequest.setDistance(0);
         cabinetAService.servo(cabinetAServoRequest);
     }
+
 
 }

@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.yiwan.vaccinedispenser.system.dispensing.ConfigFunction;
 import com.yiwan.vaccinedispenser.system.dispensing.DispensingFunction;
 import com.yiwan.vaccinedispenser.system.dispensing.DispensingHandFunction;
+import com.yiwan.vaccinedispenser.system.domain.model.vac.VacBoxSpec;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacDrug;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacGetVaccine;
 import com.yiwan.vaccinedispenser.system.sys.data.ConfigSetting;
@@ -103,6 +104,8 @@ public class ZcyFunction {
         }else {
             //拿到电子监管码信息，根据产品编码拿到疫苗信息
             DrugRecordRequest drugRecordData = JSON.parseObject(bodyJson.getString("result"),DrugRecordRequest.class);
+            VacDrug vacDrug = vacDrugService.vacDrugGetByproductNo(drugRecordData.getProductNo());
+            drugRecordData.setProductName(vacDrug.getProductName());
             drugRecordData.setIsReturn(false);
             return drugRecordData;
 
@@ -152,7 +155,7 @@ public class ZcyFunction {
 
                                 dispensingFunction.addDrugList(vacGetVaccine);
                             }else {
-                                dispensingHandFunction.dropHandDrugs();
+                                dispensingHandFunction.addDrugList(vacGetVaccine);
                             }
 
                             //修改发药状态
@@ -171,10 +174,10 @@ public class ZcyFunction {
                             ConfigSetting configSetting = configFunction.getSettingConfigData();
                             if("true".equals(configSetting.getIsIoDrop())){
                                 log.info("电磁铁发苗");
-                                dispensingFunction.addDrugList(vacGetVaccine);
+                                dispensingFunction.addDrugList(vacGetVaccine1);
                             }else {
                                 log.info("机械手发苗");
-                                dispensingHandFunction.dropHandDrugs();
+                                dispensingHandFunction.addDrugList(vacGetVaccine1);
                             }
 
                         }

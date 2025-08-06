@@ -28,6 +28,7 @@ public interface VacMachineService extends IService<VacMachine>{
 
     Result vacMachineList();
 
+    Result vacMachineLockerList();
 
     Result   vacMachineAdd(MachineListRequest request, UserBean user);
 
@@ -90,8 +91,13 @@ public interface VacMachineService extends IService<VacMachine>{
 
     Result handDrugPeople(String code,Integer bulkNum) throws Exception;
 
+
+    //机器暂停
+
+    Result machineStop(Integer type);
+
     //库存盘点
-    Result machineInventoryCount() throws Exception;
+    Result machineInventoryCount(Integer lineNum) throws Exception;
 
 
     //根据machineId来更新仓位里面的可用数量
@@ -133,4 +139,11 @@ public interface VacMachineService extends IService<VacMachine>{
     void   test1();
     //抬升伺服老化
     void test2();
+
+    //机器异常清苗
+    Result  machineClean(IdListRequest request);
+
+
+
+
 }

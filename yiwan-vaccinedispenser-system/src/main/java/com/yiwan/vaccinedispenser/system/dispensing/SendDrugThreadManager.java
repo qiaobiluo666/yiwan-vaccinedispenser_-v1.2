@@ -55,6 +55,11 @@ public class SendDrugThreadManager {
 
 
     public void goTable(){
+       String isNotError =  valueOperations.get(RedisKeyConstant.CABINET_B_SERVO_ERROR);
+       if("true".equals(isNotError)){
+           return;
+       }
+
         running=true;
         valueOperations.set(RedisKeyConstant.CABINET_B_COUNT,"1");
         taskExecutor.execute(() -> {
@@ -79,6 +84,10 @@ public class SendDrugThreadManager {
 
     //开始自动上药
     public void sendDrug() throws IOException {
+
+        if("true".equals(valueOperations.get(RedisKeyConstant.DRUG_INVENTORY_START))){
+            throw new ServiceException("正在库存盘点！");
+        }
         if("true".equals(valueOperations.get(RedisKeyConstant.autoDrug.AUTO_DRUG_START))){
             throw new ServiceException("正在自动上药");
         }
@@ -87,6 +96,10 @@ public class SendDrugThreadManager {
             throw new ServiceException("设备有异常，请清除异常!");
         }
 
+        String isNotError =  valueOperations.get(RedisKeyConstant.CABINET_B_SERVO_ERROR);
+        if("true".equals(isNotError)){
+            return;
+        }
         log.info("开始自动上药 ！！！");
         running=true;
         ConfigData configData = configFunction.getAutoDrugConfigData();

@@ -147,9 +147,12 @@ public class ConfigFunction {
 
                 case "INVENTORY_START" ->  configSetting.setInventoryStart(Boolean.parseBoolean(sysConfig.getConfigValue()));
 
+                case "INVENTORY_PY_VALUE"->  configSetting.setInventoryPyValue(Integer.valueOf(sysConfig.getConfigValue()));
+
                 case "HOSPITAL_NAME" ->  configSetting.setHospitalName(sysConfig.getConfigValue());
 
                 case "IS_IO_DROP" ->  configSetting.setIsIoDrop(sysConfig.getConfigValue());
+
 
 
             }

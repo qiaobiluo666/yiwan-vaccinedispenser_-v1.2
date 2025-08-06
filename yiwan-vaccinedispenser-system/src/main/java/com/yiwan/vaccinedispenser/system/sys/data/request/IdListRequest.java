@@ -14,4 +14,6 @@ public class IdListRequest {
 
     private List<Long> idList;
 
+    private List<Integer> errorList;
+
 }

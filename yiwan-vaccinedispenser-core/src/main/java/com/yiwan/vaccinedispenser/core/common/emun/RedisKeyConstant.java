@@ -139,10 +139,15 @@ public interface RedisKeyConstant {
 
     String  CABINET_C_BLANK_OPEN_TIME = "Machine:cabinetC:blankIsOpenTime";
 
+    //疫苗退回
+    String  DRUG_INVENTORY_START = "Machine:inventoryStart";
 
+    //疫苗退回
     String  DRUG_RETURN = "Machine:drugReturn";
 
     String DRUG_RUN_START = "Machine:drugRunStart";
+
+    String DRUG_ERROR_START = "Machine:drugErrorStart";
 
     interface handMachine{
         //取药状态

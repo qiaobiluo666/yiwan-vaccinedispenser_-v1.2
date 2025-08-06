@@ -49,10 +49,13 @@ public class VacMachineExceptionServiceImpl extends ServiceImpl<VacMachineExcept
     public Page<VacMachineException> machineExceptionList(MachineExceptionRequest request) {
 
         IPage<VacMachineException> page= new Page<>(request.getPage(),request.getSize());
-
         LambdaQueryWrapper<VacMachineException> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(VacMachineException::getDeleted,0)
                 .orderByDesc(VacMachineException::getCreateTime);
+        if(!request.getCodeList().isEmpty()){
+            log.info(request.getCodeList().toString());
+            wrapper.in(VacMachineException::getCode,request.getCodeList());
+        }
         IPage<VacMachineException> vacMachineExceptionIPage = vacMachineExceptionMapper.selectPage(page, wrapper);
 
         return (Page<VacMachineException>) vacMachineExceptionIPage;
@@ -116,10 +119,22 @@ public class VacMachineExceptionServiceImpl extends ServiceImpl<VacMachineExcept
 
     @Override
     public void sendException(Integer code, String desc) {
-        VacMachineException vacMachineException = new VacMachineException();
-        vacMachineException.setCode(code);
-        vacMachineException.setDescription(desc);
-        vacMachineExceptionMapper.insert(vacMachineException);
+
+       List<VacMachineException> vacMachineExceptionList =  vacMachineExceptionMapper.selectList(new LambdaQueryWrapper<VacMachineException>()
+                .eq(VacMachineException::getDeleted,0)
+                .eq(VacMachineException::getCode,code)
+                .eq(VacMachineException::getDescription,desc)
+
+        );
+
+        if(vacMachineExceptionList.isEmpty()){
+            VacMachineException vacMachineException = new VacMachineException();
+            vacMachineException.setCode(code);
+            vacMachineException.setDescription(desc);
+
+            vacMachineExceptionMapper.insert(vacMachineException);
+        }
+
     }
 
     @Override

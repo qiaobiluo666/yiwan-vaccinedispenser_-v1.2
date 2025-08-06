@@ -43,6 +43,8 @@ public class ConfigSetting {
     //库存盘点功能是否开启
     private Boolean inventoryStart;
 
+    //库存盘点功能 激光偏移距离
+    private Integer inventoryPyValue;
     //医院名称
     private String hospitalName;
 

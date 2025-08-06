@@ -73,14 +73,14 @@ public class TaskService {
                 ConfigSetting configSetting = configFunction.getSettingConfigData();
                 //是否有挡片配置
                 if("true".equals(configSetting.getCBlank())){
-                    dispensingFunction.closeBlank();
+                    dispensingFunction.openBlank();
                 }
             }else {
                 log.info("执行任务关闭挡片！当前时间：" + LocalTime.now());
                 ConfigSetting configSetting = configFunction.getSettingConfigData();
                 //是否有挡片配置
                 if("true".equals(configSetting.getCBlank())){
-                    dispensingFunction.openBlank();
+                    dispensingFunction.closeBlank();
                 }
 
             }
