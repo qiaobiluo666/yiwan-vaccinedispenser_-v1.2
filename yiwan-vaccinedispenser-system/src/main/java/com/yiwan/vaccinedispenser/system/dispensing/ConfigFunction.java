@@ -2,6 +2,7 @@ package com.yiwan.vaccinedispenser.system.dispensing;
 
 import com.alibaba.fastjson.JSON;
 import com.yiwan.vaccinedispenser.system.domain.model.system.SysConfig;
+import com.yiwan.vaccinedispenser.system.sys.data.ConfigCameraData;
 import com.yiwan.vaccinedispenser.system.sys.data.ConfigData;
 import com.yiwan.vaccinedispenser.system.sys.data.ConfigSendData;
 import com.yiwan.vaccinedispenser.system.sys.data.ConfigSetting;
@@ -154,6 +155,11 @@ public class ConfigFunction {
                 case "IS_IO_DROP" ->  configSetting.setIsIoDrop(sysConfig.getConfigValue());
 
 
+                case "IS_WARNNING" ->  configSetting.setIsWarn(sysConfig.getConfigValue());
+
+                case "IS_CLOSE_SENSOR" ->  configSetting.setIsCloseSensor(sysConfig.getConfigValue());
+
+
 
             }
         }
@@ -169,7 +175,6 @@ public class ConfigFunction {
         for(SysConfig sysConfig: sysConfigList){
             switch (sysConfig.getConfigType()){
 
-
                 //激光传感器到中心 的偏移量
                 case "BELT_1"->configSendData.setBelt1(Integer.parseInt(sysConfig.getConfigValue()));
 
@@ -180,7 +185,6 @@ public class ConfigFunction {
                 case "BELT_4"->configSendData.setBelt4(Integer.parseInt(sysConfig.getConfigValue()));
 
                 case "BELT_5"->configSendData.setBelt5(Integer.parseInt(sysConfig.getConfigValue()));
-
 
                 case "CABINET_C_1"->configSendData.setCabinetC1(Integer.parseInt(sysConfig.getConfigValue()));
 
@@ -194,13 +198,13 @@ public class ConfigFunction {
 
                 case "CABINET_C_6"->configSendData.setCabinetC6(Integer.parseInt(sysConfig.getConfigValue()));
 
-
-
                 case "IO_WAIT_TIME"->configSendData.setIoWaitTime(Integer.parseInt(sysConfig.getConfigValue()));
 
                 case "HAND_UP_DISTANCE"->configSendData.setHandUpDistance(Integer.parseInt(sysConfig.getConfigValue()));
 
                 case "RETURN_WORKNUM"->configSendData.setReturnWorkNum(Integer.parseInt(sysConfig.getConfigValue()));
+
+                case "RETURN_WORKNUM_TWO"->configSendData.setReturnWorkNumTwo(Integer.parseInt(sysConfig.getConfigValue()));
 
                 case "HAND_MOVE_C_X"->configSendData.setHandMoveCX(Integer.parseInt(sysConfig.getConfigValue()));
 
@@ -209,6 +213,12 @@ public class ConfigFunction {
                 case "HAND_MOVE_C_STEP"->configSendData.setHandMoveCStepDis(Integer.parseInt(sysConfig.getConfigValue()));
 
                 case "HAND_DROP_STEP"->configSendData.setHandDropStepDis(Integer.parseInt(sysConfig.getConfigValue()));
+
+                case "SMALL_BELT_STOP_SPEED"->configSendData.setSmallBeltStopSpeed(Integer.parseInt(sysConfig.getConfigValue()));
+
+                case "SMALL_BELT_GO_C_SPEED"->configSendData.setSmallBeltGoCSpeed(Integer.parseInt(sysConfig.getConfigValue()));
+
+                case "BELT_SEND_SPEED"->configSendData.setBeltSendSpeed(Integer.parseInt(sysConfig.getConfigValue()));
             }
         }
 
@@ -217,5 +227,47 @@ public class ConfigFunction {
         return configSendData;
     }
 
+    public ConfigCameraData getCameraConfigData(){
+        ConfigCameraData configCameraData = new ConfigCameraData();
+        List<SysConfig> sysConfigList = sysConfigService.getCameraConfigData();
+        //如果数据库有 那就使用数据库的
+        for(SysConfig sysConfig: sysConfigList) {
+            switch (sysConfig.getConfigType()) {
+                case "BELT_CAM_1" -> {
+                    configCameraData.setBeltCam1(sysConfig.getConfigValue());
+                    configCameraData.setBeltCam1Desc(sysConfig.getDescriptions());
+                }
+                case "BELT_CAM_2" -> {
+                    configCameraData.setBeltCam2(sysConfig.getConfigValue());
+                    configCameraData.setBeltCam2Desc(sysConfig.getDescriptions());
+                }
+                case "BELT_CAM_3" -> {
+                    configCameraData.setBeltCam3(sysConfig.getConfigValue());
+                    configCameraData.setBeltCam3Desc(sysConfig.getDescriptions());
+                }
+                case "BELT_CAM_4" -> {
+                    configCameraData.setBeltCam4(sysConfig.getConfigValue());
+                    configCameraData.setBeltCam4Desc(sysConfig.getDescriptions());
+                }
+                case "BELT_CAM_5" -> {
+                    configCameraData.setBeltCam5(sysConfig.getConfigValue());
+                    configCameraData.setBeltCam5Desc(sysConfig.getDescriptions());
+                }
+                case "LIFT_CAM_1" ->{
+                    configCameraData.setLiftCam(sysConfig.getConfigValue());
+                    configCameraData.setLiftCamDesc(sysConfig.getDescriptions());
+                }
+                case "AUTO_CAM_1" -> {
+                    configCameraData.setAutoCam1(sysConfig.getConfigValue());
+                    configCameraData.setAutoCam1Desc(sysConfig.getDescriptions());
+                }
+                case "AUTO_CAM_2" -> {
+                    configCameraData.setAutoCam2(sysConfig.getConfigValue());
+                    configCameraData.setAutoCam2Desc(sysConfig.getDescriptions());
+                }
+            }
+        }
 
+            return configCameraData;
+    }
 }

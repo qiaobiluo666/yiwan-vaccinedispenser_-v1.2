@@ -87,11 +87,7 @@ public class VacGetVaccineServiceImpl extends ServiceImpl<VacGetVaccineMapper, V
                 websocketService.sendInfo(CommandEnums.DEVICE_STATUS_SEND_DRUG_LIST_START.getCode(),commandData);
 
                 String msg;
-                if(vacDrug==null){
-                    msg= String.format("机器没有库存！未知药品编号：%s",productNoList.get(0));
-                }else {
-                    msg= String.format("机器没有库存：药品：%s 厂家：%s   药品编号：%s",vacDrug.getProductName(),vacDrug.getManufacturerName(),vacDrug.getProductNo());
-                }
+                msg = String.format("机器没有库存：药品：%s 厂家：%s   药品编号：%s", vacDrug.getProductName(), vacDrug.getManufacturerName(), vacDrug.getProductNo());
 
                 //如果机器上没有药 直接返回机器上无药
                 log.error(msg);

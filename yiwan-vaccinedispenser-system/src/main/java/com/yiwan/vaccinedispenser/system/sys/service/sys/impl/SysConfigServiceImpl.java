@@ -104,6 +104,13 @@ public class SysConfigServiceImpl implements SysConfigService {
     }
 
     @Override
+    public List<SysConfig> getCameraConfigData() {
+        return sysConfigDao.selectList(new LambdaQueryWrapper<SysConfig>()
+                .eq(SysConfig::getCategory,"CAMERA")
+                .eq(SysConfig::getDeleted,0));
+    }
+
+    @Override
     public Integer getSendDrugConfigDataIOTime() {
         List<SysConfig> sysConfigList =  sysConfigDao.selectList(new LambdaQueryWrapper<SysConfig>()
                 .eq(SysConfig::getCategory,"SEND_DRUG")
@@ -120,6 +127,14 @@ public class SysConfigServiceImpl implements SysConfigService {
     public List<SysConfig> getSettingConfigData() {
         return   sysConfigDao.selectList(new LambdaQueryWrapper<SysConfig>()
                 .eq(SysConfig::getCategory,"SETTING")
+                .eq(SysConfig::getDeleted,0));
+    }
+
+    @Override
+    public SysConfig getCameraShowUrl() {
+        return sysConfigDao.selectOne(new LambdaQueryWrapper<SysConfig>()
+                .eq(SysConfig::getCategory,"CAMERA")
+                .eq(SysConfig::getConfigType,"LIFT_CAM_1")
                 .eq(SysConfig::getDeleted,0));
     }
 

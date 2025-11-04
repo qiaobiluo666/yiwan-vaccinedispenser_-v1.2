@@ -2,7 +2,6 @@ package com.yiwan.vaccinedispenser.system.sys.dao;
 
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.yiwan.vaccinedispenser.system.domain.model.vac.VacDrugRecord;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacSendDrugRecord;
 import com.yiwan.vaccinedispenser.system.sys.data.request.vac.SendDrugRecordRequest;
 import org.apache.ibatis.annotations.Param;
@@ -120,6 +119,11 @@ public interface VacSendDrugRecordMapper extends BaseMapper<VacSendDrugRecord> {
             @Param("createTimeStart") Date createTimeStart,
             @Param("createTimeEnd") Date createTimeEnd,
             @Param("workbenchName") String workbenchName
+    );
+
+
+    SendDrugRecordRequest countTodayGroupedByProductId(
+            @Param("productNo") String productNo
     );
 
 }

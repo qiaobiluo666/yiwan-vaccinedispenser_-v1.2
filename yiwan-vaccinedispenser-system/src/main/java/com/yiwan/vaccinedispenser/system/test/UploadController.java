@@ -289,8 +289,6 @@ public class UploadController {
         }catch (Exception e){
             return null;
         }
-
-
     }
 
 
@@ -338,22 +336,18 @@ public class UploadController {
                 DrugRecordRequest data = zcyFunction.getVaccineMsgByCode(record.getSupervisedCode());
                 data.setUuid(record.getUuid());
                 log.info("拿到政采云疫苗信息：{}", com.alibaba.fastjson.JSON.toJSONString(data));
-
                 //通过接口返回给服务器
                 String url =uploadPath+"/zcy/check-code-result";
-
                 // 序列化成 JSON 字符串
                 String json = JSON.toJSONString(data);
                 log.info(json);
                 // 创建 OkHttp 请求体
                 OkHttpClient client = new OkHttpClient();
                 RequestBody body = RequestBody.create(json, MediaType.parse("application/json"));
-
                 Request request = new Request.Builder()
                         .url(url)
                         .post(body)
                         .build();
-
                 // 执行请求
                 try (Response response = client.newCall(request).execute()) {
                     if (response.isSuccessful()) {
@@ -365,8 +359,8 @@ public class UploadController {
                 }
             }
         }
-        log.info(String.valueOf(System.currentTimeMillis()-time));
 
+        log.info(String.valueOf(System.currentTimeMillis()-time));
     }
 
 

@@ -20,4 +20,7 @@ public interface CabinetCService {
     //步进 （长皮带伺服 脉冲）
     void step(CabinetCStepRequest request);
 
+
+
+
 }

@@ -51,4 +51,10 @@ public class ConfigSetting {
     //是否是Io方案
     private String isIoDrop;
 
+    //是否上传报警
+    private String isWarn;
+
+    //是否关闭底部传感器检测
+    private  String isCloseSensor;
+
 }

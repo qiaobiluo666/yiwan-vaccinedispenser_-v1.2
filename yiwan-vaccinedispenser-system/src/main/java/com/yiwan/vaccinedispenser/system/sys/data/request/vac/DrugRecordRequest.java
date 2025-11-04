@@ -106,5 +106,6 @@ public class DrugRecordRequest implements Serializable {
      */
     private int deleted;
 
-
+    //发药总数量
+    private Integer totalNum;
 }

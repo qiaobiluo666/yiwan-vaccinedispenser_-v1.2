@@ -81,8 +81,9 @@ public class CabinetCMsg {
         int address = Integer.parseInt(bytesStr[11], 16);
         log.info("收到C柜{}指令:{}", CabinetConstants.CabinetCType.SEND_DRUG.desc, NettyUtils.StringListToString(bytesStr));
             //获取当前距离
-        if("01".equals(bytesStr[10])){
+        if("01".equals(bytesStr[10])&&"03".equals(bytesStr[7])){
                 BigInteger distance = NettyUtils.parseHexStringArray(bytesStr, 11,4);
+                log.info(String.valueOf(distance));
                 valueOperations.set(RedisKeyConstant.servoGetDistance.CABINET_C, String.valueOf(distance));
             }
         switch (bytesStr[7]) {
@@ -187,6 +188,11 @@ public class CabinetCMsg {
 //                                        dispensingFunction.moveBlock(CabinetConstants.CabinetCSendDrugBlockStatus.CLOSE);
 //                                    }
 //                                }
+                            }
+
+
+                            case "03" ->{
+
                             }
                         }
                     }
@@ -308,8 +314,8 @@ public class CabinetCMsg {
             }
 
             //输入检测
-            case "06"->{
-                log.info("收到C柜{}:{}",CabinetConstants.CabinetCType.INPUT.desc,NettyUtils.StringListToString(bytesStr));
+            case "06"-> {
+                log.info("收到C柜{}:{}", CabinetConstants.CabinetCType.INPUT.desc, NettyUtils.StringListToString(bytesStr));
                 //查询所有传感器状态
                 if ("00".equals(bytesStr[9])) {
                     List<Integer> sensorList = NettyUtils.allInPut(bytesStr);
@@ -320,7 +326,17 @@ public class CabinetCMsg {
                             valueOperations.set(RedisKeyConstant.sensor.SENSOR_CABINET_C, sensorList.toString());
                         }
                     }
+                } else if ("1C".equals(bytesStr[9])) {
+
+                    //底部传感器查询
+                    switch (bytesStr[11]) {
+                        //触发
+                        case "01" -> valueOperations.set(String.format(RedisKeyConstant.sensor.SENSOR_CABINET_C_NUM, 28), "true");
+
+                        case "02" -> valueOperations.set(String.format(RedisKeyConstant.sensor.SENSOR_CABINET_C_NUM, 28), "false");
+                    }
                 }
+
             }
 
             //设置系统参数

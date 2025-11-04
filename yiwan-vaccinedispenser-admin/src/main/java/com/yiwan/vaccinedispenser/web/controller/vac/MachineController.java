@@ -37,7 +37,7 @@ public class MachineController {
     }
 
     /**
-     * 疫苗列表
+     * 药仓信息
      * */
     @PostMapping("/lockerList")
     public Result machineLockerList(){
@@ -103,12 +103,13 @@ public class MachineController {
     }
 
     /**
-     * 库存盘点
+     * 机器暂停
      */
     @GetMapping("/machine-stop")
     public Result machineStop(@RequestParam Integer type) throws Exception {
         return  vacMachineService.machineStop(type);
     }
+
 
 
     /**
@@ -140,6 +141,7 @@ public class MachineController {
         return Result.success();
     }
 
+
     /**
      * 一键清苗
      */
@@ -148,6 +150,8 @@ public class MachineController {
         log.info("收到一键清苗的list指令：{}",request);
         return  vacMachineService.machineClean(request);
     }
+
+
 
 
 }

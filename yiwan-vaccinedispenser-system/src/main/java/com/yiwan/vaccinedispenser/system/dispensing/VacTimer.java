@@ -4,8 +4,10 @@ import com.alibaba.fastjson.JSON;
 import com.yiwan.vaccinedispenser.core.common.SettingConstants;
 import com.yiwan.vaccinedispenser.core.common.emun.CabinetConstants;
 import com.yiwan.vaccinedispenser.core.common.emun.RedisKeyConstant;
+import com.yiwan.vaccinedispenser.system.domain.model.vac.VacMachine;
 import com.yiwan.vaccinedispenser.system.sys.data.ConfigSetting;
 import com.yiwan.vaccinedispenser.system.sys.data.request.vac.DrugRecordRequest;
+import com.yiwan.vaccinedispenser.system.sys.service.vac.VacMachineService;
 import com.yiwan.vaccinedispenser.system.test.UploadController;
 import com.yiwan.vaccinedispenser.system.until.VacUntil;
 import com.yiwan.vaccinedispenser.system.zyc.ZcyFunction;
@@ -53,6 +55,10 @@ public class VacTimer {
     private RedisTemplate<String, String> redisTemplate;
     @Autowired
     private UploadController uploadController;
+
+
+    @Autowired
+    private VacMachineService vacMachineService;
 
     /**
      * 一分钟轮询 挡片开启时长超过10min 自动关闭
@@ -158,14 +164,30 @@ public class VacTimer {
        log.error("未知异常：",e);
         }
     }
+
+
+
     @Scheduled(fixedDelay = 2000)
     public void getVaccineMsg() throws Exception {
         ConfigSetting configSetting = configFunction.getSettingConfigData();
-        if("true".equals(configSetting.getZcySend())){
+        if("true".equals(configSetting.getZcySend()) && "true".equals(configSetting.getIsWarn())){
             uploadController.getZycVaccineMsg();
         }
     }
 
 
+
+    /**
+     * 检测C柜底部是否有药品
+     * @throws Exception
+     */
+    @Scheduled(fixedDelay = 5000)
+    public void getSenor() throws Exception {
+        ConfigSetting configSetting = configFunction.getSettingConfigData();
+        //轮询传感器是否有药
+        if("true".equals(configSetting.getIsCloseSensor())){
+            vacMachineService.isSensorHaveDrug(configSetting);
+        }
+    }
 
 }

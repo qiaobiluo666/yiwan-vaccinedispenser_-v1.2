@@ -42,34 +42,59 @@ public class ExcelServiceImpl implements ExcelService {
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("库存管理");
 
-        // 日期标题
-        String title = new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + " 发苗机库存管理";
+        // 创建标题行
         Row titleRow = sheet.createRow(0);
-        titleRow.setHeightInPoints(30);
-        Cell titleCell = titleRow.createCell(0);
-        titleCell.setCellValue(title);
+        titleRow.setHeightInPoints(35);
 
+        // 主标题（合并前5列）
+        Cell titleCell = titleRow.createCell(0);
+        String mainTitle = "发苗机库存管理";
+        titleCell.setCellValue(mainTitle);
+
+        // 导出时间（第6列）
+        Cell dateCell = titleRow.createCell(5);
+        String exportTime = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date());
+        dateCell.setCellValue(exportTime);
+
+        // 主标题样式 - 大字体，左对齐
         CellStyle titleStyle = workbook.createCellStyle();
         Font titleFont = workbook.createFont();
         titleFont.setBold(true);
-        titleFont.setFontHeightInPoints((short) 16);
+        titleFont.setFontHeightInPoints((short) 18);
+        titleFont.setColor(IndexedColors.WHITE.getIndex());
         titleStyle.setFont(titleFont);
-        titleStyle.setAlignment(HorizontalAlignment.CENTER);
+        titleStyle.setAlignment(HorizontalAlignment.LEFT); // 左对齐
         titleStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        titleStyle.setFillForegroundColor(IndexedColors.GREY_50_PERCENT.getIndex());
+        titleStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         titleCell.setCellStyle(titleStyle);
 
-        // 合并标题单元格
-        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 1));
+        // 导出时间样式 - 小字体，右对齐
+        CellStyle dateStyle = workbook.createCellStyle();
+        Font dateFont = workbook.createFont();
+        dateFont.setBold(false);
+        dateFont.setFontHeightInPoints((short) 12);
+        dateFont.setColor(IndexedColors.WHITE.getIndex());
+        dateStyle.setFont(dateFont);
+        dateStyle.setAlignment(HorizontalAlignment.RIGHT); // 右对齐
+        dateStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        dateStyle.setFillForegroundColor(IndexedColors.GREY_50_PERCENT.getIndex());
+        dateStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        dateCell.setCellStyle(dateStyle);
 
-        // 表头样式
+        // 合并单元格：主标题合并前5列（A1到E1）
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 4));
+        // 导出时间单元格不合并，单独在第6列（F1）
+        // 表头样式 - 灰色系，左对齐
         CellStyle headerStyle = workbook.createCellStyle();
         Font headerFont = workbook.createFont();
         headerFont.setBold(true);
         headerFont.setFontHeightInPoints((short) 12);
+        headerFont.setColor(IndexedColors.WHITE.getIndex());
         headerStyle.setFont(headerFont);
-        headerStyle.setAlignment(HorizontalAlignment.CENTER);
+        headerStyle.setAlignment(HorizontalAlignment.LEFT); // 左对齐
         headerStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-        headerStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+        headerStyle.setFillForegroundColor(IndexedColors.GREY_40_PERCENT.getIndex());
         headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         headerStyle.setBorderTop(BorderStyle.THIN);
         headerStyle.setBorderBottom(BorderStyle.THIN);
@@ -79,40 +104,71 @@ public class ExcelServiceImpl implements ExcelService {
         // 表头
         Row headerRow = sheet.createRow(1);
         headerRow.setHeightInPoints(25);
-        String[] tableHeaders = {"疫苗名称", "疫苗数量(支)"};
+        String[] tableHeaders = {"疫苗种类","疫苗名称","生产企业", "疫苗总数量(支)","今日发苗(支)","今日上苗(支)"};
         for (int i = 0; i < tableHeaders.length; i++) {
             Cell cell = headerRow.createCell(i);
             cell.setCellValue(tableHeaders[i]);
             cell.setCellStyle(headerStyle);
         }
 
-        // 数据样式
+        // 数据样式 - 普通行，左对齐
         CellStyle dataStyle = workbook.createCellStyle();
-        dataStyle.setAlignment(HorizontalAlignment.CENTER);
+        dataStyle.setAlignment(HorizontalAlignment.LEFT); // 左对齐
         dataStyle.setVerticalAlignment(VerticalAlignment.CENTER);
         dataStyle.setBorderTop(BorderStyle.THIN);
         dataStyle.setBorderBottom(BorderStyle.THIN);
         dataStyle.setBorderLeft(BorderStyle.THIN);
         dataStyle.setBorderRight(BorderStyle.THIN);
 
+        // 数字样式 - 右对齐
+        CellStyle numberStyle = workbook.createCellStyle();
+        numberStyle.cloneStyleFrom(dataStyle);
+        numberStyle.setAlignment(HorizontalAlignment.RIGHT); // 数字右对齐
+
         // 写入数据
         List<InventoryResponse> vacMachineList = vacMachineService.vacMachineInventoryListPdf(productName);
         int rowNum = 2;
         for (InventoryResponse record : vacMachineList) {
             Row row = sheet.createRow(rowNum++);
-            row.setHeightInPoints(22);
-            Cell nameCell = row.createCell(0);
-            nameCell.setCellValue(record.getProductName());
-            nameCell.setCellStyle(dataStyle);
+            row.setHeightInPoints(20);
 
-            Cell numCell = row.createCell(1);
-            numCell.setCellValue(record.getTotalVaccineNum());
-            numCell.setCellStyle(dataStyle);
+            // 疫苗种类 - 左对齐
+            Cell cell0 = row.createCell(0);
+            cell0.setCellValue(record.getVaccineMinorName() != null ? record.getVaccineMinorName() : "");
+            cell0.setCellStyle(dataStyle);
+
+            // 疫苗名称 - 左对齐
+            Cell cell1 = row.createCell(1);
+            cell1.setCellValue(record.getProductName() != null ? record.getProductName() : "");
+            cell1.setCellStyle(dataStyle);
+
+            // 生产企业 - 左对齐
+            Cell cell2 = row.createCell(2);
+            cell2.setCellValue(record.getManufacturerName() != null ? record.getManufacturerName() : "");
+            cell2.setCellStyle(dataStyle);
+
+            // 疫苗总数量(支) - 数字右对齐
+            Cell cell3 = row.createCell(3);
+            cell3.setCellValue(record.getTotalVaccineNum() != null ? record.getTotalVaccineNum() : 0);
+            cell3.setCellStyle(numberStyle);
+
+            // 今日发苗(支) - 数字右对齐
+            Cell cell4 = row.createCell(4);
+            cell4.setCellValue(record.getUseDrugNum() != null ? record.getUseDrugNum() : 0);
+            cell4.setCellStyle(numberStyle);
+
+            // 今日上苗(支) - 数字右对齐
+            Cell cell5 = row.createCell(5);
+            cell5.setCellValue(record.getSendDrugNum() != null ? record.getSendDrugNum() : 0);
+            cell5.setCellStyle(numberStyle);
         }
 
         // 设置列宽
-        sheet.setColumnWidth(0, 70 * 256); // 疫苗名称列宽
-        sheet.setColumnWidth(1, 15 * 256); // 数量列宽
+        int[] columnWidths = {20, 35, 15, 15, 15, 16};
+        for (int i = 0; i < columnWidths.length; i++) {
+            sheet.setColumnWidth(i, columnWidths[i] * 256);
+        }
+
         // 写入内存流
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         workbook.write(out);
@@ -121,7 +177,7 @@ public class ExcelServiceImpl implements ExcelService {
         byte[] bytes = out.toByteArray();
 
         // 设置响应头
-        String fileName = URLEncoder.encode(title + ".xlsx", StandardCharsets.UTF_8);
+        String fileName = URLEncoder.encode("发苗机库存管理_" + new SimpleDateFormat("yyyyMMdd_HHmm").format(new Date()) + ".xlsx", StandardCharsets.UTF_8);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentDispositionFormData("attachment", fileName);
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);

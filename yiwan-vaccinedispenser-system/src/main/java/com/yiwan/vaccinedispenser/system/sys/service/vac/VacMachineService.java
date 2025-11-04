@@ -7,6 +7,8 @@ import com.yiwan.vaccinedispenser.core.security.UserBean;
 import com.yiwan.vaccinedispenser.core.web.Result;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacGetVaccine;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacMachine;
+import com.yiwan.vaccinedispenser.system.sys.data.AutoData;
+import com.yiwan.vaccinedispenser.system.sys.data.ConfigSetting;
 import com.yiwan.vaccinedispenser.system.sys.data.SendBtnData;
 import com.yiwan.vaccinedispenser.system.sys.data.request.IdListRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.request.OtherRequest;
@@ -85,11 +87,11 @@ public interface VacMachineService extends IService<VacMachine>{
     //手动上药  机械手上药
     Result handDrugMachine(String code) throws Exception;
 
+    //手动上药 多人份
+    Result handDrugPeople(String code,Integer bulkNum) throws Exception;
 
     //开机将vaccineNum 和vaccineUseNun 保持一致
     void  vaccineNunEqualsUserNum();
-
-    Result handDrugPeople(String code,Integer bulkNum) throws Exception;
 
 
     //机器暂停
@@ -137,13 +139,28 @@ public interface VacMachineService extends IService<VacMachine>{
 
     //C柜老化测试
     void   test1();
+
     //抬升伺服老化
     void test2();
+
+    //io老化测试
+    void test3();
 
     //机器异常清苗
     Result  machineClean(IdListRequest request);
 
 
+    //检测传感器是否报警
+    void isSensorHaveDrug(  ConfigSetting configSetting);
 
+
+    //C柜退苗
+    void  returnDrugWarn(Integer workNum);
+
+    //根据产品编码 获取根据药盒长度的IO间隔时间
+    Integer getVacIoTimeByProduct(String productNo,Integer times);
+
+    //自动校对仓位数据
+    Result AutoProofread(AutoData data);
 
 }

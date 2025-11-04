@@ -221,6 +221,11 @@ public class VacDrugRecordServiceImpl extends ServiceImpl<VacDrugRecordMapper, V
         }
     }
 
+    @Override
+    public DrugRecordRequest countTodayGroupedByProductId(String productNo) {
+        return vacDrugRecordMapper.countTodayGroupedByProductId(productNo);
+    }
+
 }
 
 

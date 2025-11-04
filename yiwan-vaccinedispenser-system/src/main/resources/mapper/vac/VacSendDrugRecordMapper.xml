@@ -9,6 +9,8 @@
 
     <select id="countGroupedByProductName" resultType="com.yiwan.vaccinedispenser.system.sys.data.request.vac.SendDrugRecordRequest">
         SELECT
+        vaccine_id AS vaccineId,
+        product_No As productNo,
         product_name AS productName
         <if test="workbenchName != null and workbenchName != ''">
             , workbench_name AS workbenchName
@@ -30,9 +32,20 @@
             , workbench_name
         </if>
     </select>
-
-
-
+    <select id="countTodayGroupedByProductId"
+            resultType="com.yiwan.vaccinedispenser.system.sys.data.request.vac.SendDrugRecordRequest">
+        SELECT
+            vaccine_id AS vaccineId,
+            product_No AS productNo,
+            product_name AS productName,
+            COUNT(*) AS totalNum
+        FROM vac_send_drug_record
+        WHERE deleted = 0
+          AND DATE(create_time) = CURDATE()
+          AND product_No = #{productNo}
+        GROUP BY product_No, product_name, vaccine_id
+        LIMIT 1
+    </select>
 
 
 </mapper>

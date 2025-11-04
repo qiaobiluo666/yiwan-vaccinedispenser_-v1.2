@@ -10,6 +10,7 @@ import com.yiwan.vaccinedispenser.system.com.ComService;
 import com.yiwan.vaccinedispenser.system.dispensing.*;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacGetVaccine;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacMachine;
+import com.yiwan.vaccinedispenser.system.sys.data.AutoData;
 import com.yiwan.vaccinedispenser.system.sys.data.ConfigData;
 import com.yiwan.vaccinedispenser.system.sys.data.ConfigSetting;
 import com.yiwan.vaccinedispenser.system.sys.data.DistanceServoData;
@@ -60,7 +61,6 @@ public class TestController {
     @Autowired
     private SendDrugFunction sendDrugFunction;
 
-
     @Resource(name = "redisTemplate")
     private ValueOperations<String, String> valueOperations;
 
@@ -79,11 +79,8 @@ public class TestController {
     @Autowired
     private UploadController uploadController;
 
-
     @Value("${upload.hospitalName}")
     private  String hospitalName;
-
-
 
     @Value("${upload.databaseName}")
     private  String databaseName;
@@ -99,7 +96,6 @@ public class TestController {
     public Result machineList() throws Exception {
 
         ConfigSetting configSetting = configFunction.getSettingConfigData();
-//        int[] nums = {1, 2, 3, 4, 6};
 
         int[] nums = {1, 2, 3};
 
@@ -123,7 +119,6 @@ public class TestController {
             dispensingHandFunction.addDrugList(vacGetVaccine);
         }
 
-
         VacMachine vacMachine5 = vacMachineService.testDrop(4);
         if(vacMachine5==null){
             return Result.fail("没有可发药的药仓");
@@ -136,13 +131,6 @@ public class TestController {
         vacGetVaccine.setWorkbenchNo("69");
 
         vacGetVaccine.setWorkbenchNum(nums[ThreadLocalRandom.current().nextInt(nums.length)]);
-
-//        if("true".equals(configSetting.getIsIoDrop())){
-//            dispensingFunction.addDrugList(vacGetVaccine);
-//        }else {
-//            dispensingHandFunction.addDrugList(vacGetVaccine);
-//        }
-
         VacMachine vacMachine4 = vacMachineService.testDrop(3);
         if(vacMachine4==null){
             return Result.fail("没有可发药的药仓");
@@ -154,12 +142,6 @@ public class TestController {
         vacGetVaccine.setWorkbenchName("接种台4");
         vacGetVaccine.setWorkbenchNo("69");
         vacGetVaccine.setWorkbenchNum(nums[ThreadLocalRandom.current().nextInt(nums.length)]);
-//        vacGetVaccine.setWorkbenchNum(3);
-//        if("true".equals(configSetting.getIsIoDrop())){
-//            dispensingFunction.addDrugList(vacGetVaccine);
-//        }else {
-//            dispensingHandFunction.addDrugList(vacGetVaccine);
-//        }
 
         return Result.success();
         
@@ -176,17 +158,6 @@ public class TestController {
         return Result.success(data);
     }
 
-
-    /**
-     * 测试距离
-     * */
-    @PostMapping("/sensor")
-    public Result sensor()  {
-        DistanceServoData data =sendDrugFunction.getDistanceSensor();
-        return Result.success(data);
-    }
-
-
     /**
      * 测试距离
      * */
@@ -194,6 +165,16 @@ public class TestController {
     public Result distanceXY() throws ExecutionException, InterruptedException, IOException {
         ConfigData configData = configFunction.getAutoDrugConfigData();
         DistanceServoData data =sendDrugFunction.distanceSerVoGetXY(configData);
+        return Result.success(data);
+    }
+
+
+    /**
+     * 获取传感器距离
+     * */
+    @PostMapping("/sensor")
+    public Result sensor()  {
+        DistanceServoData data =sendDrugFunction.getDistanceSensor();
         return Result.success(data);
     }
 
@@ -323,12 +304,13 @@ public class TestController {
 
 
 
-    @PostMapping("/test")
-    public Result  test1() {
-        vacMachineService.test1();
+    @PostMapping("/autoTest")
+    public Result  test1(@RequestBody AutoData data) {
+        log.info("自动对仓位参数：{}",JSON.toJSONString(data));
+        vacMachineService.AutoProofread(data);
         return Result.success();
+
     }
 
-
-
+    
 }

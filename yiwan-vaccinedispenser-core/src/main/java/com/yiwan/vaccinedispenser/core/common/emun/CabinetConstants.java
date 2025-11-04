@@ -75,6 +75,7 @@ public class CabinetConstants {
 
         HAND_DROP(21,"0x08-A柜下药"),
 
+        AUTO(23,"0x02 对仓位"),
         DROP_AUTO(12, "0x01-输入输出控制数据透传"),
         //灯板
         LED(11,"0x02-led灯板"),
@@ -676,7 +677,8 @@ public class CabinetConstants {
     //A柜自动上药指令
     public enum CabinetAGetDistanceCommand {
 
-        GET(0x01, 1,"0x01 - 读距离");
+        GET(0x01, 1,"0x01 - 读距离"),
+        AUTO(0x02,2,"0x02 - 对仓位");
 
         CabinetAGetDistanceCommand(int code,Integer num, String desc) {
             this.code = code;
@@ -1267,7 +1269,9 @@ public class CabinetConstants {
 
         BLOCK(0x03,3,"0x03 挡片控制"),
 
-        RESET(0x04,4,"0x04 - 读复位按钮状态");
+        RESET(0x04,4,"0x04 - 读复位按钮状态"),
+
+        RETURN(0x05,5,"0x05 -  退苗操作");
 
 
 
@@ -1615,7 +1619,7 @@ public class CabinetConstants {
     public enum SensorStatus{
         RESET("00", "传感器不触发"),
 
-        NORMAL("01","传感器触发正常"),
+         NORMAL("01","传感器触发正常"),
 
 
         TIMOUT("02","传感器超时");

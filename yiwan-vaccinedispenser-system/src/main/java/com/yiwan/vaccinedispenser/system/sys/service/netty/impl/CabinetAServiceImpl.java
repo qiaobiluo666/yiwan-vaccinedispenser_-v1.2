@@ -1,6 +1,7 @@
 package com.yiwan.vaccinedispenser.system.sys.service.netty.impl;
 
 import cn.hutool.core.util.HexUtil;
+import com.alibaba.fastjson.JSON;
 import com.yiwan.vaccinedispenser.core.common.SettingConstants;
 import com.yiwan.vaccinedispenser.core.common.emun.CabinetConstants;
 import com.yiwan.vaccinedispenser.core.common.emun.RedisKeyConstant;
@@ -403,15 +404,43 @@ public class CabinetAServiceImpl implements CabinetAService {
         //模式
         int mode = request.getMode();
         //状态
-        int status = 0;
+        int status;
+
+        if(command==1){
+            status = 0;
+        }else {
+            status =request.getStatus();
+        }
+
         //获取请求头、数据长度
-        StringBuilder stringBuilder =NettyUtils.toHandler(CabinetConstants.CabinetDataLength.DISTANCE.dataLength);
+        StringBuilder stringBuilder;
+        if(command==1){
+            stringBuilder =NettyUtils.toHandler(CabinetConstants.CabinetDataLength.DISTANCE.dataLength);
+        }else {
+            stringBuilder =NettyUtils.toHandler(CabinetConstants.CabinetDataLength.AUTO.dataLength);
+        }
+
         stringBuilder.append(NettyUtils.intToHexString(frameNumberNow,2));
         stringBuilder.append(NettyUtils.intToHexString(cabinet,1));
         stringBuilder.append(NettyUtils.intToHexString(type,1));
         stringBuilder.append(NettyUtils.intToHexString(command,1));
         stringBuilder.append(NettyUtils.intToHexString(mode,1));
         stringBuilder.append(NettyUtils.intToHexString(status,1));
+
+        if(command==2){
+            //阈值
+            stringBuilder.append(NettyUtils.intToHexString(request.getThreshold(),2));
+            //传感器的值
+            stringBuilder.append(NettyUtils.intToHexString(request.getSensorDis(),2));
+            //伺服运动速度
+            stringBuilder.append(NettyUtils.intToHexString(request.getSpeed(),2));
+            //开始运动距离
+            stringBuilder.append(NettyUtils.intToHexString(request.getStartDis(),4));
+            //结束运动距离
+            stringBuilder.append(NettyUtils.intToHexString(request.getEndDis(),4));
+        }
+
+
         stringBuilder.append(CRC16Modbus.calculateCRC( stringBuilder.substring(8)));
         //包尾
         stringBuilder.append(Integer.toHexString(CabinetConstants.SUFFIX_INSTRUCTION));

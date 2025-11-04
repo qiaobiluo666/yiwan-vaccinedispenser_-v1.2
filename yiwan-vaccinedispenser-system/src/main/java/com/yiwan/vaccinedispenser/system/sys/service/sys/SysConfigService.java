@@ -32,6 +32,10 @@ public interface SysConfigService {
     //获取抬升装置要走的距离
     List<SysConfig> getSendDrugConfigData();
 
+
+    //获取抬升装置要走的距离
+    List<SysConfig> getCameraConfigData();
+
     //获取IO开合的时间
     Integer getSendDrugConfigDataIOTime();
 
@@ -39,5 +43,5 @@ public interface SysConfigService {
     //获取系统参数配置
     List<SysConfig> getSettingConfigData();
 
-
+    SysConfig getCameraShowUrl();
 }

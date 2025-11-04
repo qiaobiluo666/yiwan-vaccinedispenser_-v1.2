@@ -96,17 +96,24 @@ public class ZcyFunction {
         JSONObject bodyJson = JSON.parseObject(bodyString);
 
         //如果电子监管码不存在
-        if(bodyJson.getString("success").equals("false")){
+        if("false".equals(bodyJson.getString("success"))){
             DrugRecordRequest drugRecordData = new DrugRecordRequest();
             drugRecordData.setIsReturn(true);
-            drugRecordData.setMsg(bodyJson.getString("message"));
+            drugRecordData.setMsg("政采云电子监管码请求失败:"+drugRecordData.getProductNo());
             return  drugRecordData;
         }else {
             //拿到电子监管码信息，根据产品编码拿到疫苗信息
             DrugRecordRequest drugRecordData = JSON.parseObject(bodyJson.getString("result"),DrugRecordRequest.class);
             VacDrug vacDrug = vacDrugService.vacDrugGetByproductNo(drugRecordData.getProductNo());
-            drugRecordData.setProductName(vacDrug.getProductName());
-            drugRecordData.setIsReturn(false);
+            if(vacDrug==null){
+                String msg = drugRecordData.getProductNo()+": 疫苗列表没有该编码";
+                drugRecordData.setIsReturn(true);
+                drugRecordData.setMsg(msg);
+            }else {
+                drugRecordData.setProductName(vacDrug.getProductName());
+                drugRecordData.setIsReturn(false);
+            }
+
             return drugRecordData;
 
         }
@@ -240,6 +247,7 @@ public class ZcyFunction {
      * 发苗返回结果 无库存
      */
     public ResponseResult  sendResult(VacGetVaccine vacGetVaccine,String desc) throws Exception {
+
         SendVaccineResultRequest request = new SendVaccineResultRequest();
         request.setRequestNo(vacGetVaccine.getRequestNo());
         List<SendVaccineResultData> sendVaccineResultDataList = new ArrayList<>();
@@ -252,6 +260,7 @@ public class ZcyFunction {
         ResponseResult responseResult = zcyRequestBuilder.sendVaccineEndRequest(request);
         log.info("发送政采云接口数据：{}，收到结果：{}",JSON.toJSONString(request),JSON.toJSONString(responseResult));
         return  responseResult;
+
     }
 
 

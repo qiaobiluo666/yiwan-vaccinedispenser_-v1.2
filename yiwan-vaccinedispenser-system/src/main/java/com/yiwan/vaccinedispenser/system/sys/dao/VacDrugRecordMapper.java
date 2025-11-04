@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacDrug;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacDrugRecord;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacSendDrugRecord;
+import com.yiwan.vaccinedispenser.system.sys.data.request.vac.DrugRecordRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.request.vac.SendDrugRecordRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.zyc.InventoryReportData;
 import org.apache.ibatis.annotations.Param;
@@ -102,5 +103,10 @@ public interface VacDrugRecordMapper extends BaseMapper<VacDrugRecord> {
 
 
     List<InventoryReportData> selectGroupedRecords();
+
+
+    DrugRecordRequest countTodayGroupedByProductId(
+            @Param("productNo") String productNo
+    );
 
 }

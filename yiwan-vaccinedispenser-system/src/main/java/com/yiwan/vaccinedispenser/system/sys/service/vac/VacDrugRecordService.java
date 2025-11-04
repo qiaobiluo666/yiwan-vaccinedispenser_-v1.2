@@ -7,6 +7,7 @@ import com.yiwan.vaccinedispenser.core.web.Result;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacDrugRecord;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacMachine;
 import com.yiwan.vaccinedispenser.system.sys.data.request.vac.DrugRecordRequest;
+import com.yiwan.vaccinedispenser.system.sys.data.request.vac.SendDrugRecordRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.zyc.InventoryReportData;
 
 import java.util.List;
@@ -56,6 +57,6 @@ public interface VacDrugRecordService extends IService<VacDrugRecord>{
     String getBatchNoEarly(List<String>  batchNoList);
 
 
-
+    DrugRecordRequest countTodayGroupedByProductId(String productNo);
 
 }

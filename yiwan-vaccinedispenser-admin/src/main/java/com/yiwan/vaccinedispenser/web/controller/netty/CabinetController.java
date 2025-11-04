@@ -208,7 +208,7 @@ public class CabinetController {
         cabinetCService.servo(request);
         if(request.getStatus().num==1){
             VacUntil.sleep(1000);
-            String data =valueOperations.get(RedisKeyConstant.servoGetDistance.CABINET_B);
+            String data =valueOperations.get(RedisKeyConstant.servoGetDistance.CABINET_C);
             return Result.success(data);
         }else {
             return Result.success();

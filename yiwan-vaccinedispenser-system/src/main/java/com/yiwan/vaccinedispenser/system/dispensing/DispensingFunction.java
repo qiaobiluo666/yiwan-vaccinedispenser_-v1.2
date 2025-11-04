@@ -155,15 +155,15 @@ public class DispensingFunction {
             }else if(Objects.equals(code,SettingConstants.MachineException.BELT.code)||(Objects.equals(code,SettingConstants.MachineException.SERVO.code))){
                 //皮带报警 或者伺服报警 整层禁用
                 lineNumList.add(data.getLineNum());
-
             //抬升伺服报警 无法发药！
             }else if(Objects.equals(code,SettingConstants.MachineException.SENDDRUG.code)){
+
                 String msg = "发药伺服异常！无法正常发药";
                 log.error(msg);
                 if("true".equals(configSetting.getZcySend())){
-                    vacMachineExceptionService.dropException(SettingConstants.MachineException.SENDDRUG.code,null,msg);
                     zcyFunction.sendResult(vacGetVaccine,"机器发药异常！请联系售后");
                 }
+                throw new ServiceException(msg);
             }
         }
 
@@ -364,7 +364,7 @@ public class DispensingFunction {
                     Integer sensorNum = drugListData.getLineNum();
                     Integer beltNum = drugListData.getBeltNum();
                     log.info("掉药信息：仓位：{} 掉药:{}", drugListData.getBoxNo(), drugListData.getProductName());
-                    dropDrug(sensorNum, drugListData.getPositionNum(), ioTime);
+                    dropDrug(sensorNum, drugListData.getPositionNum(), ioTime,drugListData.getProductNo());
                     VacUntil.sleep(300);
                     //将发药信息队列 移除一条
                     listOps.leftPop(String.format(RedisKeyConstant.DROP_LIST, num));
@@ -382,6 +382,7 @@ public class DispensingFunction {
     public void moveBelt() throws Exception {
 
         ConfigSetting configSetting = configFunction.getSettingConfigData();
+        ConfigSendData configSendData = configFunction.getSendDrugConfigData();
         intPut(CabinetConstants.InPutCommand.QUERY,SettingConstants.SENSOR_CABINET_A_MOVE_BELT_NUM);
         VacUntil.sleep(200);
         //判断光栅传感器是否触发
@@ -399,7 +400,6 @@ public class DispensingFunction {
             assert drugListData != null;
             Integer beltNum = drugListData.getBeltNum();
 
-
             String gsBeltHaveDrug = valueOperations.get(RedisKeyConstant.CABINET_A_GS_BELT_HAVE_DRUG);
 
             //光栅皮带上没有药
@@ -415,12 +415,13 @@ public class DispensingFunction {
 
                 //TODO 先走速度模式  等稳定了再走位置模式
                 //速度模式将药从皮带掉到光栅传感器
-                speedServo(beltNum,CabinetConstants.CabinetAServoCommand.SPEED,CabinetConstants.CabinetAServoStatus.COROTATION,500);
+                speedServo(beltNum,CabinetConstants.CabinetAServoCommand.SPEED,CabinetConstants.CabinetAServoStatus.COROTATION,configSendData.getBeltSendSpeed());
                 VacUntil.sleep(200);
 
-
-                speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.SPEED,CabinetConstants.CabinetAServoStatus.BELT_STOP,50);
+                //小皮带检测到药停止
+                speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.SPEED,CabinetConstants.CabinetAServoStatus.BELT_STOP,configSendData.getSmallBeltStopSpeed());
                 VacUntil.sleep(200);
+                int countSend = 0;
                 //等待掉药时间
                 long timeout = System.currentTimeMillis();
                 //判断是否掉药成功
@@ -433,16 +434,20 @@ public class DispensingFunction {
                     sensorIsPut = valueOperations.get(RedisKeyConstant.sensor.BELT_SENSOR);
                     assert sensorIsPut != null;
                     if(sensorIsPut.equals(CabinetConstants.SensorStatus.NORMAL.code)){
-                        dropFlag = true;
-                        //皮带停止
+                        countSend++;
+                        if(countSend>=3){
+                            dropFlag = true;
+                            //皮带停止
 //                        speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.PAUSE,CabinetConstants.CabinetAServoStatus.ZERO,300);
-                        break;
+                            break;
+                        }
+
                     }
 
                 }
 
                 //皮带伺服停止
-                speedServo(beltNum,CabinetConstants.CabinetAServoCommand.PAUSE,CabinetConstants.CabinetAServoStatus.ZERO,200);
+                speedServo(beltNum,CabinetConstants.CabinetAServoCommand.PAUSE,CabinetConstants.CabinetAServoStatus.ZERO,configSendData.getBeltSendSpeed());
 
 
                 //传送小皮带回原位
@@ -452,7 +457,7 @@ public class DispensingFunction {
                     //将出药记录加入数据库
                     log.info("发药正常：{}",JSON.toJSONString(drugListData));
                     dropRecordAndMachine(drugListData,1,"发药正常");
-                    moveBeltToC(drugListData,configSetting);
+                    moveBeltToC(drugListData,configSetting,configSendData);
 
                 }else {
 
@@ -485,7 +490,6 @@ public class DispensingFunction {
             String msg = "传送小皮带上有药 有异常";
             vacMachineExceptionService.dropException(SettingConstants.MachineException.SENDDRUG.code,null,msg);
             log.error(msg);
-
         }
 
     }
@@ -493,7 +497,7 @@ public class DispensingFunction {
 
 
     //运输小皮带运输疫苗到工作台
-    public void moveBeltToC(RedisDrugListData drugListData,ConfigSetting configSetting){
+    public void moveBeltToC(RedisDrugListData drugListData,ConfigSetting configSetting,ConfigSendData configSendData){
 
         boolean pyFlag = false;
         boolean flag = false;
@@ -502,20 +506,19 @@ public class DispensingFunction {
         //等待C柜斜坡皮带停止
         while ((System.currentTimeMillis() - timeout) < SettingConstants.FIND_BELT_STOP_WAIT_TIME) {
             //查询皮带状态
-            if("杭州浦沿".equals(configSetting.getHospitalName())) {
+            if(SettingConstants.PU_YAN_HOSPITAL_NAME.equals(configSetting.getHospitalName())) {
                 moveFind(drugListData.getWorkbenchNum());
 
             }else {
                 moveFindOld(0);
             }
 
-
             VacUntil.sleep(200);
             isStop = valueOperations.get(RedisKeyConstant.CABINET_C_BELT_STOP);
 
         //C柜是否有挡片
         if("true".equals(configSetting.getCBlank())){
-            if("杭州浦沿".equals(configSetting.getHospitalName())){
+            if(SettingConstants.PU_YAN_HOSPITAL_NAME.equals(configSetting.getHospitalName())){
                 if(!pyFlag){
                     openPuYanBlank();
                     pyFlag=true;
@@ -572,7 +575,7 @@ public class DispensingFunction {
         if ("true".equals(configSetting.getIsIoDrop())){
 
             //运动伺服 使疫苗落到运输皮带上
-            speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.SPEED,CabinetConstants.CabinetAServoStatus.COROTATION,150);
+            speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.SPEED,CabinetConstants.CabinetAServoStatus.COROTATION,configSendData.getSmallBeltGoCSpeed());
             //将药发送到工作台
             moveWork(drugListData.getWorkbenchNum());
 
@@ -598,7 +601,7 @@ public class DispensingFunction {
 
             VacUntil.sleep(300);
             //电磁铁版本
-            speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.PAUSE,CabinetConstants.CabinetAServoStatus.ZERO,150);
+            speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.PAUSE,CabinetConstants.CabinetAServoStatus.ZERO,configSendData.getSmallBeltGoCSpeed());
             //光栅皮带不在小皮带上
             valueOperations.set(RedisKeyConstant.CABINET_A_GS_BELT_HAVE_DRUG,"false");
             //将该发药队列移除
@@ -678,7 +681,11 @@ public class DispensingFunction {
     }
 
     //IO 掉药指令
-    public void dropDrug(Integer command,Integer ioNum ,Integer times){
+    public void dropDrug(Integer command,Integer ioNum ,Integer times,String productNo){
+        //获取不同长度IO的间隔时间
+        times = vacMachineService.getVacIoTimeByProduct(productNo,times);
+
+
         //开始掉药
         DropRequest dropRequest =new DropRequest();
         dropRequest.setWorkMode(CabinetConstants.Cabinet.CAB_A);
@@ -787,11 +794,11 @@ public class DispensingFunction {
     //发药记录 以及 仓柜减少药品 -1 如果为0 为null
     public void  dropRecordAndMachine(RedisDrugListData drugListData,Integer status,String desc){
         log.info("开始减库存==================");
+        //出药
+        vacSendDrugRecordService.sendDrugRecordAdd(drugListData,status , desc);
 
         //该药仓库存-1
         vacMachineService.decrementNumById(drugListData.getMachineId());
-        //出药
-        vacSendDrugRecordService.sendDrugRecordAdd(drugListData,status , desc);
 
         //多人份
         if(drugListData.getMachineStatus()==2){
@@ -831,8 +838,15 @@ public class DispensingFunction {
         Integer distance = null;
         if(goZero){
 
-            distance=configSendData.getReturnWorkNum();
-
+            beltNum= configSendData.getReturnWorkNum();
+            switch (beltNum) {
+                case 1 -> distance = configSendData.getCabinetC1();
+                case 2 -> distance = configSendData.getCabinetC2();
+                case 3 -> distance = configSendData.getCabinetC3();
+                case 4 -> distance = configSendData.getCabinetC4();
+                case 5 -> distance = configSendData.getCabinetC5();
+                case 6 -> distance = configSendData.getCabinetC6();
+            }
         }else {
 
             switch (beltNum) {
@@ -861,8 +875,8 @@ public class DispensingFunction {
 
     //打开挡片
     public void openBlank(){
-        ConfigSetting configSetting = new ConfigSetting();
-        if("杭州浦沿".equals(configSetting.getHospitalName())){
+        ConfigSetting configSetting = configFunction.getSettingConfigData();
+        if(SettingConstants.PU_YAN_HOSPITAL_NAME.equals(configSetting.getHospitalName())){
                 openPuYanBlank();
         }else {
             long timeout = System.currentTimeMillis();
@@ -895,8 +909,9 @@ public class DispensingFunction {
 
     //关闭挡片
     public void closeBlank(){
-        ConfigSetting configSetting = new ConfigSetting();
-        if("杭州浦沿".equals(configSetting.getHospitalName())){
+        ConfigSetting configSetting = configFunction.getSettingConfigData();
+        if(SettingConstants.PU_YAN_HOSPITAL_NAME.equals(configSetting.getHospitalName())){
+
             closePuYanBlank();
         }else {
             long timeout = System.currentTimeMillis();
@@ -927,38 +942,31 @@ public class DispensingFunction {
 
 
     public void  closeBlankMinute(){
-
         ConfigSetting configSetting = configFunction.getSettingConfigData();
-        if("杭州浦沿".equals(configSetting.getHospitalName())){
-
-            //查看C柜是不是还有任务 如果有 不关门
-            String drugStr = listOps.index(RedisKeyConstant.SEND_LIST,0);
-            if (drugStr==null){
-                closeBlank();
-            }
-
-        }else {
-
+        String timestampStr = valueOperations.get(RedisKeyConstant.CABINET_C_BLANK_OPEN_TIME);
+        if(timestampStr == null) {
+            timestampStr = LocalDateTime.now().toString();
+            valueOperations.set(RedisKeyConstant.CABINET_C_BLANK_OPEN_TIME, LocalDateTime.now().toString());
+        }
+        LocalDateTime lastTimestamp = LocalDateTime.parse(timestampStr);
+        long minutesElapsed = ChronoUnit.MINUTES.between(lastTimestamp, LocalDateTime.now());
+        //不是浦沿版本要判断挡片状态 开启还是关闭
+        if(!SettingConstants.PU_YAN_HOSPITAL_NAME.equals(configSetting.getHospitalName())){
             moveBlock(CabinetConstants.CabinetCSendDrugBlockStatus.QUERY);
-
             VacUntil.sleep(200);
             String isBlankOpen = valueOperations.get(RedisKeyConstant.CABINET_C_BLOCK_STATUS);
-            String timestampStr = valueOperations.get(RedisKeyConstant.CABINET_C_BLANK_OPEN_TIME);
-
             //查询挡片状态
-            if("open".equals(isBlankOpen)){
-                if(timestampStr == null){
-                    valueOperations.set(RedisKeyConstant.CABINET_C_BLANK_OPEN_TIME, LocalDateTime.now().toString());
-                }else {
-                    LocalDateTime lastTimestamp = LocalDateTime.parse(timestampStr);
-                    long minutesElapsed = ChronoUnit.MINUTES.between(lastTimestamp, LocalDateTime.now());
-                    if (minutesElapsed >= 10) {
-                        redisTemplate.delete(RedisKeyConstant.CABINET_C_BLANK_OPEN_TIME);
-                        closeBlank();
-                    }
-                }
+            if("open".equals(isBlankOpen)&& minutesElapsed >= 10){
+                redisTemplate.delete(RedisKeyConstant.CABINET_C_BLANK_OPEN_TIME);
+                closeBlank();
+            }
+        }else {
+            if (minutesElapsed >= 10) {
+                redisTemplate.delete(RedisKeyConstant.CABINET_C_BLANK_OPEN_TIME);
+                closeBlank();
             }
         }
+
     }
 
 

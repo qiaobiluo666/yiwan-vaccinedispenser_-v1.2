@@ -41,9 +41,18 @@ public class SettingConstants {
 
     }
 
+    public static final String PU_YAN_HOSPITAL_NAME = "杭州浦沿街道社区卫生服务中心";
+    //底部蜂鸣器输出
+    public static final int IS_SENSOR_OUTPUT_WARING_NUM = 14;
 
+    //底部蜂鸣器输出
+    public static final int IS_SENSOR_OUTPUT_WARING_TWO_NUM = 15;
 
+    //底部有药 传感器状态检测
+    public static final int IS_SENSOR_INPUT_WARING_NUM = 28;
 
+    //底部有药 传感器状态检测第二层轨道
+    public static final int IS_SENSOR_INPUT_WARING_TWO_NUM = 27;
 
     /**
      * 逻辑等待时间
@@ -90,7 +99,8 @@ public class SettingConstants {
     //等待读取距离最大时间
     public static final int GET_DISTANCE_WAIT_TIME = 1000;
 
-
+    //等待读取距离最大时间
+    public static final int GET_DISTANCE_AUTO_WAIT_TIME = 20000;
 
     //等待药品掉到机械手最大时间
     public static final int     SCAN_SERVO_WAIT_TIME = 10000;
@@ -109,7 +119,7 @@ public class SettingConstants {
     public static final int WAIT_BLOCK_TIME = 10000;
 
     //等待扫码步进电机运动最大时间
-    public static final int SCAN_STEP_WAIT_TIME = 6000;
+    public static final int SCAN_STEP_WAIT_TIME = 20000;
 
     //等待Z轴吸盘吸住药
     public static final int SERVO_Z_WAIT_TIME = 60000;

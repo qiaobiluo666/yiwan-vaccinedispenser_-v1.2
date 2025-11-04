@@ -108,13 +108,26 @@ public class VacMachineExceptionServiceImpl extends ServiceImpl<VacMachineExcept
 
     @Override
     public void dropException(Integer code, RedisDrugListData redisDrugListData, String desc) {
+
+        if(redisDrugListData==null){
+            LambdaQueryWrapper<VacMachineException> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+            lambdaQueryWrapper.eq(VacMachineException::getCode,code);
+            lambdaQueryWrapper.eq(VacMachineException::getDescription,desc);
+            List<VacMachineException> vacMachineExceptionList = vacMachineExceptionMapper.selectList(lambdaQueryWrapper);
+            if(!vacMachineExceptionList.isEmpty()){
+             return;
+            }
+        }
+
         VacMachineException vacMachineException = new VacMachineException();
         if(redisDrugListData!=null){
             BeanUtils.copyProperties(redisDrugListData,vacMachineException);
         }
+
         vacMachineException.setCode(code);
         vacMachineException.setDescription(desc);
         vacMachineExceptionMapper.insert(vacMachineException);
+
     }
 
     @Override
@@ -131,7 +144,6 @@ public class VacMachineExceptionServiceImpl extends ServiceImpl<VacMachineExcept
             VacMachineException vacMachineException = new VacMachineException();
             vacMachineException.setCode(code);
             vacMachineException.setDescription(desc);
-
             vacMachineExceptionMapper.insert(vacMachineException);
         }
 
@@ -139,12 +151,20 @@ public class VacMachineExceptionServiceImpl extends ServiceImpl<VacMachineExcept
 
     @Override
     public void sendException(Integer code, String productName, String desc) {
+        LambdaQueryWrapper<VacMachineException>  queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VacMachineException::getDrugName,productName);
+        queryWrapper.eq(VacMachineException::getCode,code);
+        queryWrapper.eq(VacMachineException::getDescription,desc);
+        queryWrapper.eq(VacMachineException::getDeleted,0);
+        List<VacMachineException> vacMachineExceptionList =vacMachineExceptionMapper.selectList(queryWrapper);
 
-        VacMachineException vacMachineException = new VacMachineException();
-        vacMachineException.setDrugName(productName);
-        vacMachineException.setCode(code);
-        vacMachineException.setDescription(desc);
-        vacMachineExceptionMapper.insert(vacMachineException);
+        if(vacMachineExceptionList.isEmpty()){
+            VacMachineException vacMachineException = new VacMachineException();
+            vacMachineException.setDrugName(productName);
+            vacMachineException.setCode(code);
+            vacMachineException.setDescription(desc);
+            vacMachineExceptionMapper.insert(vacMachineException);
+        }
 
 
     }
@@ -168,6 +188,27 @@ public class VacMachineExceptionServiceImpl extends ServiceImpl<VacMachineExcept
         }
 
 
+
+    }
+
+    @Override
+    public void delExceptionByCodeAndDesc(Integer code, String desc) {
+        VacMachineException vacMachineException = new VacMachineException();
+        vacMachineException.setCode(code);
+        vacMachineException.setDescription(desc);
+        vacMachineException.setDeleted(0);
+
+        LambdaQueryWrapper<VacMachineException> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VacMachineException::getCode,code);
+        queryWrapper.eq(VacMachineException::getDescription,desc);
+        queryWrapper.eq(VacMachineException::getDeleted,0);
+        List<VacMachineException> vacMachineExceptionList = vacMachineExceptionMapper.selectList(queryWrapper);
+        if(!vacMachineExceptionList.isEmpty()){
+            for (VacMachineException record :vacMachineExceptionList){
+                record.setDeleted(1);
+                vacMachineExceptionMapper.updateById(record);
+            }
+        }
 
     }
 

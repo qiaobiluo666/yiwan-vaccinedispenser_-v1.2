@@ -8,67 +8,30 @@ import lombok.EqualsAndHashCode;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.time.LocalDateTime;
 
 /**
- * @author slh
- * @version 1.0
- * @desc 仓柜配置
- * @date 2024/3/5 18:45
+ * @author 78671
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class VacMachineException extends Model<VacMachineException> {
+public class VacIo extends Model<VacIo> {
+
 
     @Serial
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 3524272153186605897L;
 
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
-    /**
-     * 异常码    1 IO超时 2 皮带超时 3 伺服报警 4 自动上药报警
-     */
 
-    private Integer code;
+    private Integer lenMin;
 
-    /**
-     * 药仓编号
-     */
+    private Integer lenMax;
 
-    private String boxNo;
+    private Integer ioTime;
 
-
-    /**
-     * 层数
-     */
-
-    private Integer lineNum;
-
-
-    /**
-     * 工作台
-     */
-
-    private Integer workNum;
-
-
-
-    /**
-     * 存放药品名称
-     */
-
-    private String drugName;
-
-    /**
-     * 错误描述
-     */
-
-    private String description;
-
-
-
+    
     private LocalDateTime createTime;
 
     private String createBy;
@@ -78,7 +41,7 @@ public class VacMachineException extends Model<VacMachineException> {
     private String updateBy;
 
     /**
-     * 是否删除  1/已删除  0/未删除
+     * 是否删除  true/已删除  false/未删除
      */
     private int deleted;
 
@@ -86,5 +49,9 @@ public class VacMachineException extends Model<VacMachineException> {
     public Serializable pkVal() {
         return this.id;
     }
+
+
+
+
 
 }

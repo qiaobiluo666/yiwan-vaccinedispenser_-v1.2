@@ -35,6 +35,8 @@ public class InterceptorConfig  extends WebMvcConfigurerAdapter {
 
                 // 仓柜管理
                 .addPathPatterns("/machine/**")
+                // 仓柜管理
+                .addPathPatterns("/ioTime/**")
 
                 //设备异常
                 .addPathPatterns("/exception/**")

@@ -193,7 +193,7 @@ public class VacDrugServiceImpl extends ServiceImpl<VacDrugMapper, VacDrug> impl
                 //TODO 没有仓位可以装这个药
                 String msg = "药盒测距异常：政采云电子监管码请求失败："+drugRecordData.getProductNo();
                 log.error(msg);
-                return Result.fail(msg);
+                return Result.fail(drugRecordData.getMsg());
             }
 
         }else {
@@ -235,9 +235,10 @@ public class VacDrugServiceImpl extends ServiceImpl<VacDrugMapper, VacDrug> impl
             if(drugRecordData.getIsReturn()){
                 //电子监管码请求失败
                 //TODO 没有仓位可以装这个药
-                String msg = "获取疫苗异常：政采云电子监管码请求失败："+drugRecordData.getProductNo();
+                String msg = "获取疫苗异常：政采云电子监管码请求失败："+drugRecordData.getProductNo() ;
                 log.error(msg);
-                return Result.fail(msg);
+                log.error(drugRecordData.getMsg());
+                return Result.fail(drugRecordData.getMsg());
             }
 
         }else {

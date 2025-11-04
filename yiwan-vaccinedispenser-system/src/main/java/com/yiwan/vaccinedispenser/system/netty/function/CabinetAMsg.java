@@ -59,6 +59,126 @@ public class CabinetAMsg {
         }
     }
 
+
+
+
+
+
+
+
+//    /**
+//     *
+//     * @param bytesStr 指令
+//     * @param workMode 什么柜子的板子
+//     */
+//    public void heChuanServoError(String[] bytesStr,Integer workMode){
+//        String errorMsg = null;
+//
+//        switch (workMode){
+//            case 10-> errorMsg = "A柜禾川伺服报警：";
+//            case 11-> errorMsg = "B柜禾川伺服报警：";
+//            case 12-> errorMsg = "C柜禾川伺服报警：";
+//        }
+//
+//        String errorCode = bytesStr[11] + " "+ bytesStr[12];
+//
+//        String msg = "报警指令为："+ NettyUtils.StringListToString(bytesStr);
+//        switch (errorCode){
+//
+//            case "20 63"->{
+//                errorMsg = errorMsg + "报警代码：Err.001 系统参数异常"+ msg;
+//
+//            }
+//            case "00 76"->{
+//                errorMsg = errorMsg + "报警代码：Err.001 系统参数异常"+ msg;
+//
+//            }
+//            case "05 73"->{
+//                errorMsg = errorMsg + "报警代码：Err.001 系统参数异常"+ msg;
+//
+//            }
+//            case "30 23"->{
+//                errorMsg = errorMsg + "报警代码：Err.001 系统参数异常"+ msg;
+//
+//            }
+//            case "10 23"->{
+//                errorMsg = errorMsg + "报警代码：Err.001 系统参数异常"+ msg;
+//
+//            }
+//            case "00 84"->{
+//                errorMsg = errorMsg + "报警代码：Err.001 系统参数异常"+ msg;
+//
+//            }
+//            case "10 32"->{
+//                errorMsg = errorMsg + "报警代码：Err.001 系统参数异常"+ msg;
+//
+//            }
+//            case "20 32"->{
+//                errorMsg = errorMsg + "报警代码：Err.001 系统参数异常"+ msg;
+//
+//            }
+//            case "00 72"->{
+//                errorMsg = errorMsg + "报警代码：Err.001 系统参数异常"+ msg;
+//
+//            }
+//            case "00 FF"->{
+//                errorMsg = errorMsg + "报警代码：Err.001 系统参数异常"+ msg;
+//
+//            }
+//
+//            case "11 86"->{
+//                errorMsg = errorMsg + "报警代码：Err.001 系统参数异常"+ msg;
+//
+//            }
+//
+//
+//            case "30 31"->{
+//                errorMsg = errorMsg + "报警代码：Err.001 系统参数异常"+ msg;
+//
+//            }
+//
+//            case "30 32"->{
+//                errorMsg = errorMsg + "报警代码：Err.001 系统参数异常"+ msg;
+//
+//            }
+//
+//
+//            case "10 42"->{
+//                errorMsg = errorMsg + "报警代码：Err.001 系统参数异常"+ msg;
+//
+//            }
+//
+//
+//            case "00 85"->{
+//                errorMsg = errorMsg + "报警代码：Err.001 系统参数异常"+ msg;
+//
+//            }
+//
+//
+//            case "00 51"->{
+//                errorMsg = errorMsg + "报警代码：Err.001 系统参数异常"+ msg;
+//
+//            }
+//
+//            case "00 75"->{
+//                errorMsg = errorMsg + "报警代码：Err.001 系统参数异常"+ msg;
+//
+//            }
+//
+//
+//
+//        }
+//
+//    }
+
+
+
+
+
+
+
+
+
     /**
      *
      * @param bytesStr
@@ -121,6 +241,7 @@ public class CabinetAMsg {
 
             //距离传感器
             case "07"->{
+                log.info("收到A柜{}:伺服X轴距离:{}",CabinetConstants.CabinetAType.DISTANCE.desc,NettyUtils.StringListToString(bytesStr));
                 receiveDistance(bytesStr);
             }
 
@@ -193,22 +314,23 @@ public class CabinetAMsg {
         if (("03".equals(bytesStr[11])&&"03".equals(bytesStr[7])&&"0A".equals(bytesStr[6]))|| ("02".equals(bytesStr[11])&&"0D".equals(bytesStr[12]))){
             String msg;
             if(address>=1&&address<=5){
-                msg = "第"+address+"皮带报警,请联系售后人员！"+ Arrays.toString(bytesStr);
+                msg = "第"+address+"皮带报警,请联系售后人员！"+ NettyUtils.StringListToString(bytesStr);
                 log.error(msg);
                 vacMachineExceptionService.sendException(SettingConstants.MachineException.BELT.code,null,msg);
             }else if(address==6||address==9){
-                msg = "第"+address+"伺服报警,无法自动发药，请联系售后人员！"+ Arrays.toString(bytesStr);
+                msg = "第"+address+"伺服报警,无法自动发药，请联系售后人员！"+ NettyUtils.StringListToString(bytesStr);
                 log.error(msg);
                 vacMachineExceptionService.sendException(SettingConstants.MachineException.SENDDRUG.code,null,msg);
             }else if(address==7||address==8){
                 log.error("自动上药伺服报警，结束自动上药");
                 sendDrugThreadManager.stop();
-                msg = "第"+address+"伺服报警,无法自动上药，请联系售后人员！"+ Arrays.toString(bytesStr);
+                msg = "第"+address+"伺服报警,无法自动上药，请联系售后人员！"+ NettyUtils.StringListToString(bytesStr);
                 log.error(msg);
                 vacMachineExceptionService.sendException(SettingConstants.MachineException.SEND.code,null,msg);
+            }else {
+                log.error("伺服：{}报警   {}",address,NettyUtils.StringListToString(bytesStr));
             }
         }
-
 
         switch (bytesStr[8]){
             //位置模式
@@ -367,15 +489,18 @@ public class CabinetAMsg {
             }
 
 
-//            //掉药传感器
-//            case "07","08","09","0A","0B","0C","0D","0E","0F","10"->{
-//                switch (bytesStr[11]) {
-//                    //触发
-//                    case "01"-> valueOperations.set(String.format(RedisKeyConstant.sensor.DROP_SENSOR, address-6),CabinetConstants.SensorStatus.NORMAL.code);
-//                    //不触发
-//                    case "02"-> valueOperations.set(String.format(RedisKeyConstant.sensor.DROP_SENSOR, address-6),CabinetConstants.SensorStatus.RESET.code);
-//                }
-//            }
+            //掉药传感器
+            case "1B","1C"->{
+                switch (bytesStr[11]) {
+                    //触发
+                    case "01"-> {
+                        valueOperations.set(String.format(RedisKeyConstant.sensor.SENSOR_CABINET_A_NUM, address),CabinetConstants.SensorStatus.NORMAL.code);
+                        log.info("传感器：{}触发",address);
+                    }
+                    //不触发
+                    case "02"-> valueOperations.set(String.format(RedisKeyConstant.sensor.SENSOR_CABINET_A_NUM, address),CabinetConstants.SensorStatus.RESET.code);
+                }
+            }
 
 
 
@@ -450,17 +575,36 @@ public class CabinetAMsg {
         switch (bytesStr[bytesStr.length-6]){
             //读取正常
             case "01" ->{
-                BigInteger distance = NettyUtils.parseHexStringArray(bytesStr, 11,4);
-                BigInteger divisor = new BigInteger("1000");
-                distance = distance.divide(divisor);;
+
+
+
                 switch (bytesStr[9]){
                     //盘存距离传感器
                     case "01"->{
 
-                        log.info("收到A柜{}:盘存距离传感器:{}",CabinetConstants.CabinetAType.DISTANCE.desc,NettyUtils.StringListToString(bytesStr));
-                        valueOperations.set(RedisKeyConstant.distance.COUNT, String.valueOf(distance));
-                        log.info(String.valueOf(distance));
-                        valueOperations.set(RedisKeyConstant.distanceStart.COUNT,"true");
+                        switch (bytesStr[8]){
+
+                            //读取距离
+                            case "01"->{
+                                BigInteger distance = NettyUtils.parseHexStringArray(bytesStr, 11,4);
+                                BigInteger divisor = new BigInteger("1000");
+                                distance = distance.divide(divisor);
+                                log.info("收到A柜{}:盘存距离传感器:{}",CabinetConstants.CabinetAType.DISTANCE.desc,NettyUtils.StringListToString(bytesStr));
+                                valueOperations.set(RedisKeyConstant.distance.COUNT, String.valueOf(distance));
+                                log.info(String.valueOf(distance));
+                                valueOperations.set(RedisKeyConstant.distanceStart.COUNT,"true");
+                            }
+                            //对仓位
+                            case "02"->{
+                                BigInteger distance = NettyUtils.parseHexStringArray(bytesStr, 11,4);
+                                log.info("收到A柜{}:伺服X轴距离:{}",CabinetConstants.CabinetAType.DISTANCE.desc,NettyUtils.StringListToString(bytesStr));
+                                valueOperations.set(RedisKeyConstant.distance.AUTO, String.valueOf(distance));
+                                log.info(String.valueOf(distance));
+                                valueOperations.set(RedisKeyConstant.distanceStart.AUTO,"true");
+                            }
+
+                        }
+
 
                     }
 
@@ -474,9 +618,21 @@ public class CabinetAMsg {
                 switch (bytesStr[9]){
                     //左边距离传感器
                     case "01"->{
-                        log.error("收到A柜{}:盘存距离传感器:{}",CabinetConstants.CabinetAType.DISTANCE.desc,NettyUtils.StringListToString(bytesStr));
-                        valueOperations.set(RedisKeyConstant.distance.COUNT, "ERROR");
-                        valueOperations.set(RedisKeyConstant.distanceStart.COUNT,"true");
+                        switch (bytesStr[8]){
+
+                            case "01"->{
+                                log.error("收到A柜{}:盘存距离传感器:{}",CabinetConstants.CabinetAType.DISTANCE.desc,NettyUtils.StringListToString(bytesStr));
+                                valueOperations.set(RedisKeyConstant.distance.COUNT, "ERROR");
+                                valueOperations.set(RedisKeyConstant.distanceStart.COUNT,"true");
+                            }
+
+                            case "02"->{
+                                log.error("收到A柜{}:伺服X轴距离:{}",CabinetConstants.CabinetAType.DISTANCE.desc,NettyUtils.StringListToString(bytesStr));
+                                valueOperations.set(RedisKeyConstant.distance.AUTO, "ERROR");
+                                valueOperations.set(RedisKeyConstant.distanceStart.AUTO,"true");
+                            }
+                        }
+
 
                     }
 
@@ -484,6 +640,9 @@ public class CabinetAMsg {
             }
         }
     }
+
+
+
 
 
 }

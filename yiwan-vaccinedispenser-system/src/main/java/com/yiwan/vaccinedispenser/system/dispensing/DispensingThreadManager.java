@@ -23,6 +23,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.time.LocalTime;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -283,6 +284,17 @@ public class DispensingThreadManager {
             });
         }
 
+        try {
+            Set<String> keys = redisTemplate.keys("Machine:cameraNum*");
+            if (keys != null && !keys.isEmpty()) {
+                redisTemplate.delete(keys);
+                System.out.println("🧹 清理 Redis Key：" + keys);
+            } else {
+                System.out.println("✅ Redis 中没有历史摄像头计数 Key");
+            }
+        } catch (Exception e) {
+            System.err.println("⚠️ 启动时清理 Redis Key 失败: " + e.getMessage());
+        }
 
         //手动上药状态初始化
         valueOperations.set(RedisKeyConstant.handDrugStatus.HAND_START_STATUS,"true");
@@ -337,6 +349,9 @@ public class DispensingThreadManager {
 
         //B伺服报警清除
         valueOperations.set(RedisKeyConstant.CABINET_B_SERVO_ERROR,"false");
+
+        //自动盘点初始化
+        valueOperations.set(RedisKeyConstant.AUTO_IS_START,"false");
     }
 
     //判断挡片
@@ -351,7 +366,6 @@ public class DispensingThreadManager {
             if ("true".equals(configSetting.getCBlank())) {
                 LocalTime now = LocalTime.now();
                 if(cBlankOpenMorning!=null && !"00:00:00".equals(cBlankOpenMorning) ){
-                    log.info("任务1：{}",cBlankOpenMorning);
                     LocalTime startTime = LocalTime.parse(cBlankOpenMorning);
                     LocalTime endTime = LocalTime.parse(cBlankCloseMorning);
                     if (now.isAfter(startTime) && now.isBefore(endTime)) {
@@ -363,29 +377,20 @@ public class DispensingThreadManager {
                     }
                 }
 
-//                if(cBlankOpenAfternoon!=null && !"00:00:00".equals(cBlankOpenAfternoon) ){
-//                    log.info("任务1：{}",cBlankOpenMorning);
-//                    LocalTime startTime = LocalTime.parse(cBlankOpenAfternoon);
-//                    LocalTime endTime = LocalTime.parse(cBlankCloseAfternoon);
-//                    if (now.isAfter(startTime) && now.isBefore(endTime)) {
-//                        log.info("查询是否开启");
-//                        dispensingFunction.openBlank();
-//                    } else if (now.isAfter(endTime)) {
-//                        log.info("查询是否关闭");
-//                        dispensingFunction.closeBlank();
-//                    }
-//                }
+                if(cBlankOpenAfternoon!=null && !"00:00:00".equals(cBlankOpenAfternoon) ){
+                    log.info("任务1：{}",cBlankOpenMorning);
+                    LocalTime startTime = LocalTime.parse(cBlankOpenAfternoon);
+                    LocalTime endTime = LocalTime.parse(cBlankCloseAfternoon);
+                    if (now.isAfter(startTime) && now.isBefore(endTime)) {
+                        log.info("查询是否开启");
+                        dispensingFunction.openBlank();
+                    } else if (now.isAfter(endTime)) {
+                        log.info("查询是否关闭");
+                        dispensingFunction.closeBlank();
+                    }
+                }
 
 
-//                LocalTime startTime = LocalTime.of(7, 50);
-//                LocalTime endTime = LocalTime.of(11, 0);
-//                if (now.isAfter(startTime) && now.isBefore(endTime)) {
-//                    log.info("查询是否开启");
-//                    dispensingFunction.openBlank();
-//                } else if (now.isAfter(endTime)) {
-//                    log.info("查询是否关闭");
-//                    dispensingFunction.closeBlank();
-//                }
             }
         });
 

@@ -15,6 +15,7 @@ import com.yiwan.vaccinedispenser.system.dispensing.DispensingFunction;
 import com.yiwan.vaccinedispenser.system.dispensing.SendDrugFunction;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacGetVaccine;
 import com.yiwan.vaccinedispenser.system.sys.dao.VacGetVaccineMapper;
+import com.yiwan.vaccinedispenser.system.sys.data.AutoData;
 import com.yiwan.vaccinedispenser.system.sys.data.ConfigSetting;
 import com.yiwan.vaccinedispenser.system.sys.data.DistanceServoData;
 import com.yiwan.vaccinedispenser.system.sys.data.RedisDrugListData;
@@ -253,26 +254,6 @@ class YuandiInjectiondispenserApplicationTests {
 	@Test
 	void test13() {
 
-		Integer sensorNum =1;
-		Integer ioNum =3;
-
-		dispensingFunction.dropDrug(sensorNum,ioNum, SettingConstants.IO_DROP_WAIT_TIME);
-
-		sensorNum =2;
-		ioNum =2;
-		dispensingFunction.dropDrug(sensorNum,ioNum, SettingConstants.IO_DROP_WAIT_TIME);
-
-		sensorNum =3;
-		ioNum =3;
-		dispensingFunction.dropDrug(sensorNum,ioNum, SettingConstants.IO_DROP_WAIT_TIME);
-
-
-		sensorNum =4;
-		ioNum =2;
-		dispensingFunction.dropDrug(sensorNum,ioNum, SettingConstants.IO_DROP_WAIT_TIME);
-
-
-
 	}
 
 	@Test
@@ -354,5 +335,22 @@ class YuandiInjectiondispenserApplicationTests {
 		request.setDistanceZ(7244);
 		request.setDistance(1200);
 		cabinetAService.handGetDrug(request);
+	}
+
+
+	@Test
+	void test22(){
+		AutoData autoData = new AutoData();
+		autoData.setStartBoxNo("A0101");
+		autoData.setEndBoxNo("A0123");
+		autoData.setLineNum(1);
+		autoData.setSpeed(10);
+		autoData.setThreshold(10);
+		//偏移2个mm
+		autoData.setOffsetDis(20);
+		autoData.setSensorDis(70);
+
+		vacMachineService.AutoProofread(autoData);
+
 	}
 }

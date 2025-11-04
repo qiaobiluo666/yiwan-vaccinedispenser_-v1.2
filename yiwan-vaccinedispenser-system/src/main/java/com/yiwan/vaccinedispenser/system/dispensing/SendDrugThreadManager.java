@@ -53,7 +53,6 @@ public class SendDrugThreadManager {
 
     private volatile boolean running = true;
 
-
     public void goTable(){
        String isNotError =  valueOperations.get(RedisKeyConstant.CABINET_B_SERVO_ERROR);
        if("true".equals(isNotError)){
@@ -61,7 +60,7 @@ public class SendDrugThreadManager {
        }
 
         running=true;
-        valueOperations.set(RedisKeyConstant.CABINET_B_COUNT,"1");
+        valueOperations.set(RedisKeyConstant.CABINET_B_ERROR_COUNT,"0");
         taskExecutor.execute(() -> {
             ConfigData configData = configFunction.getAutoDrugConfigData();
 
@@ -84,10 +83,17 @@ public class SendDrugThreadManager {
 
     //开始自动上药
     public void sendDrug() throws IOException {
+        if("true".equals(valueOperations.get(RedisKeyConstant.AUTO_IS_START))){
+            throw new ServiceException("正在自动对仓！");
+        }
+
+
+
 
         if("true".equals(valueOperations.get(RedisKeyConstant.DRUG_INVENTORY_START))){
             throw new ServiceException("正在库存盘点！");
         }
+
         if("true".equals(valueOperations.get(RedisKeyConstant.autoDrug.AUTO_DRUG_START))){
             throw new ServiceException("正在自动上药");
         }
@@ -142,7 +148,11 @@ public class SendDrugThreadManager {
         //A柜步进电机回原
         sendDrugFunction.cabinetAStepInit(CabinetConstants.CabinetAStepMode.CLAMP);
 
+        //等待夹爪步进电机运动完成
+        sendDrugFunction.waitCabinetAStepEnd(1);
         sendDrugFunction.cabinetAStepInit(CabinetConstants.CabinetAStepMode.BLOCK);
+        sendDrugFunction.waitCabinetAStepEnd(2);
+
         //A柜伺服 回原
         sendDrugFunction.moveHandServoInit(configData);
         //B柜步进电机回原
@@ -152,8 +162,7 @@ public class SendDrugThreadManager {
         sendDrugFunction.cabinetBServoInit();
 
 
-        //等待夹爪步进电机运动完成
-        sendDrugFunction.waitCabinetAStepEnd(1);
+
         valueOperations.set(RedisKeyConstant.CABINET_B_TEST_DRUGS_RESULT_IS_END,"false");
         //判断机器是否正在发药
         valueOperations.set(RedisKeyConstant.autoDrug.AUTO_DRUG_START,"true");
@@ -179,6 +188,9 @@ public class SendDrugThreadManager {
 
     public void stop() throws IOException {
         log.info("===============停止自动上药=================");
+
+        //关掉气泵
+        sendDrugFunction.xiPangEnd();
         valueOperations.set(RedisKeyConstant.autoDrug.AUTO_DRUG_START,"false");
         sendDrugFunction.autoDrug(CabinetConstants.CabinetBApplyCommand.AUTO, CabinetConstants.CabinetBApplyMode.STOP, CabinetConstants.CabinetBApplyStatus.ZERO);
         running = false;
@@ -187,23 +199,22 @@ public class SendDrugThreadManager {
         commandData.put("code", CommandEnums.DOSAGE_BUTTON_FINISH.getCode());
         commandData.put("data", "end");
         websocketService.sendInfo(CommandEnums.ON_CABINET_WEB.getCode(),commandData);
+
     }
 
 
     //查看设备是否正常 能开始上药
     public Boolean status(){
-        if("true".equals(valueOperations.get(RedisKeyConstant.controlStatus.CABINET_B))&&
-            "true".equals(valueOperations.get(RedisKeyConstant.controlStatus.CABINET_A))&&
-            "true".equals(valueOperations.get(RedisKeyConstant.cameraStatus.ABOVE))&&
-            "true".equals(valueOperations.get(RedisKeyConstant.cameraStatus.SIDE))&&
-            "true".equals(valueOperations.get(RedisKeyConstant.cameraStatus.BELOW))){
-            return true;
-        }else {
-            return false;
-        }
+        return "true".equals(valueOperations.get(RedisKeyConstant.controlStatus.CABINET_B)) &&
+                "true".equals(valueOperations.get(RedisKeyConstant.controlStatus.CABINET_A)) &&
+                "true".equals(valueOperations.get(RedisKeyConstant.cameraStatus.ABOVE)) &&
+                "true".equals(valueOperations.get(RedisKeyConstant.cameraStatus.SIDE)) &&
+                "true".equals(valueOperations.get(RedisKeyConstant.cameraStatus.BELOW));
     }
 
-
-
+    //获取running状态
+    public boolean getIsRunning(){
+        return running;
+    }
 
 }

@@ -39,4 +39,7 @@ public interface VacMachineExceptionService extends IService<VacMachineException
     //清除控制器异常报警
     void  delExceptionByName(List<VacMachineException> vacMachineExceptionList);
 
+    //批量删除
+    void delExceptionByCodeAndDesc(Integer code,String desc);
+
 }

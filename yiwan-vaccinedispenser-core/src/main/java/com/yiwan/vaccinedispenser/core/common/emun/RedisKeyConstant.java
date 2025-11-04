@@ -32,6 +32,8 @@ public interface RedisKeyConstant {
     //发送命令时存储命令的key
     String FRAME_NUMBER_COMMAND= "Machine:frameNumberCommand%s";
 
+    String CAMERA_OPEN_NUM= "Machine:cameraNum%s";
+
     //A柜是否收到00
     String CABINET_A_RECEIVE_MSG = "Machine:cabinetAReceiveMsg";
 
@@ -76,7 +78,7 @@ public interface RedisKeyConstant {
     String CABINET_A_SERVO_IS_ERROR ="Machine:cabinetA:servoIsError:%s";
 
 
-
+    String CABINET_B_SERVO_IS_RETURN = "Machine:cabinetB:servoIsReturn";
 
     //扫码步进电机是否运动完成
     String CABINET_B_SCAN_STEP_STATUS = "Machine:scanStepStatus";
@@ -113,13 +115,7 @@ public interface RedisKeyConstant {
     String CABINET_B_INIT = "Machine:autoDrug:Status:cabinetInit";
 
 
-    //B柜机械手回原点
-    String CABINET_B_COUNT= "Machine:autoDrug:Count";
-
-
-
-
-    //B柜机械手回原点
+    //B柜错误计数
     String CABINET_B_ERROR_COUNT= "Machine:autoDrug:errorCount";
 
 
@@ -145,9 +141,15 @@ public interface RedisKeyConstant {
     //疫苗退回
     String  DRUG_RETURN = "Machine:drugReturn";
 
+    //疫苗退回
+    String  TEST_IO_COUNT = "Machine:testIoCount";
+
     String DRUG_RUN_START = "Machine:drugRunStart";
 
     String DRUG_ERROR_START = "Machine:drugErrorStart";
+
+
+    String AUTO_IS_START = "Machine:autoISStart";
 
     interface handMachine{
         //取药状态
@@ -200,7 +202,9 @@ public interface RedisKeyConstant {
         //C柜传感器
         String SENSOR_CABINET_C = "Machine:sensor:cabinetCAll";
 
+        String SENSOR_CABINET_C_NUM = "Machine:sensor:cabinetC:%s";
 
+        String SENSOR_CABINET_A_NUM = "Machine:sensor:cabinetA:%s";
 
         //A柜传感器 SensorStatus
         //运输小皮带传感器状态 (光栅传感器) SensorStatus
@@ -305,6 +309,8 @@ public interface RedisKeyConstant {
         String LEFT =  "Machine:autoDrug:getDistance:leftStart";
         String RIGHT =  "Machine:autoDrug:getDistance:rightStart";
         String COUNT = "Machine:autoDrug:getDistance:countStart";
+
+        String AUTO = "Machine:autoDrug:getDistance:autoStart";
     }
 
 
@@ -316,6 +322,8 @@ public interface RedisKeyConstant {
         String RIGHT =  "Machine:autoDrug:getDistance:right";
 
         String COUNT = "Machine:autoDrug:getDistance:count";
+
+        String AUTO = "Machine:autoDrug:getDistance:AUTO";
     }
 
 

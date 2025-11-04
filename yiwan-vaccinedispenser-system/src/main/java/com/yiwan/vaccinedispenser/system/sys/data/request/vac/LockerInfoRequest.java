@@ -31,4 +31,7 @@ public class LockerInfoRequest implements Serializable {
     //库存盘点状态
     String  inventoryStatus;
 
+    //医院名称
+    String hospitalName;
+
 }

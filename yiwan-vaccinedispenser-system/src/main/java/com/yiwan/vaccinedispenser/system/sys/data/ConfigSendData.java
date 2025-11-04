@@ -46,6 +46,16 @@ public class ConfigSendData {
     //退苗退回的工作台
     private Integer returnWorkNum;
 
+    //退苗退回的工作台
+    private Integer returnWorkNumTwo;
 
+    //小皮带停止速度
+    private Integer smallBeltStopSpeed;
+
+    //抬升小皮带送到C柜速度
+    private Integer smallBeltGoCSpeed;
+
+    //5层皮带送药速度
+    private Integer beltSendSpeed;
 
 }

@@ -1,5 +1,6 @@
 package com.yiwan.vaccinedispenser.system.sys.service.vac.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -148,6 +149,9 @@ public class VacSendDrugRecordServiceImpl extends ServiceImpl<VacSendDrugRecordM
             vacSendDrugRecord.setUpdateTime(LocalDateTime.now());
             vacSendDrugRecordMapper.insert(vacSendDrugRecord);
 
+        }else {
+            log.error("没有查到发药信息");
+            log.warn("药品信息：{}   工作台信息：{}", JSON.toJSONString(vacDrugRecord),JSON.toJSONString(vacWorkbench));
         }
 
 
@@ -250,6 +254,11 @@ public class VacSendDrugRecordServiceImpl extends ServiceImpl<VacSendDrugRecordM
     @Override
     public List<SendDrugRecordRequest> sendDrugRecordTotalListByCreateTime(Date createTimeStart, Date createTimeEndate,String workbenchName) {
         return vacSendDrugRecordMapper.countGroupedByProductName(createTimeStart,createTimeEndate,workbenchName);
+    }
+
+    @Override
+    public SendDrugRecordRequest countTodayGroupedByProductId(String productNo) {
+        return vacSendDrugRecordMapper.countTodayGroupedByProductId(productNo);
     }
 
 
