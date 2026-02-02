@@ -2,6 +2,9 @@ package com.yuandi.injectiondispenser.admin;
 
 import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yiwan.vaccinedispenser.YiwanVaccinedispenserApplication;
 import com.yiwan.vaccinedispenser.core.common.SettingConstants;
 import com.yiwan.vaccinedispenser.core.common.emun.CabinetConstants;
@@ -13,8 +16,11 @@ import com.yiwan.vaccinedispenser.system.com.ComService;
 import com.yiwan.vaccinedispenser.system.dispensing.ConfigFunction;
 import com.yiwan.vaccinedispenser.system.dispensing.DispensingFunction;
 import com.yiwan.vaccinedispenser.system.dispensing.SendDrugFunction;
+import com.yiwan.vaccinedispenser.system.domain.model.vac.VacDrug;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacGetVaccine;
+import com.yiwan.vaccinedispenser.system.domain.model.vac.VacMachine;
 import com.yiwan.vaccinedispenser.system.sys.dao.VacGetVaccineMapper;
+import com.yiwan.vaccinedispenser.system.sys.dao.VacMachineMapper;
 import com.yiwan.vaccinedispenser.system.sys.data.AutoData;
 import com.yiwan.vaccinedispenser.system.sys.data.ConfigSetting;
 import com.yiwan.vaccinedispenser.system.sys.data.DistanceServoData;
@@ -41,13 +47,15 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.*;
 
 @SpringBootTest(classes = YiwanVaccinedispenserApplication.class)
 @RunWith(SpringRunner.class)
 @Slf4j
 class YuandiInjectiondispenserApplicationTests {
-
+	@Autowired
+	private VacMachineMapper vacMachineMapper;
 
 	@Autowired
 	private CabinetAService cabinetAService;
@@ -353,4 +361,86 @@ class YuandiInjectiondispenserApplicationTests {
 		vacMachineService.AutoProofread(autoData);
 
 	}
+
+	@Test
+	void test23(){
+		LambdaQueryWrapper<VacMachine> queryWrapper = new LambdaQueryWrapper<>();
+		queryWrapper.eq(VacMachine::getDeleted,0)
+				.eq(VacMachine::getBoxSpecId,14);
+			queryWrapper.orderByAsc(VacMachine::getLineNum);
+			queryWrapper.notIn(VacMachine::getLineNum, Arrays.asList(8, 10));
+		queryWrapper .apply("line_num % 2 = 0");
+		 List<VacMachine> vacMachineList =	vacMachineMapper.selectList(queryWrapper);
+		 log.info(JSON.toJSONString(vacMachineList));
+	}
+
+
+	@Test
+	void test24(){
+		vacDrugRecordService.updateBatchNo();
+	}
+
+
+	@Test
+	void test35(){
+
+		List<Long> boxSepcIds =new ArrayList<>();
+		boxSepcIds.add(13L);
+		boxSepcIds.add(14L);
+
+		LambdaQueryWrapper<VacMachine> queryWrapper = new LambdaQueryWrapper<>();
+		queryWrapper.eq(VacMachine::getDeleted,0)
+				//可用量要小于最大存储量
+				.eq(VacMachine::getProductNo,"78977010201")
+				.lt(VacMachine::getVaccineNum,7)
+				.in(VacMachine::getBoxSpecId,boxSepcIds)
+				.eq(VacMachine::getExpiredAt,Date.from(Instant.ofEpochMilli(1782748800000L)))
+				.eq(VacMachine::getBatchNo,"Y0C281M")
+				.eq(VacMachine::getDeleted,0)
+				.eq(VacMachine::getStatus,1)
+				//使用量、层数 升序排列
+				.orderByDesc(VacMachine::getVaccineNum);
+
+		queryWrapper.orderByAsc(VacMachine::getLineNum);
+		if (boxSepcIds != null && boxSepcIds.contains(14L)) {
+			queryWrapper.notIn(VacMachine::getLineNum, Arrays.asList(8, 10));
+		}
+		queryWrapper.orderByAsc(VacMachine::getBoxNo);
+		List<VacMachine> vacMachineList =  vacMachineMapper.selectList(queryWrapper);
+
+		log.info(String.valueOf(Date.from(Instant.ofEpochMilli(1782748800000L))));
+		log.info(JSON.toJSONString(vacMachineList));
+
+	}
+
+
+	@Test
+	void test44(){
+
+		String result = "{\"body\":\"{\\\"success\\\":true,\\\"result\\\":{\\\"batchNo\\\":\\\"202505027A\\\",\\\"expiredAt\\\":1840809600000,\\\"price\\\":6880,\\\"productNo\\\":\\\"01109000910\\\",\\\"supervisedCode\\\":\\\"81901900532076362854\\\",\\\"tag\\\":null},\\\"code\\\":null,\\\"message\\\":null}\",\"headers\":{\"Connection\":\"keep-alive\",\"Content-Length\":\"193\",\"Date\":\"Fri, 30 Jan 2026 00:04:49 GMT\",\"Content-Type\":\"application/json\"},\"httpStatus\":200}\n";
+		JSONObject outerJson = JSON.parseObject(result);
+		String bodyString = outerJson.getString("body");
+
+		// 解析内层 JSON 字符串
+		JSONObject bodyJson = JSON.parseObject(bodyString);
+
+		// result 是 JSON 对象，不是 JSON 数组
+		JSONObject resultObj = bodyJson.getJSONObject("result");
+
+		// 将 JSON 对象转换为 Java 对象
+		VacDrug vacDrug = resultObj.toJavaObject(VacDrug.class);
+
+		// 或者如果你需要列表形式，可以创建包含单个对象的列表
+		List<VacDrug> resultList = Collections.singletonList(vacDrug);
+
+
+		for(VacDrug vacDrugs :resultList){
+			vacDrugService.vacSaveOrUpdateDrug(vacDrugs);
+		}
+
+
+
+
+	}
+
 }

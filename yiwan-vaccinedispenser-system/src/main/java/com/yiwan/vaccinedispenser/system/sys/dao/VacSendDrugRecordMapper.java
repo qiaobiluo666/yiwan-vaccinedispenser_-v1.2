@@ -126,4 +126,7 @@ public interface VacSendDrugRecordMapper extends BaseMapper<VacSendDrugRecord> {
             @Param("productNo") String productNo
     );
 
+    List<SendDrugRecordRequest> countToday(
+    );
+
 }

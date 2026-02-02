@@ -47,5 +47,18 @@
         LIMIT 1
     </select>
 
+    <select id="countToday"
+            resultType="com.yiwan.vaccinedispenser.system.sys.data.request.vac.SendDrugRecordRequest">
+        SELECT
+            vaccine_id AS vaccineId,
+            product_No AS productNo,
+            product_name AS productName,
+            COUNT(*) AS totalNum
+        FROM vac_send_drug_record
+        WHERE deleted = 0
+          AND DATE(create_time) = CURDATE()
+        GROUP BY product_No, product_name, vaccine_id
+        ORDER BY totalNum DESC, product_No ASC
+    </select>
 
 </mapper>

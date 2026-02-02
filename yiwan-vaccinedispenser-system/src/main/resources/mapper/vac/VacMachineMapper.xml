@@ -22,6 +22,7 @@
 
     <select id="inventoryList" resultType="com.yiwan.vaccinedispenser.system.sys.data.response.vac.InventoryResponse">
         SELECT
+
             MIN(vaccine_id) AS vaccineId,
             COUNT(*) AS productCount,
             MAX(update_time) AS latestUpdateTime,
@@ -29,6 +30,7 @@
             product_No AS productNo,
             SUM(vaccine_num) AS totalVaccineNum,
             status AS status
+
         FROM
             vac_machine
         WHERE
@@ -37,6 +39,7 @@
         <if test="productName != null and productName!='' ">
             and   product_name LIKE CONCAT('%',#{productName},'%')
         </if>
+
         GROUP BY
             product_name,productNo,status
 
@@ -85,7 +88,6 @@
         SET vaccine_use_num = vaccine_num
         WHERE deleted = 0
     </update>
-
 
 
 </mapper>

@@ -79,7 +79,7 @@ public class CabinetCMsg {
         ConfigSetting configSetting = configFunction.getSettingConfigData();
 
         int address = Integer.parseInt(bytesStr[11], 16);
-        log.info("收到C柜{}指令:{}", CabinetConstants.CabinetCType.SEND_DRUG.desc, NettyUtils.StringListToString(bytesStr));
+
             //获取当前距离
         if("01".equals(bytesStr[10])&&"03".equals(bytesStr[7])){
                 BigInteger distance = NettyUtils.parseHexStringArray(bytesStr, 11,4);
@@ -87,8 +87,11 @@ public class CabinetCMsg {
                 valueOperations.set(RedisKeyConstant.servoGetDistance.CABINET_C, String.valueOf(distance));
             }
         switch (bytesStr[7]) {
+
             case "01" ->  {
+                log.info("收到C柜{}指令:{}", CabinetConstants.CabinetCType.SEND_DRUG.desc, NettyUtils.StringListToString(bytesStr));
                 switch (bytesStr[8]){
+
                     //发药指令
                     case "01"->{
                         switch (bytesStr[12]){
@@ -109,8 +112,9 @@ public class CabinetCMsg {
                                     listOps.leftPop(RedisKeyConstant.SEND_LIST);
 
                                     if("true".equals(configSetting.getZcySend())){
-//                                    if("true".equals(isOpen)){
+
                                         zcyFunction.sendResult(drugListData,"1");
+
                                     }
 
                                 }
@@ -196,6 +200,7 @@ public class CabinetCMsg {
                             }
                         }
                     }
+
                     //查询皮带状态指令
                     case "02"->{
                         //检测斜坡皮带是否停止
@@ -313,29 +318,74 @@ public class CabinetCMsg {
 
             }
 
+
+//            //伺服电机
+//            case "03"->{
+//                //B柜伺服报警 自动上药停止
+//                if ("03".equals(bytesStr[11]) && "0C".equals(bytesStr[6]) || "02".equals(bytesStr[11]) && "0D".equals(bytesStr[12])){
+//                    valueOperations.set(RedisKeyConstant.CABINET_C_SERVO_ERROR,"true");
+//                    String msg = "C柜第"+address+"伺服报警，结束自动上药 ";
+//                    log.error(msg+ NettyUtils.StringListToString(bytesStr));
+//                    sendDrugThreadManager.stop();
+//                    vacMachineExceptionService.sendException(SettingConstants.MachineException.SENDWARING.code, msg);
+//                    Map<String, Object> commandData = new HashMap<>();
+//                    commandData.put("code", CommandEnums.DEVICE_STATUS_SEND_DRUG_LIST_ERROR.getCode());
+//                    commandData.put("data", msg);
+//                    websocketService.sendInfo(CommandEnums.MACHINE_STATUS_COMMAND.getCode(),commandData);
+//
+//                }
+//            }
+
+
             //输入检测
             case "06"-> {
                 log.info("收到C柜{}:{}", CabinetConstants.CabinetCType.INPUT.desc, NettyUtils.StringListToString(bytesStr));
                 //查询所有传感器状态
-                if ("00".equals(bytesStr[9])) {
-                    List<Integer> sensorList = NettyUtils.allInPut(bytesStr);
-                    for (Integer integer : sensorList) {
-                        if (integer == 1) {
-                            valueOperations.set(RedisKeyConstant.sensor.SENSOR_CABINET_C, sensorList.toString());
-                        } else {
-                            valueOperations.set(RedisKeyConstant.sensor.SENSOR_CABINET_C, sensorList.toString());
+                switch (bytesStr[9]) {
+                    case "00"->{
+                        List<Integer> sensorList = NettyUtils.allInPut(bytesStr);
+                        for (Integer integer : sensorList) {
+                            if (integer == 1) {
+                                valueOperations.set(RedisKeyConstant.sensor.SENSOR_CABINET_C, sensorList.toString());
+                            } else {
+                                valueOperations.set(RedisKeyConstant.sensor.SENSOR_CABINET_C, sensorList.toString());
+                            }
                         }
                     }
-                } else if ("1C".equals(bytesStr[9])) {
 
-                    //底部传感器查询
-                    switch (bytesStr[11]) {
-                        //触发
-                        case "01" -> valueOperations.set(String.format(RedisKeyConstant.sensor.SENSOR_CABINET_C_NUM, 28), "true");
+                    case "1C"->{
+                        //底部传感器查询  //首南闸门控制传感器
+                        switch (bytesStr[11]) {
+                            //触发
+                            case "01" -> {
+                                valueOperations.set(String.format(RedisKeyConstant.sensor.SENSOR_CABINET_C_NUM, 28), "true");
+                                log.info("传感器28触发");
+                            }
 
-                        case "02" -> valueOperations.set(String.format(RedisKeyConstant.sensor.SENSOR_CABINET_C_NUM, 28), "false");
+                            case "02" ->{
+                                valueOperations.set(String.format(RedisKeyConstant.sensor.SENSOR_CABINET_C_NUM, 28), "false");
+                                log.info("传感器28不触发");
+                            }
+                        }
                     }
+
+
+                    case "1B"->{
+                        //底部传感器查询
+                        switch (bytesStr[11]) {
+                            //触发
+                            case "01" -> {valueOperations.set(String.format(RedisKeyConstant.sensor.SENSOR_CABINET_C_NUM, 27), "true");
+                                    log.info("传感器27触发");}
+
+                            case "02" -> {valueOperations.set(String.format(RedisKeyConstant.sensor.SENSOR_CABINET_C_NUM, 27), "false");
+                                    log.info("传感器27不触发");
+                            }
+
+                        }
+                    }
+
                 }
+
 
             }
 
@@ -348,6 +398,11 @@ public class CabinetCMsg {
             case "81" -> {
                 log.info("收到C柜{}:{}",CabinetConstants.CabinetSettingType.GET_SETTING.desc,NettyUtils.StringListToString(bytesStr));
                 cabinetSysMsg.receiveMsgCabinetSys(CabinetConstants.Cabinet.CAB_C,bytesStr);
+            }
+
+
+            default -> {
+                log.info("收到C柜其他指令:{}",NettyUtils.StringListToString(bytesStr));
             }
         }
     }

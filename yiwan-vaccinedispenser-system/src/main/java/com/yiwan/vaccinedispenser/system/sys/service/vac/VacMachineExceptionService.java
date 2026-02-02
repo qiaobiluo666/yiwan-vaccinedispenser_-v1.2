@@ -36,6 +36,10 @@ public interface VacMachineExceptionService extends IService<VacMachineException
     //根据控制器名称查询
     List<VacMachineException> getExceptionByName(String name);
 
+    //发药异常的仓位list
+    List<String> getExceptionBoxNoListByError();
+
+
     //清除控制器异常报警
     void  delExceptionByName(List<VacMachineException> vacMachineExceptionList);
 

@@ -567,16 +567,16 @@ public class CabinetSettingServiceImpl implements CabinetSettingService {
         WorkSettingRequest workSettingRequest =new WorkSettingRequest();
         workSettingRequest.setWorkMode(workMode);
         getCabinet(workSettingRequest);
-        VacUntil.sleep(100);
+        VacUntil.sleep(1000);
         //获取ip端口号
         IPSettingRequest ipSettingRequest = new IPSettingRequest();
         ipSettingRequest.setWorkMode(workMode);
         ipSettingRequest.setCabinet(workMode);
         getIpPort(ipSettingRequest);
-        VacUntil.sleep(100);
+        VacUntil.sleep(1000);
 
         getVersion(workMode);
-        VacUntil.sleep(100);
+        VacUntil.sleep(1000);
 
         //获取步进电机
         for(int i=1; i<7;i++){
@@ -585,7 +585,7 @@ public class CabinetSettingServiceImpl implements CabinetSettingService {
             stepSettingData.setCabinet(workMode);
             stepSettingData.setMode(i);
             getStep(stepSettingData);
-            VacUntil.sleep(100);
+            VacUntil.sleep(1000);
         }
 
         //获取伺服电机
@@ -596,7 +596,7 @@ public class CabinetSettingServiceImpl implements CabinetSettingService {
             data.setCabinet(workMode);
             data.setMode(i);
             getServo(data);
-            VacUntil.sleep(100);
+            VacUntil.sleep(1000);
         }
 
         //A柜相关参数
@@ -607,7 +607,7 @@ public class CabinetSettingServiceImpl implements CabinetSettingService {
             timeSettingRequest.setMode(CabinetConstants.SettingTimeCabinetMode.CABINET_A);
             timeSettingRequest.setStatus(i);
             getTime(timeSettingRequest);
-            VacUntil.sleep(100);
+            VacUntil.sleep(1000);
         }
 
         //B柜相关参数
@@ -618,19 +618,19 @@ public class CabinetSettingServiceImpl implements CabinetSettingService {
             timeSettingRequest.setMode(CabinetConstants.SettingTimeCabinetMode.CABINET_B);
             timeSettingRequest.setStatus(i);
             getTime(timeSettingRequest);
-            VacUntil.sleep(100);
+            VacUntil.sleep(1000);
         }
 
 
         //C柜相关参数
-        for(int i=1; i<3;i++) {
+        for(int i=2; i<11;i++) {
             TimeSettingRequest timeSettingRequest = new TimeSettingRequest();
             timeSettingRequest.setWorkMode(workMode);
             timeSettingRequest.setCabinet(workMode);
             timeSettingRequest.setMode(CabinetConstants.SettingTimeCabinetMode.CABINET_C);
             timeSettingRequest.setStatus(i);
             getTime(timeSettingRequest);
-            VacUntil.sleep(100);
+            VacUntil.sleep(1000);
         }
 
         //A私有参数
@@ -640,12 +640,13 @@ public class CabinetSettingServiceImpl implements CabinetSettingService {
         privateSettingData.setMode(CabinetConstants.SettingTimeCabinetMode.CABINET_A);
         privateSettingData.setStatus(1);
         getPrivate(privateSettingData);
-
+        VacUntil.sleep(1000);
         //B私有参数
         for(int i=1;i<=4;i++){
             privateSettingData.setMode(CabinetConstants.SettingTimeCabinetMode.CABINET_B);
             privateSettingData.setStatus(i);
             getPrivate(privateSettingData);
+            VacUntil.sleep(1000);
         }
 
         //C私有参数
@@ -654,6 +655,7 @@ public class CabinetSettingServiceImpl implements CabinetSettingService {
             privateSettingData.setMode(CabinetConstants.SettingTimeCabinetMode.CABINET_C);
             privateSettingData.setStatus(i);
             getPrivate(privateSettingData);
+            VacUntil.sleep(1000);
         }
 
         //C柜伺服电机距离参数
@@ -661,19 +663,25 @@ public class CabinetSettingServiceImpl implements CabinetSettingService {
             privateSettingData.setMode(CabinetConstants.SettingTimeCabinetMode.CABINET_C);
             privateSettingData.setStatus(i);
             getPrivate(privateSettingData);
+            VacUntil.sleep(1000);
         }
 
 
 
         privateSettingData.setStatus(240);
+        VacUntil.sleep(1000);
         getPrivate(privateSettingData);
+        VacUntil.sleep(1000);
     }
 
     @Override
     public CabinetSysResponse getAllSysList(CabinetConstants.Cabinet workMode) {
         List<VacMachineSys> vacMachineSysList = vacMachineSysMapper.selectList(new LambdaQueryWrapper<VacMachineSys>()
                 .eq(VacMachineSys::getWorkMode,workMode.num)
-                .eq(VacMachineSys::getDeleted,0));
+                .eq(VacMachineSys::getDeleted,0)
+                .orderByAsc(VacMachineSys::getCommand)
+                .orderByAsc(VacMachineSys::getMode))
+                ;
 
         CabinetSysResponse cabinetSysResponse = new CabinetSysResponse();
         for (VacMachineSys vacMachineSys:vacMachineSysList){

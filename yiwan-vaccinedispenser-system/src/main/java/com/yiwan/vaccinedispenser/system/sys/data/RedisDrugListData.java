@@ -34,7 +34,8 @@ public class RedisDrugListData {
     //位置
     private Integer positionNum;
 
-
+    //疫苗id
+    private Long vaccineId;
 
     //产品名称
     private String productName;

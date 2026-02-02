@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yiwan.vaccinedispenser.core.web.Result;
+import com.yiwan.vaccinedispenser.system.domain.model.vac.VacDrug;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacDrugRecord;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacSendDrugRecord;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacWorkbench;
@@ -14,6 +15,7 @@ import com.yiwan.vaccinedispenser.system.sys.dao.VacSendDrugRecordMapper;
 import com.yiwan.vaccinedispenser.system.sys.data.RedisDrugListData;
 import com.yiwan.vaccinedispenser.system.sys.data.request.vac.SendDrugRecordRequest;
 import com.yiwan.vaccinedispenser.system.sys.service.vac.VacDrugRecordService;
+import com.yiwan.vaccinedispenser.system.sys.service.vac.VacDrugService;
 import com.yiwan.vaccinedispenser.system.sys.service.vac.VacSendDrugRecordService;
 import com.yiwan.vaccinedispenser.system.sys.service.vac.VacWorkbenchService;
 import lombok.extern.slf4j.Slf4j;
@@ -49,6 +51,9 @@ public class VacSendDrugRecordServiceImpl extends ServiceImpl<VacSendDrugRecordM
 
     @Autowired
     private VacDrugRecordMapper vacDrugRecordMapper;
+
+    @Autowired
+    private VacDrugService vacDrugService;
 
     @Override
     public Page<VacSendDrugRecord> getList(SendDrugRecordRequest request) {
@@ -127,11 +132,12 @@ public class VacSendDrugRecordServiceImpl extends ServiceImpl<VacSendDrugRecordM
 
     @Override
     public void sendDrugRecordAdd(RedisDrugListData drugListData, Integer status, String desc) {
-
+        log.info(JSON.toJSONString(drugListData));
         //获取最早的入药记录
         VacDrugRecord vacDrugRecord = vacDrugRecordService.getListByMachineIdAndProductNo(drugListData.getMachineId(), drugListData.getProductNo());
-
+        log.info(JSON.toJSONString(vacDrugRecord));
         VacWorkbench vacWorkbench =vacWorkbenchService.getByWorkbenchNum(drugListData.getWorkbenchNum());
+        log.info(JSON.toJSONString(vacWorkbench));
         if(vacDrugRecord!=null&&vacWorkbench!=null){
 
             //上药记录 药品的状态变成不在药仓里
@@ -150,9 +156,32 @@ public class VacSendDrugRecordServiceImpl extends ServiceImpl<VacSendDrugRecordM
             vacSendDrugRecordMapper.insert(vacSendDrugRecord);
 
         }else {
+            VacDrug vacDrug =vacDrugService.vacDrugGetByproductNo(drugListData.getProductNo());
+
             log.error("没有查到发药信息");
-            log.warn("药品信息：{}   工作台信息：{}", JSON.toJSONString(vacDrugRecord),JSON.toJSONString(vacWorkbench));
+            VacSendDrugRecord vacSendDrugRecord = new VacSendDrugRecord();
+            BeanUtils.copyProperties(drugListData,vacSendDrugRecord);
+            vacSendDrugRecord.setMachineId(drugListData.getMachineId());
+            vacSendDrugRecord.setMachineNo(drugListData.getMachineNo());
+            if(vacDrug!=null){
+                vacSendDrugRecord.setVaccineId(vacDrug.getId());
+            }
+            vacSendDrugRecord.setSupervisedCode("未知电子监管码");
+            vacSendDrugRecord.setProductNo(drugListData.getProductNo());
+            vacSendDrugRecord.setProductName(drugListData.getProductName());
+
+            vacSendDrugRecord.setWorkbenchName(drugListData.getWorkbenchName());
+            vacSendDrugRecord.setWorkbenchNo(drugListData.getWorkbenchNo());
+
+            //发药记录
+            vacSendDrugRecord.setStatus(status);
+            vacSendDrugRecord.setDescription(desc+"没找到上药记录");
+            vacSendDrugRecord.setCreateTime(LocalDateTime.now());
+            vacSendDrugRecord.setUpdateTime(LocalDateTime.now());
+            vacSendDrugRecordMapper.insert(vacSendDrugRecord);
+
         }
+
 
 
     }
@@ -259,6 +288,11 @@ public class VacSendDrugRecordServiceImpl extends ServiceImpl<VacSendDrugRecordM
     @Override
     public SendDrugRecordRequest countTodayGroupedByProductId(String productNo) {
         return vacSendDrugRecordMapper.countTodayGroupedByProductId(productNo);
+    }
+
+    @Override
+    public List<SendDrugRecordRequest> countToday() {
+        return vacSendDrugRecordMapper.countToday();
     }
 
 

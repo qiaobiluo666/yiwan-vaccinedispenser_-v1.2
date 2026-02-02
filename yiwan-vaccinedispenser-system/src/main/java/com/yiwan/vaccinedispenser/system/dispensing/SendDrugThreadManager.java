@@ -35,8 +35,6 @@ public class SendDrugThreadManager {
     @Autowired
     private SendDrugFunction  sendDrugFunction;
 
-
-
     @Autowired
     private ConfigFunction configFunction;
 
@@ -86,8 +84,6 @@ public class SendDrugThreadManager {
         if("true".equals(valueOperations.get(RedisKeyConstant.AUTO_IS_START))){
             throw new ServiceException("正在自动对仓！");
         }
-
-
 
 
         if("true".equals(valueOperations.get(RedisKeyConstant.DRUG_INVENTORY_START))){
@@ -155,12 +151,13 @@ public class SendDrugThreadManager {
 
         //A柜伺服 回原
         sendDrugFunction.moveHandServoInit(configData);
+
         //B柜步进电机回原
         sendDrugFunction.cabinetBStepInit();
-
-        //B柜伺服回原到初始上方扫码位置
-        sendDrugFunction.cabinetBServoInit();
-
+        if("true".equals(valueOperations.get(RedisKeyConstant.autoDrug.AUTO_DRUG_START))){
+            //B柜伺服回原到初始上方扫码位置
+            sendDrugFunction.cabinetBServoInit();
+        }
 
 
         valueOperations.set(RedisKeyConstant.CABINET_B_TEST_DRUGS_RESULT_IS_END,"false");
@@ -187,10 +184,17 @@ public class SendDrugThreadManager {
 
 
     public void stop() throws IOException {
-        log.info("===============停止自动上药=================");
+        ConfigData configData = configFunction.getAutoDrugConfigData();
 
-        //关掉气泵
-        sendDrugFunction.xiPangEnd();
+        log.info("===============停止自动上药=================");
+        String x =  valueOperations.get(RedisKeyConstant.CABINET_B_SERVO_ERROR);
+        if("true".equals(x)){
+            //关掉气泵
+            sendDrugFunction.xiPangEnd();
+        }else {
+            sendDrugFunction.servoTableReturn(configData,"停止上药");
+        }
+
         valueOperations.set(RedisKeyConstant.autoDrug.AUTO_DRUG_START,"false");
         sendDrugFunction.autoDrug(CabinetConstants.CabinetBApplyCommand.AUTO, CabinetConstants.CabinetBApplyMode.STOP, CabinetConstants.CabinetBApplyStatus.ZERO);
         running = false;
@@ -199,6 +203,7 @@ public class SendDrugThreadManager {
         commandData.put("code", CommandEnums.DOSAGE_BUTTON_FINISH.getCode());
         commandData.put("data", "end");
         websocketService.sendInfo(CommandEnums.ON_CABINET_WEB.getCode(),commandData);
+
 
     }
 

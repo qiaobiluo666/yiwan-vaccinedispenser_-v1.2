@@ -33,11 +33,14 @@ public class CameraDetaultHandler extends SimpleChannelInboundHandler<String> {
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
 		super.channelActive(ctx);
+		log.info("[{}] 连接成功", name);
 	}
 
 	@Override
 	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-		log.info("{}client链接已断开！",name);
+		String remoteAddress = ctx.channel() != null && ctx.channel().remoteAddress() != null 
+			? ctx.channel().remoteAddress().toString() : "unknown";
+		log.warn("[{}] 连接断开 - 远程地址: {}", name, remoteAddress);
 		super.channelInactive(ctx);
 		if (!cameraClient.isConnecting()) {
 			cameraClient.setConnecting(true);
@@ -47,14 +50,25 @@ public class CameraDetaultHandler extends SimpleChannelInboundHandler<String> {
 
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-//		super.exceptionCaught(ctx, cause);
-		log.warn("{}相机处理器触发异常!",name,cause);
+		// 获取详细的错误信息
+		String errorType = cause.getClass().getSimpleName();
+		String errorMsg = cause.getMessage();
+		String remoteAddress = ctx.channel() != null && ctx.channel().remoteAddress() != null 
+			? ctx.channel().remoteAddress().toString() : "unknown";
+		
+		if (cause instanceof java.io.IOException) {
+			log.warn("[{}] IO异常断开 - {}: {} - 远程地址: {}", 
+				name, errorType, errorMsg, remoteAddress);
+		} else {
+			log.error("[{}] 异常断开 - {}: {} - 远程地址: {}", 
+				name, errorType, errorMsg, remoteAddress, cause);
+		}
+		
 		ctx.channel().close();
 		if (!cameraClient.isConnecting()) {
 			cameraClient.setConnecting(true);
 			cameraClient.connect();
 		}
-
 	}
 
 	@Override

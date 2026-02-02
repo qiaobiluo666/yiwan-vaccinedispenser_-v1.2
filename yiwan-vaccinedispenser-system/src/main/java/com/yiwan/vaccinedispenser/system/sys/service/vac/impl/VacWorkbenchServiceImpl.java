@@ -117,6 +117,13 @@ public class VacWorkbenchServiceImpl extends ServiceImpl<VacWokrbenchMapper, Vac
 
     }
 
+    @Override
+    public Result getWorkBenchTotalNum() {
+        LambdaQueryWrapper<VacWorkbench> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(VacWorkbench::getDeleted, 0);
+        return Result.success( vacWokrbenchMapper.selectCount(wrapper));
+    }
+
 }
 
 

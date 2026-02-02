@@ -42,6 +42,9 @@ public class SettingConstants {
     }
 
     public static final String PU_YAN_HOSPITAL_NAME = "杭州浦沿街道社区卫生服务中心";
+
+    public static final String SHOU_NAN_HOSPITAL_NAME = "宁波首南";
+
     //底部蜂鸣器输出
     public static final int IS_SENSOR_OUTPUT_WARING_NUM = 14;
 
@@ -78,10 +81,17 @@ public class SettingConstants {
     public static final int IO_DROP_WAIT_TIME = 16;
 
     //等待药品掉落光栅传感器时间
-    public static final int DRUG_BELT_WAIT_TIME = 10000;
+    public static final int DRUG_BELT_WAIT_TIME = 12000;
 
     //等待药品掉到运输皮带时间
     public static final int WORK_DRUG_BELT_WAIT_TIME = 10000;
+
+
+    //等待药品掉到运输皮带时间
+    public static final int SHOU_NAN_BLANK_WAIT_TIME = 60000;
+
+
+
 
     //查询C柜斜坡是否停止
     public static final int FIND_BELT_STOP_WAIT_TIME = 60000;

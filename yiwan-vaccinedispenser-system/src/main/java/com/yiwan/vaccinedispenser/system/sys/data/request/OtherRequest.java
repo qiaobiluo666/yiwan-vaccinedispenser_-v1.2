@@ -35,5 +35,10 @@ public class OtherRequest {
     //灯与灯的间隔时间
     private Integer ledTime;
 
+    //批量修改autoZ
+    private Integer line;
+    private Integer autoZ;
 
+    //仓位
+    private String boxNo;
 }

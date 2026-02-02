@@ -2,10 +2,13 @@ package com.yiwan.vaccinedispenser.system.camera;
 
 import cn.hutool.core.util.HexUtil;
 import com.yiwan.vaccinedispenser.core.common.CommandEnums;
+import com.yiwan.vaccinedispenser.core.common.SettingConstants;
 import com.yiwan.vaccinedispenser.core.common.emun.RedisKeyConstant;
 import com.yiwan.vaccinedispenser.core.web.ErrorCode;
 import com.yiwan.vaccinedispenser.core.web.Result;
 import com.yiwan.vaccinedispenser.core.websocket.WebsocketService;
+import com.yiwan.vaccinedispenser.system.domain.model.vac.VacMachineException;
+import com.yiwan.vaccinedispenser.system.sys.service.vac.VacMachineExceptionService;
 import com.yiwan.vaccinedispenser.system.until.NettyUtils;
 import com.yiwan.vaccinedispenser.system.until.VacUntil;
 import io.netty.bootstrap.Bootstrap;
@@ -24,6 +27,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -46,6 +50,9 @@ public class CameraClient {
 	private Integer port;
 
 	private String data;
+
+	@Autowired
+	private VacMachineExceptionService vacMachineExceptionService;
 
 	private NettyReceiveCameraService nettyReceiveCameraService;
 
@@ -100,13 +107,37 @@ public class CameraClient {
 			}
 
 			if (!future.isSuccess()) {
-				log.warn("当前相机：{}, 执行重新连接到服务器{}:{}", name, host, port);
+
+				// 获取详细的错误信息
+				Throwable cause = future.cause();
+				String errorDetail = cause != null ? cause.getMessage() : "未知错误";
+				String errorType = cause != null ? cause.getClass().getSimpleName() : "Unknown";
+				
+				log.warn("[{}] 连接失败 {}:{} - {}: {}", name, host, port, errorType, errorDetail);
+
+				if (vacMachineExceptionService.getExceptionByName(name).isEmpty()) {
+
+					vacMachineExceptionService.sendException(SettingConstants.MachineException.CONTROLLER.code, name, errorDetail);
+
+				}
 				valueOperations.set(redisKey,"false");
 				commandData.put("data", "fail");
-				future.channel().eventLoop().schedule(this::connect, 2, TimeUnit.SECONDS);
+				future.channel().eventLoop().schedule(this::connect, 10, TimeUnit.SECONDS);
+
+
 			} else {
 				socketChannel = (SocketChannel) future.channel();
-				log.info("当前客户端：{} 服务端连接成功...", name);
+				log.info("[{}] 连接成功 {}:{}", name, host, port);
+
+
+				List<VacMachineException> exceptions = vacMachineExceptionService.getExceptionByName(name);
+				if (!exceptions.isEmpty()) {
+					vacMachineExceptionService.delExceptionByName(exceptions);
+				}
+
+
+
+
 				valueOperations.set(redisKey,"true");
 				commandData.put("data", "success");
 				isConnecting = false;
@@ -138,7 +169,7 @@ public class CameraClient {
 			socketChannel.writeAndFlush(EXECUTE_COMMAND);
 			VacUntil.sleep(150);
 		}else {
-			log.warn("当前客户端：{} 已经断开了连接", name);
+			log.warn("[{}] 连接断开，无法发送命令", name);
 			if (!isConnecting()) {
 				setConnecting(true);
 				connect();

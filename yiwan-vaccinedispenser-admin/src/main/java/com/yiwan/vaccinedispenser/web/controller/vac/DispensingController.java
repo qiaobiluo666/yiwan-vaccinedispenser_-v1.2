@@ -43,9 +43,11 @@ public class DispensingController {
      * */
     @GetMapping("/auto-drug-start")
     public Result autoDrugStart() throws IOException {
+
         sendDrugThreadManager.sendDrug();
         sendDrugThreadManager.goTable();
         return Result.success();
+
     }
 
 

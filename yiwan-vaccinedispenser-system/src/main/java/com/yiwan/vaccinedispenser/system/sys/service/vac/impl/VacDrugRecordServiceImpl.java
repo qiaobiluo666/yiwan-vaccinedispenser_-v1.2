@@ -1,14 +1,15 @@
 package com.yiwan.vaccinedispenser.system.sys.service.vac.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.yiwan.vaccinedispenser.core.common.emun.RedisKeyConstant;
 import com.yiwan.vaccinedispenser.core.web.Result;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacDrugRecord;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacMachine;
-import com.yiwan.vaccinedispenser.system.domain.model.vac.VacSendDrugRecord;
 import com.yiwan.vaccinedispenser.system.sys.dao.VacDrugRecordMapper;
 import com.yiwan.vaccinedispenser.system.sys.data.request.vac.DrugRecordRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.zyc.InventoryReportData;
@@ -18,8 +19,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.ListOperations;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -35,6 +40,12 @@ public class VacDrugRecordServiceImpl extends ServiceImpl<VacDrugRecordMapper, V
 
     @Autowired
     private VacMachineService vacMachineService;
+
+    @Resource(name = "redisTemplate")
+    private ListOperations<String, String> listOps;
+
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
 
     @Override
     public Page<VacDrugRecord> drugRecordList(DrugRecordRequest request) {
@@ -224,6 +235,46 @@ public class VacDrugRecordServiceImpl extends ServiceImpl<VacDrugRecordMapper, V
     @Override
     public DrugRecordRequest countTodayGroupedByProductId(String productNo) {
         return vacDrugRecordMapper.countTodayGroupedByProductId(productNo);
+    }
+
+    @Override
+    public List<DrugRecordRequest> countToday() {
+        return vacDrugRecordMapper.countToday();
+    }
+
+    @Override
+    public void updateBatchNo() {
+        LambdaQueryWrapper<VacDrugRecord> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VacDrugRecord::getDeleted,0)
+                .groupBy(VacDrugRecord::getProductNo);
+
+        List<VacDrugRecord> vacDrugRecordList = vacDrugRecordMapper.selectList(queryWrapper);
+        for(VacDrugRecord vacDrugRecord :vacDrugRecordList){
+            LambdaQueryWrapper<VacDrugRecord> queryWrapper1 = new LambdaQueryWrapper<>();
+            queryWrapper1.eq(VacDrugRecord::getDeleted,0);
+            queryWrapper1.eq(VacDrugRecord::getProductNo,vacDrugRecord.getProductNo());
+            queryWrapper1.orderByAsc(VacDrugRecord::getCreateTime);
+            queryWrapper1.groupBy(VacDrugRecord::getBatchNo);
+
+
+            //删除原来的列表
+            String key = String.format(RedisKeyConstant.BATCH_NO_LIST, vacDrugRecord.getProductNo());
+            redisTemplate.delete(key);
+            List<VacDrugRecord> batchNoList = vacDrugRecordMapper.selectList(queryWrapper1);
+            //遍历批次
+            for(VacDrugRecord record:batchNoList){
+                String batchNo = record.getBatchNo();
+                // 获取列表所有元素
+                List<String> list = listOps.range(key, 0, -1);
+                if (list == null || !list.contains(batchNo)) {
+                    listOps.rightPush(key, batchNo);
+                }
+            }
+
+        }
+
+
+
     }
 
 }

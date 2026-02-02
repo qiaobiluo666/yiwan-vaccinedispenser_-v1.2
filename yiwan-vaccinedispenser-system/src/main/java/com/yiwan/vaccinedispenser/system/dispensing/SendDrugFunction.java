@@ -6,7 +6,6 @@ import com.yiwan.vaccinedispenser.core.common.CommandEnums;
 import com.yiwan.vaccinedispenser.core.common.SettingConstants;
 import com.yiwan.vaccinedispenser.core.common.emun.CabinetConstants;
 import com.yiwan.vaccinedispenser.core.common.emun.RedisKeyConstant;
-import com.yiwan.vaccinedispenser.core.web.Result;
 import com.yiwan.vaccinedispenser.core.websocket.WebsocketService;
 import com.yiwan.vaccinedispenser.system.camera.CameraSendMsg;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacBoxSpec;
@@ -18,14 +17,14 @@ import com.yiwan.vaccinedispenser.system.sys.data.request.vac.DrugRecordRequest;
 import com.yiwan.vaccinedispenser.system.sys.service.netty.CabinetAService;
 import com.yiwan.vaccinedispenser.system.sys.service.netty.CabinetBService;
 import com.yiwan.vaccinedispenser.system.sys.service.vac.*;
+import com.yiwan.vaccinedispenser.system.test.UploadController;
 import com.yiwan.vaccinedispenser.system.until.VacUntil;
 import com.yiwan.vaccinedispenser.system.zyc.ZcyFunction;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
-
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.*;
@@ -53,7 +52,8 @@ public class SendDrugFunction {
     @Autowired
     private SendDrugThreadManager sendDrugThreadManager;
 
-
+    @Autowired
+    private UploadController uploadController;
 
 
     @Autowired
@@ -93,6 +93,8 @@ public class SendDrugFunction {
     @Autowired
     private WebsocketService websocketService;
 
+    @Resource(name = "redisTemplate")
+    private ListOperations<String, String> listOps;
 
     /**
      * 药掉到滑台 并测量距离
@@ -172,7 +174,6 @@ public class SendDrugFunction {
 
             if(countStr==null){
 //                valueOperations.set(RedisKeyConstant.CABINET_B_COUNT,"1");
-
                 valueOperations.set(RedisKeyConstant.sensor.TABLE_SENSOR_COUNT,"1");
             }else {
                 int count = Integer.parseInt(countStr);
@@ -208,8 +209,6 @@ public class SendDrugFunction {
                 tableReturn();
                 return;
             }
-
-
 
             //判断机械手是否运动完成
             long timeout = System.currentTimeMillis();
@@ -314,6 +313,12 @@ public class SendDrugFunction {
                 drugRecordData = zcyFunction.getVaccineMsgByCode(scanCodeData.getCode());
                 log.info("拿到政采云疫苗信息：{}",JSON.toJSONString(drugRecordData));
             }else {
+//                 drugRecordData = uploadController.getZcyCode(scanCodeData.getCode());
+//                 if(drugRecordData==null){
+//                     drugRecordData = new DrugRecordRequest();
+//                     drugRecordData.setIsReturn(true);
+//                 }
+
                 if(scanCodeData.getCode().length()>7){
                     drugRecordData = vacDrugService.sendDrugTest(scanCodeData.getCode());
                     drugRecordData.setExpiredAt(new Date());
@@ -361,6 +366,19 @@ public class SendDrugFunction {
                 servoTableReturn(configData,"没有仓位能装退回");
                 return;
             }
+
+            //检测Redis 里面有没有这个批次的list 没有按照顺序添加
+
+
+            String key = String.format(RedisKeyConstant.BATCH_NO_LIST, drugRecordRequest.getProductNo());
+            String batchNo = drugRecordRequest.getBatchNo();
+
+            // 获取列表所有元素
+            List<String> list = listOps.range(key, 0, -1);
+            if (list == null || !list.contains(batchNo)) {
+                listOps.rightPush(key, batchNo);
+            }
+
 
             //等机械手回原以后才能开始掉药
             boolean flag = false;
@@ -481,7 +499,7 @@ public class SendDrugFunction {
 
 
                 try {
-                    if(!dropDrugHandle(clampDis,dropDis,drugRecordRequest)){
+                    if(!dropDrugHandleAuto(clampDis,dropDis,drugRecordRequest)){
                         String errorMsg = String.format("自动上药异常：药物异常报警,%s 药没掉入药仓",drugRecordRequest.getProductName());
                         log.error(errorMsg);
 
@@ -492,16 +510,18 @@ public class SendDrugFunction {
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
+                if("true".equals(valueOperations.get(RedisKeyConstant.autoDrug.AUTO_DRUG_START))){
 
-                log.info("上药信息：{}",JSON.toJSONString(drugRecordRequest));
-                //机械手上有药，仓位药品数量+1，新增上药记录
-                addDrugRecord(drugRecordRequest,1);
+                    log.info("上药信息：{}",JSON.toJSONString(drugRecordRequest));
+                    //机械手上有药，仓位药品数量+1，新增上药记录
+                    addDrugRecord(drugRecordRequest,1);
+                    //A柜 步进电机 回原
+                    cabinetAStepInit(CabinetConstants.CabinetAStepMode.BLOCK);
+                    //机械手回原
+                    moveHandServoInit(configData);
 
-                //A柜 步进电机 回原
-                cabinetAStepInit(CabinetConstants.CabinetAStepMode.BLOCK);
+                }
 
-                //机械手回原
-                moveHandServoInit(configData);
 
                 //可以进入掉药区域
                 valueOperations.set(RedisKeyConstant.HANDLE_IS_DROP,"true");
@@ -531,6 +551,114 @@ public class SendDrugFunction {
 
 
     //机械手挡片 夹药回原   掉药
+    public boolean dropDrugHandleAuto(int clampDis , int dropDis ,DrugRecordRequest drugRecordRequest) throws IOException {
+
+        cabinetAStepPosition(CabinetConstants.CabinetAStepMode.CLAMP,clampDis);
+        //等待夹爪步进电机运动完成
+        waitCabinetAStepEnd(1);
+        long timeouts ;
+        if("true".equals(valueOperations.get(RedisKeyConstant.autoDrug.AUTO_DRUG_START))){
+            boolean flag = false;
+            timeouts = System.currentTimeMillis();
+            while ((System.currentTimeMillis() - timeouts) < SettingConstants.DRUG_HAVE_HAND_WAIT_TIME){
+                if("true".equals(valueOperations.get(RedisKeyConstant.CABINET_B_SERVO_IS_RETURN))){
+                    flag =true;
+                    break;
+                }
+                VacUntil.sleep(200);
+            }
+            if(!flag){
+                String msg = "B柜伺服电机运动异常 停止上药";
+                log.error(msg);
+                vacMachineExceptionService.sendException(SettingConstants.MachineException.SEND.code,null,msg);
+                sendDrugThreadManager.stop();
+                return false;
+            }
+        }
+
+        if("true".equals(valueOperations.get(RedisKeyConstant.autoDrug.AUTO_DRUG_START)) ){
+            //运动伺服
+            moveHandServo(drugRecordRequest.getAutoX(),drugRecordRequest.getAutoZ());
+
+        }else {
+            log.info("已经停止上药！");
+            return  false;
+        }
+
+
+        //挡片步进电机旋转90
+        cabinetAStepPosition(CabinetConstants.CabinetAStepMode.BLOCK,900);
+        waitCabinetAStepEnd(2);
+
+        //A柜机械手 步进电机走 往外走5mm
+        cabinetAStepPosition(CabinetConstants.CabinetAStepMode.CLAMP,clampDis-500);
+        waitCabinetAStepEnd(1);
+
+
+        String sensorIsPuts= null;
+        boolean drugHand = false;
+        boolean inputFlag = false;
+         timeouts = System.currentTimeMillis();
+        while ((System.currentTimeMillis() - timeouts) < SettingConstants.WAIT_DROP_TIME){
+            //查询 机械手底部传感器信号
+            intPut(CabinetConstants.Cabinet.CAB_A,CabinetConstants.InPutCommand.QUERY,SettingConstants.SENSOR_CABINET_A_HAND_NUM);
+            VacUntil.sleep(200);
+            //判断机械手底部传感器信号是否被触发
+            sensorIsPuts = valueOperations.get(RedisKeyConstant.sensor.HAND_SENSOR);
+            assert sensorIsPuts != null;
+            //如果传感器触发 一直等待 不触发结束
+            if(sensorIsPuts.equals(CabinetConstants.SensorStatus.RESET.code)){
+                drugHand =true;
+//                suckerOutput(CabinetConstants.Cabinet.CAB_A,SettingConstants.CABINET_A_SUCKER_NUM,CabinetConstants.OutPutCommand.NOT_OUTPUT);
+                break;
+            }
+
+            if((System.currentTimeMillis() - timeouts)>3000&&(System.currentTimeMillis() - timeouts)<20000){
+                //A柜 步进电机 回原
+                cabinetAStepInit(CabinetConstants.CabinetAStepMode.CLAMP);
+                waitCabinetAStepEnd(1);
+
+                //夹紧
+                cabinetAStepPosition(CabinetConstants.CabinetAStepMode.CLAMP,dropDis);
+                waitCabinetAStepEnd(1);
+
+                //震动电机
+//                suckerOutput(CabinetConstants.Cabinet.CAB_A,SettingConstants.CABINET_A_SUCKER_NUM,CabinetConstants.OutPutCommand.OUTPUT);
+                inputFlag = true;
+
+                //空出 1cm缝隙
+                cabinetAStepPosition(CabinetConstants.CabinetAStepMode.CLAMP,0);
+                waitCabinetAStepEnd(1);
+                VacUntil.sleep(500);
+
+
+            }
+
+//            //震动电机
+//            if((System.currentTimeMillis() - timeouts)>10000 && inputFlag ){
+//                suckerOutput(CabinetConstants.Cabinet.CAB_A,SettingConstants.CABINET_A_SUCKER_NUM,CabinetConstants.OutPutCommand.NOT_OUTPUT);
+//                inputFlag = false;
+//            }
+
+
+        }
+
+        if(!drugHand){
+            log.error("自动上药异常：药物异常报警,药没掉入药仓");
+            return false;
+        }
+
+        //回原
+        //A柜步进电机回原
+        cabinetAStepInit(CabinetConstants.CabinetAStepMode.CLAMP);
+//        cabinetAStepPosition(CabinetConstants.CabinetAStepMode.CLAMP,0);
+        waitCabinetAStepEnd(1);
+        return  true;
+
+    }
+
+
+    //机械手挡片 夹药回原   掉药
     public boolean dropDrugHandle(int clampDis , int dropDis ,DrugRecordRequest drugRecordRequest) throws IOException {
 
         cabinetAStepPosition(CabinetConstants.CabinetAStepMode.CLAMP,clampDis);
@@ -556,8 +684,12 @@ public class SendDrugFunction {
             }
         }
 
+
         //运动伺服
         moveHandServo(drugRecordRequest.getAutoX(),drugRecordRequest.getAutoZ());
+
+
+
 
         //挡片步进电机旋转90
         cabinetAStepPosition(CabinetConstants.CabinetAStepMode.BLOCK,900);
@@ -571,7 +703,7 @@ public class SendDrugFunction {
         String sensorIsPuts= null;
         boolean drugHand = false;
         boolean inputFlag = false;
-         timeouts = System.currentTimeMillis();
+        timeouts = System.currentTimeMillis();
         while ((System.currentTimeMillis() - timeouts) < SettingConstants.WAIT_DROP_TIME){
             //查询 机械手底部传感器信号
             intPut(CabinetConstants.Cabinet.CAB_A,CabinetConstants.InPutCommand.QUERY,SettingConstants.SENSOR_CABINET_A_HAND_NUM);
@@ -582,11 +714,11 @@ public class SendDrugFunction {
             //如果传感器触发 一直等待 不触发结束
             if(sensorIsPuts.equals(CabinetConstants.SensorStatus.RESET.code)){
                 drugHand =true;
-                suckerOutput(CabinetConstants.Cabinet.CAB_A,SettingConstants.CABINET_A_SUCKER_NUM,CabinetConstants.OutPutCommand.NOT_OUTPUT);
+//                suckerOutput(CabinetConstants.Cabinet.CAB_A,SettingConstants.CABINET_A_SUCKER_NUM,CabinetConstants.OutPutCommand.NOT_OUTPUT);
                 break;
             }
 
-            if((System.currentTimeMillis() - timeouts)>3000&&(System.currentTimeMillis() - timeouts)<15000){
+            if((System.currentTimeMillis() - timeouts)>3000&&(System.currentTimeMillis() - timeouts)<9000){
                 //A柜 步进电机 回原
                 cabinetAStepInit(CabinetConstants.CabinetAStepMode.CLAMP);
                 waitCabinetAStepEnd(1);
@@ -596,7 +728,7 @@ public class SendDrugFunction {
                 waitCabinetAStepEnd(1);
 
                 //震动电机
-                suckerOutput(CabinetConstants.Cabinet.CAB_A,SettingConstants.CABINET_A_SUCKER_NUM,CabinetConstants.OutPutCommand.OUTPUT);
+//                suckerOutput(CabinetConstants.Cabinet.CAB_A,SettingConstants.CABINET_A_SUCKER_NUM,CabinetConstants.OutPutCommand.OUTPUT);
                 inputFlag = true;
 
                 //空出 1cm缝隙
@@ -607,13 +739,16 @@ public class SendDrugFunction {
 
             }
 
-            if((System.currentTimeMillis() - timeouts)>15000 && inputFlag ){
-                suckerOutput(CabinetConstants.Cabinet.CAB_A,SettingConstants.CABINET_A_SUCKER_NUM,CabinetConstants.OutPutCommand.NOT_OUTPUT);
-                inputFlag = false;
-            }
+//            //震动电机
+//            if((System.currentTimeMillis() - timeouts)>10000 && inputFlag ){
+//                suckerOutput(CabinetConstants.Cabinet.CAB_A,SettingConstants.CABINET_A_SUCKER_NUM,CabinetConstants.OutPutCommand.NOT_OUTPUT);
+//                inputFlag = false;
+//            }
 
 
         }
+
+
 
         if(!drugHand){
             log.error("自动上药异常：药物异常报警,药没掉入药仓");
@@ -628,6 +763,7 @@ public class SendDrugFunction {
         return  true;
 
     }
+
 
 
     //A柜步进电机位置模式
@@ -803,7 +939,7 @@ public class SendDrugFunction {
                 }
             }
 
-        } else {
+        } else if(type==2) {
             //Z轴先走
             request.setDistance(distanceZ);
             request.setMode(CabinetConstants.CabinetBServoMode.SCAN_SERVO_Z.num);
@@ -844,6 +980,60 @@ public class SendDrugFunction {
                     VacUntil.sleep(200);
                 }
             }
+        }else {
+            //清港Z轴先走 走完再走Y 最后走X
+            //Z轴先走
+            request.setDistance(distanceZ);
+            request.setMode(CabinetConstants.CabinetBServoMode.SCAN_SERVO_Z.num);
+            cabinetBService.servo(request);
+            long timeout = System.currentTimeMillis();
+            while ((System.currentTimeMillis() - timeout) < SettingConstants.SCAN_SERVO_WAIT_TIME) {
+                if ("true".equals(valueOperations.get(RedisKeyConstant.scanServo.Z))) {
+                    break;
+                }
+                VacUntil.sleep(100);
+                if("true".equals(valueOperations.get(RedisKeyConstant.CABINET_B_SERVO_ERROR))){
+                    log.error("B柜伺服已经报警！终止自动上药程序！");
+                    sendDrugThreadManager.stop();
+                    servoNormalFlag = false;
+                    break;
+                }
+
+                VacUntil.sleep(100);
+            }
+
+            if(servoNormalFlag){
+
+                request.setDistance(distanceY);
+                request.setMode(CabinetConstants.CabinetBServoMode.SCAN_SERVO_Y.num);
+                cabinetBService.servo(request);
+                VacUntil.sleep(50);
+
+                while ((System.currentTimeMillis() - timeout) < SettingConstants.SCAN_SERVO_WAIT_TIME) {
+
+                    if ( "true".equals(valueOperations.get(RedisKeyConstant.scanServo.Y))) {
+                        break;
+                    }
+                    VacUntil.sleep(200);
+                }
+
+                request.setMode(CabinetConstants.CabinetBServoMode.SCAN_SERVO_X.num);
+                request.setDistance(distanceX);
+                cabinetBService.servo(request);
+
+
+                timeout = System.currentTimeMillis();
+                while ((System.currentTimeMillis() - timeout) < SettingConstants.SCAN_SERVO_WAIT_TIME) {
+
+                    if ("true".equals(valueOperations.get(RedisKeyConstant.scanServo.X)) ) {
+                        break;
+                    }
+                    VacUntil.sleep(200);
+                }
+            }
+
+
+
         }
 
         //如果伺服报警 则显示3轴运动失败  true 运动正常 false 运动异常
@@ -877,6 +1067,8 @@ public class SendDrugFunction {
 
     //重新开始上药初始化
     public void autoInit() throws IOException {
+
+
         cabinetBStepInit();
         cabinetBServoInit();
         valueOperations.set(RedisKeyConstant.CABINET_B_TEST_DRUGS_RESULT_IS_END,"false");
@@ -951,6 +1143,7 @@ public class SendDrugFunction {
 
 
         log.info(JSON.toJSONString(data));
+        log.info(JSON.toJSONString(distanceServoData));
         distanceServoData.setServoX(moveX);
         distanceServoData.setServoY(moveY);
         distanceServoData.setServoZ(configData.getSensorDistanceZ());
@@ -1120,8 +1313,10 @@ public class SendDrugFunction {
         Integer resultRight = getDistanceRight();
         Integer resultAbove = getDistanceHigh();
         Integer resultInventory = getDistanceCount();
+        if(resultInventory!=null){
+            resultInventory = resultInventory-configSetting.getInventoryCountValue();
+        }
 
-        resultInventory = resultInventory-configSetting.getInventoryCountValue();
 
 
         //左右距离传感器会出现 多次给数据情况
@@ -1139,6 +1334,9 @@ public class SendDrugFunction {
                 }else {
                     log.error("库存盘点传感器异常");
                     resultInventory = getDistanceCount();
+                    if(resultInventory==null){
+                        resultInventory=0;
+                    }
                     resultInventory = resultInventory-configSetting.getInventoryCountValue();
                 }
 
@@ -1515,6 +1713,7 @@ public class SendDrugFunction {
 
     //B柜伺服电机走到扫码位置
     public void cabinetBServoInit() throws IOException {
+        ConfigSetting configSetting = configFunction.getSettingConfigData();
 
         valueOperations.set(RedisKeyConstant.CABINET_B_INIT,"false");
         ConfigData configData = configFunction.getAutoDrugConfigData();
@@ -1522,7 +1721,13 @@ public class SendDrugFunction {
         distanceServoData.setServoZ(configData.getAboveScanZ());
         distanceServoData.setServoY(configData.getAboveScanY());
         distanceServoData.setServoX(configData.getAboveScanX());
-        moveScanServo(distanceServoData,2);
+
+        if ("台州玉环清港".equals(configSetting.getHospitalName())){
+            moveScanServo(distanceServoData,3);
+        }else {
+            moveScanServo(distanceServoData,2);
+        }
+
         valueOperations.set(RedisKeyConstant.CABINET_B_INIT,"true");
 
     }
@@ -1639,14 +1844,25 @@ public class SendDrugFunction {
      */
 
     public void  servoTableReturn(ConfigData configData,String msg) throws IOException {
+        ConfigSetting configSetting = configFunction.getSettingConfigData();
         log.warn(msg);
         DistanceServoData distanceServoData = new DistanceServoData();
         distanceServoData.setServoX(configData.getWasteX());
         distanceServoData.setServoY(configData.getWasteY());
         distanceServoData.setServoZ(0);
-        moveScanServo(distanceServoData,2);
+        if("台州玉环清港".equals(configSetting.getHospitalName())){
+            moveScanServo(distanceServoData,2);
+        }else {
+            moveScanServo(distanceServoData,3);
+        }
+
         distanceServoData.setServoZ(configData.getWasteZ());
-        moveScanServo(distanceServoData,2);
+        if("台州玉环清港".equals(configSetting.getHospitalName())){
+            moveScanServo(distanceServoData,2);
+        }else {
+            moveScanServo(distanceServoData,3);
+        }
+
         xiPangEnd();
         tableReturn();
     }
@@ -1674,7 +1890,7 @@ public class SendDrugFunction {
      * 将扫码扫到的信息
      */
     public DrugRecordRequest findBox(DistanceServoData distanceServoData ,DrugRecordRequest request){
-
+        ConfigData configData = configFunction.getAutoDrugConfigData();
         //计算一个仓位最多能存储多少只药品  误差要加 5mm
         int num = getDrugNum(distanceServoData.getVaccineLong(), request);
 
@@ -1685,12 +1901,17 @@ public class SendDrugFunction {
         for(VacBoxSpec vacBoxSpec:vacBoxSpecList){
             boxSpecIds.add(vacBoxSpec.getId());
         }
+
         log.info("符合的仓位规格id:{}",JSON.toJSONString(boxSpecIds));
         if (!boxSpecIds.isEmpty()) {
-            //正常上药
-            return vacMachineService.findBox(boxSpecIds,num ,request);
-//            //优先装满整个机器 每个仓位一个
-//            return vacMachineService.findBoxTest(boxSpecIds,num ,request);
+            if("true".equals(configData.getSendDrugTest())){
+                //优先装满整个机器 每个仓位一个
+                return vacMachineService.findBoxTest(boxSpecIds,num ,request);
+            }else {
+                //正常上药
+                return vacMachineService.findBox(boxSpecIds,num ,request);
+            }
+
         }else {
             return null;
         }

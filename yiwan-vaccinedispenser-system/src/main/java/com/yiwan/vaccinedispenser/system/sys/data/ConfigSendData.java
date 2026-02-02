@@ -58,4 +58,7 @@ public class ConfigSendData {
     //5层皮带送药速度
     private Integer beltSendSpeed;
 
+
+
+
 }

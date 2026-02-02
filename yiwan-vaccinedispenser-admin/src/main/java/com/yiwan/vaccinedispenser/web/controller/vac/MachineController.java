@@ -1,10 +1,13 @@
 package com.yiwan.vaccinedispenser.web.controller.vac;
 
+import com.alibaba.fastjson.JSON;
 import com.yiwan.vaccinedispenser.core.security.CurrentUser;
 import com.yiwan.vaccinedispenser.core.security.UserBean;
 import com.yiwan.vaccinedispenser.core.web.Result;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacGetVaccine;
 import com.yiwan.vaccinedispenser.system.sys.data.request.IdListRequest;
+import com.yiwan.vaccinedispenser.system.sys.data.request.OtherRequest;
+import com.yiwan.vaccinedispenser.system.sys.data.request.vac.MachineInventoryRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.request.vac.MachineListRequest;
 import com.yiwan.vaccinedispenser.system.sys.service.vac.VacMachineService;
 import lombok.extern.slf4j.Slf4j;
@@ -122,6 +125,28 @@ public class MachineController {
         return Result.success();
     }
 
+    /**
+     * 单仓盘点
+     */
+    @PostMapping("/inventory/countOnly")
+    public Result machineInventoryCountOnly(@RequestBody MachineInventoryRequest request) throws Exception {
+        log.info("单仓盘点：{}", JSON.toJSONString(request));
+        vacMachineService.machineInventoryCount(request);
+        return Result.success();
+    }
+
+    /**
+     * 异常仓位库存盘点
+     */
+    @GetMapping("/inventory/error")
+    public Result machineInventoryCountError() throws Exception {
+        vacMachineService.machineInventoryError();
+        return Result.success("异常库存盘点成功");
+    }
+
+
+
+
 
     /**
      * 单机发苗列表
@@ -141,7 +166,6 @@ public class MachineController {
         return Result.success();
     }
 
-
     /**
      * 一键清苗
      */
@@ -150,8 +174,4 @@ public class MachineController {
         log.info("收到一键清苗的list指令：{}",request);
         return  vacMachineService.machineClean(request);
     }
-
-
-
-
 }

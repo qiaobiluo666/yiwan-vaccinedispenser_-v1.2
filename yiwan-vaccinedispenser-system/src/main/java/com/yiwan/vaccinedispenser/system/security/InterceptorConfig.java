@@ -34,14 +34,20 @@ public class InterceptorConfig  extends WebMvcConfigurerAdapter {
                 .addPathPatterns("/box-spec/**")
 
                 // 仓柜管理
-                .addPathPatterns("/machine/**")
+                .addPathPatterns("/machine/add")
+                .addPathPatterns("/machine/edit")
+                .addPathPatterns("/machine/del")
+                .addPathPatterns("/machine/batch-add")
+                .addPathPatterns("/machine/sendDrugAlone")
                 // 仓柜管理
                 .addPathPatterns("/ioTime/**")
 
                 //设备异常
                 .addPathPatterns("/exception/**")
                 //工作台配置
-                .addPathPatterns("/workbench/**")
+                .addPathPatterns("/workbench/add")
+                .addPathPatterns("/workbench/edit")
+                .addPathPatterns("/workbench/del")
 
 
 

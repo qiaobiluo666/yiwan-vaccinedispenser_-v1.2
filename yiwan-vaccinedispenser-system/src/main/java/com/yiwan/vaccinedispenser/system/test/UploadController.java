@@ -78,7 +78,6 @@ public class UploadController {
         String boundary = "----WebKitFormBoundary" ;
 //        URL url = new URL("http://127.0.0.1:5080/upload");
         URL url = new URL(uploadPath+"/upload");
-        log.info(uploadPath+"/upload");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
         conn.setDoOutput(true);
@@ -211,7 +210,7 @@ public class UploadController {
                 int maxAttempts = 10;
                 int intervalMillis = 500;
 
-                DrugRecordRequest data = null;
+                DrugRecordRequest data = new DrugRecordRequest();
                 for (int i = 1; i <= maxAttempts; i++) {
                     data = getVaccineMsg(uuid, code);
 
@@ -233,9 +232,12 @@ public class UploadController {
 
                 if (data == null) {
                     log.error("❌ 经过 {} 次尝试后仍未获取到数据", maxAttempts);
+                }else {
+                    data.setIsReturn(false);
                 }
             return  data;
             } else {
+
                 System.err.println("❌ 请求失败，状态码：" + response.statusCode());
                 System.err.println("响应内容：" + response.body());
                 return  null;
@@ -359,8 +361,6 @@ public class UploadController {
                 }
             }
         }
-
-        log.info(String.valueOf(System.currentTimeMillis()-time));
     }
 
 

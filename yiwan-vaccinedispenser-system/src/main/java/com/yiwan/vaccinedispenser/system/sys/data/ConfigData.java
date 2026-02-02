@@ -116,4 +116,10 @@ public class ConfigData {
     //左边旋转角度
     private Integer leftAngle;
 
+
+    private String hospitalName;
+
+    //是否开启自动上药测试功能r
+    private String sendDrugTest;
+
 }

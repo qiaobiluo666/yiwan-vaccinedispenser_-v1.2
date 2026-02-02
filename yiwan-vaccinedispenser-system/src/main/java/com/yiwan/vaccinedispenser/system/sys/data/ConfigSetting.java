@@ -57,4 +57,7 @@ public class ConfigSetting {
     //是否关闭底部传感器检测
     private  String isCloseSensor;
 
+    //退苗是否发往接种太
+    private  String isGoTable;
+
 }

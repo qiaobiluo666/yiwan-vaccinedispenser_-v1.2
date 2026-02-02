@@ -10,11 +10,7 @@ import com.yiwan.vaccinedispenser.system.sys.service.sys.SysConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import java.util.List;
-
-
-
 
 
 /**
@@ -102,6 +98,8 @@ public class ConfigFunction {
                 //左方步进电机旋转的角度
                 case  "LEFT_ANGLE" -> configData.setLeftAngle(Integer.parseInt(sysConfig.getConfigValue()));
 
+                case  "SEND_DRUG_TEST" -> configData.setSendDrugTest(sysConfig.getConfigValue());
+
             }
         }
 
@@ -159,7 +157,7 @@ public class ConfigFunction {
 
                 case "IS_CLOSE_SENSOR" ->  configSetting.setIsCloseSensor(sysConfig.getConfigValue());
 
-
+                case "IS_GO_TABLE" ->  configSetting.setIsGoTable(sysConfig.getConfigValue());
 
             }
         }

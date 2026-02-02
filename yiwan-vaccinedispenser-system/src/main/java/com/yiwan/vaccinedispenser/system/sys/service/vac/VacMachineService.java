@@ -13,6 +13,7 @@ import com.yiwan.vaccinedispenser.system.sys.data.SendBtnData;
 import com.yiwan.vaccinedispenser.system.sys.data.request.IdListRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.request.OtherRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.request.vac.DrugRecordRequest;
+import com.yiwan.vaccinedispenser.system.sys.data.request.vac.MachineInventoryRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.request.vac.MachineListRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.request.vac.VacMachineRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.response.vac.InventoryResponse;
@@ -75,7 +76,6 @@ public interface VacMachineService extends IService<VacMachine>{
     Page<InventoryResponse> vacMachineInventoryList(String productName, Integer page, Integer size);
 
 
-
     List<InventoryResponse>  vacMachineInventoryListPdf(String productName);
 
     //库存明细
@@ -99,7 +99,9 @@ public interface VacMachineService extends IService<VacMachine>{
     Result machineStop(Integer type);
 
     //库存盘点
-    Result machineInventoryCount(Integer lineNum) throws Exception;
+    Result machineInventoryCount(MachineInventoryRequest request) throws Exception;
+
+    Result machineInventoryError() throws Exception;
 
 
     //根据machineId来更新仓位里面的可用数量
@@ -133,6 +135,7 @@ public interface VacMachineService extends IService<VacMachine>{
     //获取单机版疫苗信息
     List<SendBtnData>  getSendBtnMSg();
 
+    List<String> getBatchListNum(List<String> batchNoList);
 
     void machineSendDrugAlone(VacGetVaccine vacGetVaccine ,UserBean userBean) throws Exception;
 
@@ -162,5 +165,18 @@ public interface VacMachineService extends IService<VacMachine>{
 
     //自动校对仓位数据
     Result AutoProofread(AutoData data);
+
+
+
+    //控制挡片
+    void blankController(OtherRequest request);
+
+
+    void autoChangeAutoZ(OtherRequest request);
+
+
+    //测试新款抬升demo
+    void test4();
+
 
 }

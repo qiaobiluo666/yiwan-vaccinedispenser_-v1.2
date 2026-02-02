@@ -2,6 +2,7 @@ package com.yiwan.vaccinedispenser.system.dispensing;
 
 
 import com.yiwan.vaccinedispenser.core.common.emun.RedisKeyConstant;
+import com.yiwan.vaccinedispenser.system.domain.model.vac.VacDrugRecord;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacMachine;
 import com.yiwan.vaccinedispenser.system.sys.data.ConfigSendData;
 import com.yiwan.vaccinedispenser.system.sys.data.ConfigSetting;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -81,6 +83,10 @@ public class DispensingThreadManager {
         }
 
         blankStatus();
+
+
+
+
     }
 
 
@@ -145,12 +151,14 @@ public class DispensingThreadManager {
             while (running) {
                 //判断发药队列到底有没有数据
                 boolean shouldDrop = checkBeltLayersInRedis();
+                ConfigSendData configSendData = configFunction.getSendDrugConfigData();
+                Integer ioTime = configSendData.getIoWaitTime();
                 if(shouldDrop){
                     CountDownLatch latch = new CountDownLatch(1);
                     //开始正式动皮带
                     taskExecutor.execute(() -> {
                         try {
-                            dispensingFunction.moveBelt();
+                            dispensingFunction.moveBelt(ioTime);
                         }catch (Exception e){
                             log.error(String.valueOf(e));
                             log.error("皮带运输模块异常");
@@ -397,8 +405,6 @@ public class DispensingThreadManager {
 
 
     }
-
-
 
 
 }

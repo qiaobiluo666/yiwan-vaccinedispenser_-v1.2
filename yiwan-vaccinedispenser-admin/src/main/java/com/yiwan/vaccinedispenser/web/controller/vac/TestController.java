@@ -241,6 +241,7 @@ public class TestController {
                 VacUntil.sleep(request.getLedTime());
             }
         }
+
         return Result.success();
 
     }
@@ -309,8 +310,27 @@ public class TestController {
         log.info("自动对仓位参数：{}",JSON.toJSONString(data));
         vacMachineService.AutoProofread(data);
         return Result.success();
-
     }
 
+    @PostMapping("/blank")
+    public Result Blank(@RequestBody OtherRequest request){
+        log.info("挡片控制传参：{}",JSON.toJSONString(request));
+        vacMachineService.blankController(request);
+        return Result.success();
+    }
+
+    @PostMapping("/autoChangeAutoZ")
+    public Result autoChangeAutoZ(@RequestBody OtherRequest request){
+        log.info("自动上药Z：{}",JSON.toJSONString(request));
+        vacMachineService.autoChangeAutoZ(request);
+        return Result.success();
+    }
+
+
+    @PostMapping("/test")
+    public Result test02(){
+        vacMachineService.test4();
+        return Result.success();
+    }
     
 }

@@ -33,10 +33,13 @@ public interface VacMachineMapper extends BaseMapper<VacMachine> {
 
 
     //更新update null 为 null
-
     int updateNullById(@Param("vacMachine") VacMachine vacMachine);
 
 
     int syncUseNumWithTotal();
+
+
+
+    List<VacMachine> updateBatchNo();
 
 }

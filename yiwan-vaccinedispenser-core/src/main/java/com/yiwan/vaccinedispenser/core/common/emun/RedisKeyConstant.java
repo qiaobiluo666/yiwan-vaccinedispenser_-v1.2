@@ -13,6 +13,8 @@ public interface RedisKeyConstant {
     //五层皮带的掉药列表
     String DROP_LIST = "Dispensing:fiveDrop:%s";
 
+    String BATCH_NO_LIST = "Setting:batchNO:%s";
+
     //机械手掉药列表
     String DROP_HAND_LIST = "Dispensing:handDrop";
 
@@ -25,6 +27,8 @@ public interface RedisKeyConstant {
     //IP设置
     String IP_SET = "Machine:IPWorkMode";
 
+    //连续发药不正常3次报警
+    String SEND_DRUG_ERROR = "Machine:sendDrugError";
 
     /**
      * 机器判断状态
@@ -131,7 +135,7 @@ public interface RedisKeyConstant {
 
     String CABINET_B_SERVO_ERROR = "Machine:cabinetB:isServoError";
 
-
+    String CABINET_C_SERVO_ERROR = "Machine:cabinetC:isServoError";
 
     String  CABINET_C_BLANK_OPEN_TIME = "Machine:cabinetC:blankIsOpenTime";
 

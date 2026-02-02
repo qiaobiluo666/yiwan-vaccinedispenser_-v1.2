@@ -59,4 +59,10 @@ public interface VacDrugRecordService extends IService<VacDrugRecord>{
 
     DrugRecordRequest countTodayGroupedByProductId(String productNo);
 
+    List<DrugRecordRequest> countToday();
+
+
+    void updateBatchNo();
+
+
 }

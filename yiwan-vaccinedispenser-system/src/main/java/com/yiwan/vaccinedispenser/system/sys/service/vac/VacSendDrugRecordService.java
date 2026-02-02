@@ -55,4 +55,6 @@ public interface VacSendDrugRecordService extends IService<VacSendDrugRecord>{
 
     SendDrugRecordRequest countTodayGroupedByProductId(String productNo);
 
+
+    List<SendDrugRecordRequest>   countToday();
 }

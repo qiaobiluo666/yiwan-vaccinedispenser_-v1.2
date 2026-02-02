@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -119,6 +120,7 @@ public class VacMachineExceptionServiceImpl extends ServiceImpl<VacMachineExcept
             }
         }
 
+
         VacMachineException vacMachineException = new VacMachineException();
         if(redisDrugListData!=null){
             BeanUtils.copyProperties(redisDrugListData,vacMachineException);
@@ -176,6 +178,20 @@ public class VacMachineExceptionServiceImpl extends ServiceImpl<VacMachineExcept
         queryWrapper.eq(VacMachineException::getDrugName,name);
         queryWrapper.eq(VacMachineException::getDeleted,0);
         return vacMachineExceptionMapper.selectList(queryWrapper);
+    }
+
+    @Override
+    public List<String> getExceptionBoxNoListByError() {
+        LambdaQueryWrapper<VacMachineException> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(VacMachineException::getCode,SettingConstants.MachineException.IO.code,SettingConstants.MachineException.SENDWARING.code);
+        queryWrapper.isNotNull(VacMachineException::getBoxNo);
+        queryWrapper.eq(VacMachineException::getDeleted,0);
+        List<VacMachineException> vacMachineExceptionList =  vacMachineExceptionMapper.selectList(queryWrapper);
+        List<String> boxNoList = new ArrayList<>();
+        for(VacMachineException record:vacMachineExceptionList){
+            boxNoList.add(record.getBoxNo());
+        }
+        return boxNoList;
     }
 
     @Override

@@ -33,4 +33,7 @@ public interface VacWorkbenchService extends IService<VacWorkbench>{
 
 
     VacWorkbench getByWorkbenchNum(Integer workbenchNum);
+
+
+    Result getWorkBenchTotalNum();
 }

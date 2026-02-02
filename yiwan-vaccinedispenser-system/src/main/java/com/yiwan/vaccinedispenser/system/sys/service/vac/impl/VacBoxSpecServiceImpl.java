@@ -117,9 +117,14 @@ public class VacBoxSpecServiceImpl extends ServiceImpl<VacBoxSpecMapper, VacBoxS
         queryWrapper
                 .ge(VacBoxSpec::getLength,length)
                 .apply("length - ranges <= {0}", length)
-                .eq(VacBoxSpec::getDeleted,0);
+                .eq(VacBoxSpec::getDeleted,0)
+                .orderByAsc(VacBoxSpec::getLength);
 
         return vacBoxSpecMapper.selectList(queryWrapper);
+
+
+
+
     }
 
 }
