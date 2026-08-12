@@ -9,7 +9,7 @@
 
             <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
                 <fileNamePattern>./logs/%d{yyyyMMdd}.log</fileNamePattern>
-                <maxHistory>720</maxHistory>
+                <maxHistory>30</maxHistory>
             </rollingPolicy>
 
             <encoder>
@@ -38,7 +38,7 @@
 
             <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
                 <fileNamePattern>./logs/%d{yyyyMMdd}.log</fileNamePattern>
-                <maxHistory>720</maxHistory>
+                <maxHistory>30</maxHistory>
             </rollingPolicy>
 
             <encoder>

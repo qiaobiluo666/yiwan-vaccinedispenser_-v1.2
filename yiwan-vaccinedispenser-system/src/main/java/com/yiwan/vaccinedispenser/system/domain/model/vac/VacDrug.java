@@ -132,6 +132,27 @@ public class VacDrug extends Model<VacDrug> {
 
     private String vaccineCode;
 
+    /**
+     * io时间
+     */
+
+    private Integer ioTime;
+
+
+    /**
+     * A柜步进伸出距离
+     */
+
+    private Integer stepExtendDis;
+
+
+    /**
+     * A柜步进升高距离
+     */
+
+    private Integer stepLiftDis;
+
+
 
     /**
      * 单仓存储最大数量

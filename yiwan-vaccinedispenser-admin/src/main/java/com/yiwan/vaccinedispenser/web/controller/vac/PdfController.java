@@ -74,6 +74,24 @@ public class PdfController {
         return pdfService.getSendDrugDetailPdf(createTimeStart,createTimeEnd,workbenchName);
     }
 
+    @GetMapping("/drugRecord")
+    public ResponseEntity<byte[]> downloadDrugRecordPdf(
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date createTimeStart,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date createTimeEnd
+    ) throws Exception {
+        log.info("收到参数：{}，{}",createTimeStart,createTimeEnd);
+        return pdfService.getDrugRecordPdf(createTimeStart,createTimeEnd);
+    }
+
+    @GetMapping("/drugRecord/detail")
+    public ResponseEntity<byte[]> downloadDrugRecordDetailPdf(
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date createTimeStart,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date createTimeEnd
+    ) throws Exception {
+        log.info("收到参数：{}，{}",createTimeStart,createTimeEnd);
+        return pdfService.getDrugRecordDetailPdf(createTimeStart,createTimeEnd);
+    }
+
 
 
 

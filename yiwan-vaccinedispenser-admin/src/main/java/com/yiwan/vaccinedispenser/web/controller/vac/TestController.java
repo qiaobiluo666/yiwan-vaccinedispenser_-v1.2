@@ -266,6 +266,13 @@ public class TestController {
     public Result io( @RequestBody OtherRequest request) throws InterruptedException {
 
     int count=1;
+        for(int i=request.getIoNumStart();i<=request.getIoNumEnd();i++){
+            valueOperations.set(String.format(RedisKeyConstant.CABINET_A_IO_OUTPUT_TEST_COUNT,request.getIoLine(),i),"0");
+            valueOperations.set(String.format(RedisKeyConstant.CABINET_A_IO_OUTPUT_TEST_ERROR_COUNT,request.getIoLine(),i),"0");
+            VacUntil.sleep(20);
+        }
+
+
     while (count<=request.getCount()) {
         DropRequest dropRequest = new DropRequest();
         for(int i=request.getIoNumStart();i<=request.getIoNumEnd();i++){
@@ -276,8 +283,13 @@ public class TestController {
             dropRequest.setTimes(request.getTime());
             cabinetAService.dropCommand(dropRequest);
             VacUntil.sleep(request.getIoWaitTime());
+            String ioCount  =valueOperations.get(String.format(RedisKeyConstant.CABINET_A_IO_OUTPUT_TEST_COUNT,request.getIoLine(),i));
+            assert ioCount != null;
+            valueOperations.set(String.format(RedisKeyConstant.CABINET_A_IO_OUTPUT_TEST_COUNT,request.getIoLine(),i),String.valueOf(Integer.parseInt(ioCount)+1));
         }
+        log.info("循环了{}",count);
         count++;
+
     }
 
         return Result.success();
@@ -329,7 +341,7 @@ public class TestController {
 
     @PostMapping("/test")
     public Result test02(){
-        vacMachineService.test4();
+        vacMachineService.test7();
         return Result.success();
     }
     

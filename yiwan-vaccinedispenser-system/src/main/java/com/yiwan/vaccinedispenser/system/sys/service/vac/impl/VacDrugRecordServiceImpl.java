@@ -136,6 +136,25 @@ public class VacDrugRecordServiceImpl extends ServiceImpl<VacDrugRecordMapper, V
     }
 
     @Override
+    public VacDrugRecord getListByMachineIdAndProductNoAndExpiredAt(Long machineId,String productNo,Date expiredAt) {
+
+        LambdaQueryWrapper<VacDrugRecord> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper
+                .eq(VacDrugRecord::getDeleted,0)
+                .eq(VacDrugRecord::getMachineId,machineId)
+                .eq(VacDrugRecord::getProductNo,productNo)
+                .eq(VacDrugRecord::getStatus,"0")
+                .eq(VacDrugRecord::getExpiredAt,expiredAt)
+                .orderByAsc(VacDrugRecord::getCreateTime);
+        List<VacDrugRecord> vacDrugRecordList = vacDrugRecordMapper.selectList(lambdaQueryWrapper);
+        if(vacDrugRecordList.isEmpty()){
+            return null;
+        }else {
+            return vacDrugRecordList.get(0);
+        }
+    }
+
+    @Override
     public VacDrugRecord getLastByMachineId(Long machineId) {
 
         LambdaQueryWrapper<VacDrugRecord> lambdaQueryWrapper = new LambdaQueryWrapper<>();
@@ -275,6 +294,45 @@ public class VacDrugRecordServiceImpl extends ServiceImpl<VacDrugRecordMapper, V
 
 
 
+    }
+
+    @Override
+    public List<VacDrugRecord> drugRecordListByCreateTime(Date createTimeStart, Date createTimeEnd) {
+        LambdaQueryWrapper<VacDrugRecord> wrapper = new LambdaQueryWrapper<>();
+        if (createTimeStart != null) {
+            wrapper.gt(VacDrugRecord::getCreateTime, createTimeStart);
+        }
+        if (createTimeEnd != null) {
+            wrapper.lt(VacDrugRecord::getCreateTime, createTimeEnd);
+        }
+        wrapper.eq(VacDrugRecord::getDeleted, 0);
+        wrapper.orderByDesc(VacDrugRecord::getCreateTime);
+        return vacDrugRecordMapper.selectList(wrapper);
+    }
+
+    @Override
+    public List<DrugRecordRequest> drugRecordTotalListByCreateTime(Date createTimeStart, Date createTimeEnd) {
+        List<VacDrugRecord> records = drugRecordListByCreateTime(createTimeStart, createTimeEnd);
+        Map<String, DrugRecordRequest> grouped = new LinkedHashMap<>();
+
+        for (VacDrugRecord record : records) {
+            String key = StringUtils.defaultIfBlank(record.getProductNo(), record.getProductName());
+            if (StringUtils.isBlank(key)) {
+                continue;
+            }
+
+            DrugRecordRequest item = grouped.get(key);
+            if (item == null) {
+                item = new DrugRecordRequest();
+                item.setProductNo(record.getProductNo());
+                item.setProductName(record.getProductName());
+                item.setTotalNum(0);
+                grouped.put(key, item);
+            }
+            item.setTotalNum(item.getTotalNum() + 1);
+        }
+
+        return new ArrayList<>(grouped.values());
     }
 
 }

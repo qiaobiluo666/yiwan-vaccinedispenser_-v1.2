@@ -27,6 +27,8 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -321,7 +323,8 @@ public class SendDrugFunction {
 
                 if(scanCodeData.getCode().length()>7){
                     drugRecordData = vacDrugService.sendDrugTest(scanCodeData.getCode());
-                    drugRecordData.setExpiredAt(new Date());
+                    drugRecordData.setExpiredAt(Date.from(LocalDate.now().atStartOfDay()
+                            .atZone(ZoneId.systemDefault()).toInstant()));
                     drugRecordData.setBatchNo("测试编号");
                     drugRecordData.setPrice(String.valueOf(321));
                     drugRecordData.setTag("测试标签");
@@ -413,6 +416,10 @@ public class SendDrugFunction {
                 return;
             }
 
+            if("false".equals(valueOperations.get(RedisKeyConstant.autoDrug.AUTO_DRUG_START))){
+                return;
+            }
+
             // 提前走夹药一段距离
             int longs = distanceServoData.getVaccineWide()*100;
             if((configData.getHandLen()-longs-configData.getEarly())>0){
@@ -421,9 +428,15 @@ public class SendDrugFunction {
             }else {
                 cabinetAStepPosition(CabinetConstants.CabinetAStepMode.CLAMP,0);
             }
-
+            if("false".equals(valueOperations.get(RedisKeyConstant.autoDrug.AUTO_DRUG_START))){
+                return;
+            }
             //移动到掉药区域
             isNormal = goDrop(distanceServoData,configData,scanCodeData);
+
+            if("false".equals(valueOperations.get(RedisKeyConstant.autoDrug.AUTO_DRUG_START))){
+                return;
+            }
             if(!isNormal){
                 String msg = "伺服报警 退出移动到掉药区域！";
                 log.error(msg);
@@ -440,6 +453,13 @@ public class SendDrugFunction {
             xiPangEnd();
             //等待1S后 伺服回到初始位置
             VacUntil.sleep(200);
+
+
+            if("false".equals(valueOperations.get(RedisKeyConstant.autoDrug.AUTO_DRUG_START))){
+                return;
+            }
+
+
             //先回扫码位置 不然要撞到
             Thread threadInit = new Thread(() -> {
                 try {
@@ -459,73 +479,98 @@ public class SendDrugFunction {
             //机械手没药！重新开始上药
             if (!dropDrugFlag) {
                 //传感器一直不触发 检查机械手是否有药、或者传感器损坏
-                String errorMsg = String.format("自动上药异常：药物异常报警,%s 药没掉入药仓",drugRecordRequest.getProductName());
+                String errorMsg = String.format("自动上药异常：药物异常报警,%s 药没掉入药仓 停止自动上药",drugRecordRequest.getProductName());
                 log.error(errorMsg);
                 vacMachineExceptionService.sendException(SettingConstants.MachineException.SEND.code,drugRecordData.getProductName(),errorMsg);
                 servoTableReturn(configData,errorMsg);
 
-                String errorCountStr = valueOperations.get(RedisKeyConstant.CABINET_B_ERROR_COUNT);
+                sendDrugThreadManager.stop();
 
-                if(errorCountStr==null){
-                    errorCount = 1;
-                }else {
-                    errorCount = Integer.parseInt(errorCountStr);
-                }
-                log.info("当前错误计数: {}, 错误计数字符串: {}", errorCount, errorCountStr);
-                if(errorCount<=0){
-                    valueOperations.set(RedisKeyConstant.CABINET_B_ERROR_COUNT,String.valueOf(errorCount+1));
-                }else {
-                    String msg = "药没掉入机械手2次！自动上药停止";
-                    log.error(msg);
-                    vacMachineExceptionService.sendException(SettingConstants.MachineException.SEND.code,null,msg);
-                    sendDrugThreadManager.stop();
-                }
+//                String errorCountStr = valueOperations.get(RedisKeyConstant.CABINET_B_ERROR_COUNT);
+//
+//                if(errorCountStr==null){
+//                    errorCount = 1;
+//                }else {
+//                    errorCount = Integer.parseInt(errorCountStr);
+//                }
+//                log.info("当前错误计数: {}, 错误计数字符串: {}", errorCount, errorCountStr);
+//                if(errorCount<=0){
+//                    valueOperations.set(RedisKeyConstant.CABINET_B_ERROR_COUNT,String.valueOf(errorCount+1));
+//                }else {
+//                    String msg = "药没掉入机械手2次！自动上药停止";
+//                    log.error(msg);
+//                    vacMachineExceptionService.sendException(SettingConstants.MachineException.SEND.code,null,msg);
+//                    sendDrugThreadManager.stop();
+//                }
+
+
+                return;
+            }
+            if("false".equals(valueOperations.get(RedisKeyConstant.autoDrug.AUTO_DRUG_START))){
                 return;
             }
 
-
             //掉药到机械手 重新开一个线程
             Thread thread = new Thread(() -> {
-
-                valueOperations.set(RedisKeyConstant.CABINET_A_HANDLE_IS_MOVE_END,"false");
-                valueOperations.set(RedisKeyConstant.HANDLE_IS_DROP,"false");
-                log.info("================================开始机械手程序===============================");
-                valueOperations.set(RedisKeyConstant.CABINET_A_HANDLE_IS_MOVE_END,"true");
-
-                //夹紧
-                int clampDis = configData.getHandLen()-longs-configData.getGap();
-                //走的行程
-                int dropDis = configData.getHandLen()-longs+200;
-
-
+                // 最外层兜底try-catch：捕获线程内所有异常，彻底杜绝线程静默死亡
                 try {
+                    valueOperations.set(RedisKeyConstant.CABINET_A_HANDLE_IS_MOVE_END,"false");
+                    valueOperations.set(RedisKeyConstant.HANDLE_IS_DROP,"false");
+                    log.info("================================开始机械手程序===============================");
+                    valueOperations.set(RedisKeyConstant.CABINET_A_HANDLE_IS_MOVE_END,"true");
+
+                    //夹紧
+                    int clampDis = configData.getHandLen()-longs-configData.getGap();
+                    //走的行程
+                    int dropDis = configData.getHandLen()-longs+200;
+
                     if(!dropDrugHandleAuto(clampDis,dropDis,drugRecordRequest)){
                         String errorMsg = String.format("自动上药异常：药物异常报警,%s 药没掉入药仓",drugRecordRequest.getProductName());
                         log.error(errorMsg);
-
                         vacMachineExceptionService.sendException(SettingConstants.MachineException.SEND.code,null,errorMsg);
                         sendDrugThreadManager.stop();
                         return;
                     }
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+
+                    if("true".equals(valueOperations.get(RedisKeyConstant.autoDrug.AUTO_DRUG_START))){
+                        log.info("上药信息：{}",JSON.toJSONString(drugRecordRequest));
+                        //机械手上有药，仓位药品数量+1，新增上药记录
+                        addDrugRecord(drugRecordRequest,1);
+                        //A柜 步进电机 回原
+                        cabinetAStepInit(CabinetConstants.CabinetAStepMode.BLOCK);
+                        //机械手回原
+                        moveHandServoInit(configData);
+                    }
+
+                    //可以进入掉药区域
+                    valueOperations.set(RedisKeyConstant.HANDLE_IS_DROP,"true");
+                    log.info("=================================上药结束==========================");
+
+                } catch (Throwable t) {
+                    // 捕获所有异常+错误，必须打印完整异常对象t，才能看到行号和堆栈
+                    String errorMsg = "机械手线程执行发生未捕获异常，流程强制终止";
+                    log.error(errorMsg, t);
+
+                    // 异常场景做故障闭环：和业务失败逻辑保持一致
+                    try {
+                        vacMachineExceptionService.sendException(
+                                SettingConstants.MachineException.SEND.code,
+                                null,
+                                errorMsg + "：" + t.getMessage()
+                        );
+                        sendDrugThreadManager.stop();
+                    } catch (Exception e) {
+                        log.error("异常通知发送失败", e);
+                    }
+
+                    // 可选：异常时强制复位Redis标志位，避免状态卡死导致后续流程永远等待
+                    try {
+                        valueOperations.set(RedisKeyConstant.HANDLE_IS_DROP,"true");
+                        valueOperations.set(RedisKeyConstant.CABINET_A_HANDLE_IS_MOVE_END,"true");
+                    } catch (Exception e) {
+                        log.error("Redis标志位复位失败", e);
+                    }
                 }
-                if("true".equals(valueOperations.get(RedisKeyConstant.autoDrug.AUTO_DRUG_START))){
-
-                    log.info("上药信息：{}",JSON.toJSONString(drugRecordRequest));
-                    //机械手上有药，仓位药品数量+1，新增上药记录
-                    addDrugRecord(drugRecordRequest,1);
-                    //A柜 步进电机 回原
-                    cabinetAStepInit(CabinetConstants.CabinetAStepMode.BLOCK);
-                    //机械手回原
-                    moveHandServoInit(configData);
-
-                }
-
-
-                //可以进入掉药区域
-                valueOperations.set(RedisKeyConstant.HANDLE_IS_DROP,"true");
-                log.info("=================================上药结束==========================");
             });
 
             thread.start();
@@ -548,14 +593,13 @@ public class SendDrugFunction {
     }
 
 
-
-
     //机械手挡片 夹药回原   掉药
     public boolean dropDrugHandleAuto(int clampDis , int dropDis ,DrugRecordRequest drugRecordRequest) throws IOException {
 
         cabinetAStepPosition(CabinetConstants.CabinetAStepMode.CLAMP,clampDis);
         //等待夹爪步进电机运动完成
         waitCabinetAStepEnd(1);
+        log.info("检测B柜伺服电机是否异常");
         long timeouts ;
         if("true".equals(valueOperations.get(RedisKeyConstant.autoDrug.AUTO_DRUG_START))){
             boolean flag = false;
@@ -575,23 +619,28 @@ public class SendDrugFunction {
                 return false;
             }
         }
+        log.info("夹爪步进完成，开始等待B柜伺服回原");
+        // 新增开始
+        log.info("开始查询AUTO_DRUG_START状态");
+        String autoStartFlag = valueOperations.get(RedisKeyConstant.autoDrug.AUTO_DRUG_START);
+        log.info("AUTO_DRUG_START查询完成，结果:{}", autoStartFlag);
+        // 新增结束
 
-        if("true".equals(valueOperations.get(RedisKeyConstant.autoDrug.AUTO_DRUG_START)) ){
-            //运动伺服
+        if("true".equals(autoStartFlag)) {
+            log.info("进入伺服运动分支，开始执行moveHandServo"); // 新增
             moveHandServo(drugRecordRequest.getAutoX(),drugRecordRequest.getAutoZ());
-
+            log.info("moveHandServo执行完成"); // 新增
         }else {
             log.info("已经停止上药！");
-            return  false;
+            return false;
         }
-
 
         //挡片步进电机旋转90
         cabinetAStepPosition(CabinetConstants.CabinetAStepMode.BLOCK,900);
         waitCabinetAStepEnd(2);
 
         //A柜机械手 步进电机走 往外走5mm
-        cabinetAStepPosition(CabinetConstants.CabinetAStepMode.CLAMP,clampDis-500);
+        cabinetAStepPosition(CabinetConstants.CabinetAStepMode.CLAMP,clampDis-200);
         waitCabinetAStepEnd(1);
 
 
@@ -688,15 +737,12 @@ public class SendDrugFunction {
         //运动伺服
         moveHandServo(drugRecordRequest.getAutoX(),drugRecordRequest.getAutoZ());
 
-
-
-
         //挡片步进电机旋转90
         cabinetAStepPosition(CabinetConstants.CabinetAStepMode.BLOCK,900);
         waitCabinetAStepEnd(2);
 
         //A柜机械手 步进电机走 往外走5mm
-        cabinetAStepPosition(CabinetConstants.CabinetAStepMode.CLAMP,clampDis-500);
+        cabinetAStepPosition(CabinetConstants.CabinetAStepMode.CLAMP,clampDis-200);
         waitCabinetAStepEnd(1);
 
 
@@ -747,8 +793,6 @@ public class SendDrugFunction {
 
 
         }
-
-
 
         if(!drugHand){
             log.error("自动上药异常：药物异常报警,药没掉入药仓");
@@ -896,6 +940,7 @@ public class SendDrugFunction {
 
         //Z轴最后走
         if (type == 1) {
+            log.info("Z轴最后走！");
             request.setMode(CabinetConstants.CabinetBServoMode.SCAN_SERVO_X.num);
             request.setDistance(distanceX);
             cabinetBService.servo(request);
@@ -1844,23 +1889,34 @@ public class SendDrugFunction {
      */
 
     public void  servoTableReturn(ConfigData configData,String msg) throws IOException {
+        long timeout = System.currentTimeMillis();
+        while ((System.currentTimeMillis() - timeout) < SettingConstants.SCAN_SERVO_WAIT_TIME) {
+            if( "false".equals(valueOperations.get(RedisKeyConstant.scanServo.X)) &&  "false".equals(valueOperations.get(RedisKeyConstant.scanServo.Y)) && "false".equals(valueOperations.get(RedisKeyConstant.scanServo.Z)) ){
+                break;
+            }
+            VacUntil.sleep(200);
+        }
+
+        VacUntil.sleep(1000);
         ConfigSetting configSetting = configFunction.getSettingConfigData();
         log.warn(msg);
         DistanceServoData distanceServoData = new DistanceServoData();
         distanceServoData.setServoX(configData.getWasteX());
         distanceServoData.setServoY(configData.getWasteY());
         distanceServoData.setServoZ(0);
+
         if("台州玉环清港".equals(configSetting.getHospitalName())){
-            moveScanServo(distanceServoData,2);
-        }else {
             moveScanServo(distanceServoData,3);
+        }else {
+            moveScanServo(distanceServoData,2);
         }
 
         distanceServoData.setServoZ(configData.getWasteZ());
+
         if("台州玉环清港".equals(configSetting.getHospitalName())){
-            moveScanServo(distanceServoData,2);
-        }else {
             moveScanServo(distanceServoData,3);
+        }else {
+            moveScanServo(distanceServoData,2);
         }
 
         xiPangEnd();
@@ -1894,8 +1950,11 @@ public class SendDrugFunction {
         //计算一个仓位最多能存储多少只药品  误差要加 5mm
         int num = getDrugNum(distanceServoData.getVaccineLong(), request);
 
+        //根据初始位置拿到仓位的长宽高
+        VacDrug vacDrug = vacDrugService.vacDrugGetByproductNo(request.getProductNo());
+
         //确定是什么型号的仓柜
-        List<VacBoxSpec> vacBoxSpecList = vacBoxSpecService.findVacBoxSpec(distanceServoData.getVaccineWide());
+        List<VacBoxSpec> vacBoxSpecList = vacBoxSpecService.findVacBoxSpec(vacDrug.getVaccineWide());
 
         List<Long> boxSpecIds = new ArrayList<>();
         for(VacBoxSpec vacBoxSpec:vacBoxSpecList){
@@ -1929,6 +1988,32 @@ public class SendDrugFunction {
         vacDrugRecordService.addDrugRecord(request);
         //仓位更新
         vacMachineService.updateBox(request,status);
+    }
+
+    /**
+     * 查找仓位（排除已预留的machineId，用于PLC模式防并发）
+     */
+    public DrugRecordRequest findBoxExcludeMachineIds(DistanceServoData distanceServoData, DrugRecordRequest request, Set<Long> excludeMachineIds) {
+        ConfigData configData = configFunction.getAutoDrugConfigData();
+        int num = getDrugNum(distanceServoData.getVaccineLong(), request);
+        //根据初始位置拿到仓位的长宽高
+        VacDrug vacDrug = vacDrugService.vacDrugGetByproductNo(request.getProductNo());
+
+        List<VacBoxSpec> vacBoxSpecList = vacBoxSpecService.findVacBoxSpec(vacDrug.getVaccineWide());
+        List<Long> boxSpecIds = new ArrayList<>();
+        for (VacBoxSpec vacBoxSpec : vacBoxSpecList) {
+            boxSpecIds.add(vacBoxSpec.getId());
+        }
+
+        log.info("符合的仓位规格id(排除预留):{}", JSON.toJSONString(boxSpecIds));
+        if (!boxSpecIds.isEmpty()) {
+            if ("true".equals(configData.getSendDrugTest())) {
+                return vacMachineService.findBoxTest(boxSpecIds, num, request);
+            } else {
+                return vacMachineService.findBoxExcludeMachineIds(boxSpecIds, num, request, excludeMachineIds);
+            }
+        }
+        return null;
     }
 
     //获取板子的长度
@@ -2015,7 +2100,7 @@ public class SendDrugFunction {
         }
 
         List<VacDrug> vacDrugList = vacDrugMapper.selectList(queryWrapper);
-
+        log.info(JSON.toJSONString(vacDrugList));
         if(vacDrugList.isEmpty()){
             data1.setIsRight(false);
             return data1;

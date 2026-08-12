@@ -116,7 +116,6 @@ public class CameraClient {
 				log.warn("[{}] 连接失败 {}:{} - {}: {}", name, host, port, errorType, errorDetail);
 
 				if (vacMachineExceptionService.getExceptionByName(name).isEmpty()) {
-
 					vacMachineExceptionService.sendException(SettingConstants.MachineException.CONTROLLER.code, name, errorDetail);
 
 				}
@@ -130,13 +129,19 @@ public class CameraClient {
 				log.info("[{}] 连接成功 {}:{}", name, host, port);
 
 
-				List<VacMachineException> exceptions = vacMachineExceptionService.getExceptionByName(name);
-				if (!exceptions.isEmpty()) {
-					vacMachineExceptionService.delExceptionByName(exceptions);
+				if (vacMachineExceptionService != null) {
+					// 延迟300ms再执行，足够等数据库初始化完成
+					future.channel().eventLoop().schedule(() -> {
+						try {
+							List<VacMachineException> exceptions = vacMachineExceptionService.getExceptionByName(name);
+							if (!exceptions.isEmpty()) {
+								vacMachineExceptionService.delExceptionByName(exceptions);
+							}
+						} catch (Exception e) {
+							log.error("[{}] 清除设备异常记录失败", name, e);
+						}
+					}, 300, TimeUnit.MILLISECONDS);
 				}
-
-
-
 
 				valueOperations.set(redisKey,"true");
 				commandData.put("data", "success");

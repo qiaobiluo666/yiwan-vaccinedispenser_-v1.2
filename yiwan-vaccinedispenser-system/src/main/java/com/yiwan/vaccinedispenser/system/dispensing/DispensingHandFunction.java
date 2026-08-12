@@ -12,6 +12,7 @@ import com.yiwan.vaccinedispenser.core.common.emun.RedisKeyConstant;
 import com.yiwan.vaccinedispenser.core.exception.ServiceException;
 import com.yiwan.vaccinedispenser.core.websocket.WebsocketService;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacGetVaccine;
+import com.yiwan.vaccinedispenser.system.domain.model.vac.VacDrugRecord;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacMachine;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacMachineException;
 import com.yiwan.vaccinedispenser.system.sys.dao.VacMachineExceptionMapper;
@@ -166,9 +167,13 @@ public class DispensingHandFunction {
         //过滤掉 设备异常 导致的仓位 或者皮带问题
         LambdaQueryWrapper<VacMachine> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(VacMachine::getDeleted,"0")
-                .eq(VacMachine::getProductNo,vacGetVaccine.getProductNo())
                 .gt(VacMachine::getVaccineUseNum,0)
                 .in(VacMachine::getStatus, 1, 2);
+        if (vacGetVaccine.getProductNoList() != null && !vacGetVaccine.getProductNoList().isEmpty()) {
+            lambdaQueryWrapper.in(VacMachine::getProductNo, vacGetVaccine.getProductNoList());
+        } else {
+            lambdaQueryWrapper.eq(VacMachine::getProductNo, vacGetVaccine.getProductNo());
+        }
         if(!boxNoList.isEmpty()){
             lambdaQueryWrapper.notIn(VacMachine::getBoxNo,boxNoList);
         }
@@ -215,6 +220,31 @@ public class DispensingHandFunction {
                         .filter(drug -> drug.getExpiredAt() != null)
                         .sorted(Comparator.comparing(VacMachine::getExpiredAt))
                         .toList();
+
+                // 如果size>=2，取上药记录最早的那一个
+                if (nearestExpiryDrugList.size() >= 2) {
+                    VacMachine earliestRecordDrug = null;
+                    LocalDateTime earliestTime = null;
+                    for (VacMachine drug : nearestExpiryDrugList) {
+                        VacDrugRecord record = vacDrugRecordService.getListByMachineIdAndProductNo(drug.getId(), drug.getProductNo());
+                        if (record != null && record.getCreateTime() != null) {
+                            if (earliestTime == null || record.getCreateTime().isBefore(earliestTime)) {
+                                earliestTime = record.getCreateTime();
+                                earliestRecordDrug = drug;
+                            }
+                        }
+                    }
+                    if (earliestRecordDrug != null) {
+                        List<VacMachine> reorderedList = new ArrayList<>();
+                        reorderedList.add(earliestRecordDrug);
+                        for (VacMachine drug : nearestExpiryDrugList) {
+                            if (!drug.getId().equals(earliestRecordDrug.getId())) {
+                                reorderedList.add(drug);
+                            }
+                        }
+                        nearestExpiryDrugList = reorderedList;
+                    }
+                }
 
                 // 获取最近的有效期
                 Date nearestExpiryDate = nearestExpiryDrugList.get(0).getExpiredAt();

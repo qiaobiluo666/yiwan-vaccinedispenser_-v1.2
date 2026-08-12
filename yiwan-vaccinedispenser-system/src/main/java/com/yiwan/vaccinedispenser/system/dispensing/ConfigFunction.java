@@ -204,6 +204,8 @@ public class ConfigFunction {
 
                 case "RETURN_WORKNUM_TWO"->configSendData.setReturnWorkNumTwo(Integer.parseInt(sysConfig.getConfigValue()));
 
+                case "ERROR_WORKBENCH_NUM"->configSendData.setErrorWorkbenchNum(Integer.parseInt(sysConfig.getConfigValue()));
+
                 case "HAND_MOVE_C_X"->configSendData.setHandMoveCX(Integer.parseInt(sysConfig.getConfigValue()));
 
                 case "HAND_MOVE_C_Z"->configSendData.setHandMoveCZ(Integer.parseInt(sysConfig.getConfigValue()));
@@ -217,6 +219,12 @@ public class ConfigFunction {
                 case "SMALL_BELT_GO_C_SPEED"->configSendData.setSmallBeltGoCSpeed(Integer.parseInt(sysConfig.getConfigValue()));
 
                 case "BELT_SEND_SPEED"->configSendData.setBeltSendSpeed(Integer.parseInt(sysConfig.getConfigValue()));
+
+                case "HAVE_BLANK"->configSendData.setHaveBlank(sysConfig.getConfigValue());
+
+                case "HAVE_BLANK_TIME"->configSendData.setHaveBlankTime(Integer.parseInt(sysConfig.getConfigValue()));
+
+                case "LAST_IO_ADD_TIME"->configSendData.setLastIOAddTime(Integer.parseInt(sysConfig.getConfigValue()));
             }
         }
 

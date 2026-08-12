@@ -12,6 +12,7 @@ import com.yiwan.vaccinedispenser.system.until.VacUntil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -37,6 +38,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Component
+@ConditionalOnExpression("${netty.enable:true}")
 public class DispensingThreadManager {
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
@@ -49,6 +51,7 @@ public class DispensingThreadManager {
 
     @Autowired
     private DispensingFunction dispensingFunction;
+
     @Autowired
     private DispensingHandFunction dispensingHandFunction;
 
@@ -73,20 +76,29 @@ public class DispensingThreadManager {
     public void init() {
         redisInit();
         ConfigSetting configSetting = configFunction.getSettingConfigData();
-        if("true".equals(configSetting.getIsIoDrop())){
-            log.info("电磁铁模式");
-            drop();
-            moveBelt();
-        }else {
-            log.info("机械手模式");
-            handDrop();
-        }
+        ConfigSendData configSendData = configFunction.getSendDrugConfigData();
 
-        blankStatus();
+        // 将业务逻辑移到异步线程执行
+        CompletableFuture.runAsync(() -> {
+            if("true".equals(configSetting.getIsIoDrop())){
+                log.info("电磁铁模式");
+                drop();
+                moveBelt();
+                VacUntil.sleep(1000);
+                //关闭挡片
+                if("true".equals(configSendData.getHaveBlank())){
+                    // 移除5秒延时，改为检查Netty连接状态
+                        log.info("=======正在关闭抬升小挡片==============");
+                        dispensingFunction.closeLiftBlank(configSendData.getHaveBlankTime());
+                        log.info("=======正在关闭抬升小挡片==============");
+                }
+            }else {
+                log.info("机械手模式");
+                handDrop();
+            }
 
-
-
-
+            blankStatus();
+        });
     }
 
 
@@ -99,8 +111,6 @@ public class DispensingThreadManager {
                 boolean shouldDrop = checkDropLayersInRedis();
                 if(shouldDrop){
 
-                    ConfigSendData configSendData = configFunction.getSendDrugConfigData();
-                    Integer ioTime = configSendData.getIoWaitTime();
 
                     CountDownLatch latch = new CountDownLatch(5);
                     //开始正式掉药
@@ -109,7 +119,7 @@ public class DispensingThreadManager {
                         final int num = i;
                         taskExecutor.execute(() -> {
                             try {
-                                dispensingFunction.dropDrugs(num,ioTime);
+                                dispensingFunction.dropDrugs(num);
                             }catch (Exception e){
                                 log.error("在第 " + num + " 层掉药时发生异常", e);
 
@@ -151,14 +161,13 @@ public class DispensingThreadManager {
             while (running) {
                 //判断发药队列到底有没有数据
                 boolean shouldDrop = checkBeltLayersInRedis();
-                ConfigSendData configSendData = configFunction.getSendDrugConfigData();
-                Integer ioTime = configSendData.getIoWaitTime();
+
                 if(shouldDrop){
                     CountDownLatch latch = new CountDownLatch(1);
                     //开始正式动皮带
                     taskExecutor.execute(() -> {
                         try {
-                            dispensingFunction.moveBelt(ioTime);
+                            dispensingFunction.moveBelt();
                         }catch (Exception e){
                             log.error(String.valueOf(e));
                             log.error("皮带运输模块异常");

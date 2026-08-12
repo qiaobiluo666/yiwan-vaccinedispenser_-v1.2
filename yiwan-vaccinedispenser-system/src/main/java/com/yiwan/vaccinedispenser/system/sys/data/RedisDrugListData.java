@@ -21,8 +21,6 @@ public class RedisDrugListData {
 
     private String boxNo;
 
-
-
     //药仓id
     private Long machineId;
 
@@ -70,6 +68,10 @@ public class RedisDrugListData {
 
     private Integer dropZ;
 
+
+    private Integer vaccineNum;
+
+    private Integer vaccineUseNum;
 
 
 }

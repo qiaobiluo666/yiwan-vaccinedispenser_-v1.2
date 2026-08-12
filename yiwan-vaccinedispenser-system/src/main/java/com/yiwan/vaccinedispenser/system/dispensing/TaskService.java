@@ -3,7 +3,7 @@ package com.yiwan.vaccinedispenser.system.dispensing;
 import com.yiwan.vaccinedispenser.system.sys.data.ConfigSetting;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +23,13 @@ public class TaskService {
 
     @Autowired
     private DispensingFunction dispensingFunction;
+
+    @Value("${plc.enable:false}")
+    private boolean plcEnabled;
+
+    @Value("${netty.enable:false}")
+    private boolean nettyEnabled;
+
     private final ThreadPoolTaskScheduler scheduler;
     private ScheduledFuture<?>[] scheduledTasks = new ScheduledFuture<?>[4];
 
@@ -71,16 +78,16 @@ public class TaskService {
             if(index==0 || index==2){
                 log.info("执行任务开启挡片！当前时间：" + LocalTime.now());
                 ConfigSetting configSetting = configFunction.getSettingConfigData();
-                //是否有挡片配置
+                // 挡片功能启用后，根据 PLC 和 Netty 配置选择对应的设备控制方式。
                 if("true".equals(configSetting.getCBlank())){
-                    dispensingFunction.openBlank();
+                    dispensingFunction.openBlankByDeviceMode(plcEnabled, nettyEnabled);
                 }
             }else {
                 log.info("执行任务关闭挡片！当前时间：" + LocalTime.now());
                 ConfigSetting configSetting = configFunction.getSettingConfigData();
-                //是否有挡片配置
+                // 挡片功能启用后，根据 PLC 和 Netty 配置选择对应的设备控制方式。
                 if("true".equals(configSetting.getCBlank())){
-                    dispensingFunction.closeBlank();
+                    dispensingFunction.closeBlankByDeviceMode(plcEnabled, nettyEnabled);
                 }
 
             }

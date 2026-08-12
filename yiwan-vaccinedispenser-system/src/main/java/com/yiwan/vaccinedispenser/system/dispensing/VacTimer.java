@@ -16,6 +16,7 @@ import net.bytebuddy.asm.Advice;
 import org.apache.http.conn.HttpHostConnectException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -51,6 +52,9 @@ public class VacTimer {
     @Resource(name = "redisTemplate")
     private ValueOperations<String, String> valueOperations;
 
+    @Resource(name = "redisTemplate")
+    private ListOperations<String, String> listOps;
+
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
     @Autowired
@@ -59,6 +63,52 @@ public class VacTimer {
 
     @Autowired
     private VacMachineService vacMachineService;
+
+    /** 发药队列停滞跟踪 key */
+    private static final String SEND_LIST_STALE_SINCE = "Machine:sendList:staleSince";
+    private static final String SEND_LIST_STALE_CONTENT = "Machine:sendList:staleContent";
+    private static final long STALE_TIMEOUT_MS = 5 * 60 * 1000;
+
+    /**
+     * 每分钟检查 SEND_LIST，如果只有1条且5分钟内数量、内容不变则清除
+     */
+    @Scheduled(fixedDelay = 60000)
+    public void cleanStaleSendList() {
+        Long size = listOps.size(RedisKeyConstant.SEND_LIST);
+        if (size == null || size != 1) {
+            //数量不为1，清除跟踪状态
+            redisTemplate.delete(SEND_LIST_STALE_SINCE);
+            redisTemplate.delete(SEND_LIST_STALE_CONTENT);
+            return;
+        }
+        //正好1条
+        String currentContent = listOps.index(RedisKeyConstant.SEND_LIST, 0);
+        String staleSinceStr = valueOperations.get(SEND_LIST_STALE_SINCE);
+        String staleContent = valueOperations.get(SEND_LIST_STALE_CONTENT);
+
+        if (staleSinceStr == null) {
+            //首次发现1条，记录时间戳和内容
+            valueOperations.set(SEND_LIST_STALE_SINCE, String.valueOf(System.currentTimeMillis()));
+            valueOperations.set(SEND_LIST_STALE_CONTENT, currentContent);
+            return;
+        }
+
+        //内容变了，重置跟踪
+        if (!currentContent.equals(staleContent)) {
+            valueOperations.set(SEND_LIST_STALE_SINCE, String.valueOf(System.currentTimeMillis()));
+            valueOperations.set(SEND_LIST_STALE_CONTENT, currentContent);
+            return;
+        }
+
+        //内容不变，检查是否超时
+        long staleSince = Long.parseLong(staleSinceStr);
+        if (System.currentTimeMillis() - staleSince >= STALE_TIMEOUT_MS) {
+            log.info("[定时] 发药队列滞留超过5分钟，清除: {}", currentContent);
+            listOps.leftPop(RedisKeyConstant.SEND_LIST);
+            redisTemplate.delete(SEND_LIST_STALE_SINCE);
+            redisTemplate.delete(SEND_LIST_STALE_CONTENT);
+        }
+    }
 
     /**
      * 一分钟轮询 挡片开启时长超过10min 自动关闭

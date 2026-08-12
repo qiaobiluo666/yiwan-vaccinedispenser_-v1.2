@@ -15,6 +15,10 @@ public interface PdfService {
 
     ResponseEntity<byte[]> getSendDrugDetailPdf(Date createTimeStart, Date createTimeEnd,String workbenchName) throws DocumentException, IOException;
 
+    ResponseEntity<byte[]> getDrugRecordPdf(Date createTimeStart, Date createTimeEnd) throws DocumentException, IOException;
+
+    ResponseEntity<byte[]> getDrugRecordDetailPdf(Date createTimeStart, Date createTimeEnd) throws DocumentException, IOException;
+
     ResponseEntity<byte[]> getVaccineListPdf() throws DocumentException, IOException;
 
     ResponseEntity<byte[]>  getInventoryPdf(String productName) throws DocumentException, IOException;

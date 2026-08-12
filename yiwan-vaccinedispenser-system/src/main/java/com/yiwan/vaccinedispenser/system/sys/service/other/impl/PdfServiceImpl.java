@@ -7,11 +7,14 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.yiwan.vaccinedispenser.core.until.StringUntils;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacDrug;
+import com.yiwan.vaccinedispenser.system.domain.model.vac.VacDrugRecord;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacMachine;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacSendDrugRecord;
+import com.yiwan.vaccinedispenser.system.sys.data.request.vac.DrugRecordRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.request.vac.SendDrugRecordRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.response.vac.InventoryResponse;
 import com.yiwan.vaccinedispenser.system.sys.service.other.PdfService;
+import com.yiwan.vaccinedispenser.system.sys.service.vac.VacDrugRecordService;
 import com.yiwan.vaccinedispenser.system.sys.service.vac.VacDrugService;
 import com.yiwan.vaccinedispenser.system.sys.service.vac.VacMachineService;
 import com.yiwan.vaccinedispenser.system.sys.service.vac.VacSendDrugRecordService;
@@ -46,6 +49,9 @@ public class PdfServiceImpl implements PdfService {
 
     @Autowired
     private VacDrugService vacDrugService;
+
+    @Autowired
+    private VacDrugRecordService vacDrugRecordService;
 
 
     @Autowired
@@ -190,6 +196,107 @@ public class PdfServiceImpl implements PdfService {
         HttpHeaders httpheaders = new HttpHeaders();
         httpheaders.setContentType(MediaType.APPLICATION_PDF);
         httpheaders.setContentDispositionFormData("attachment", "report.pdf");
+        return ResponseEntity.ok()
+                .headers(httpheaders)
+                .body(outputStream.toByteArray());
+    }
+
+    @Override
+    public ResponseEntity<byte[]> getDrugRecordPdf(Date createTimeStart, Date createTimeEnd) throws DocumentException, IOException {
+        Document document = new Document(PageSize.A4);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        PdfWriter.getInstance(document, outputStream);
+        document.open();
+        Font chineseFont = loadChineseFont(fontPath);
+        Font titleFont = new Font(chineseFont.getBaseFont(), 16, Font.BOLD);
+        Font headerFont = new Font(chineseFont.getBaseFont(), 12, Font.BOLD);
+
+        String title = dateFormat.format(createTimeStart) + " —— " + dateFormat.format(createTimeEnd) + " 上苗记录";
+        Paragraph titleParagraph = new Paragraph(title, titleFont);
+        titleParagraph.setAlignment(Element.ALIGN_CENTER);
+        titleParagraph.setSpacingAfter(10f);
+        document.add(titleParagraph);
+
+        List<DrugRecordRequest> vacDrugRecordList = vacDrugRecordService.drugRecordTotalListByCreateTime(createTimeStart, createTimeEnd);
+        PdfPTable table = new PdfPTable(2);
+        table.setWidthPercentage(100);
+        table.setSpacingBefore(10f);
+        table.setHeaderRows(1);
+        table.setWidths(new float[]{2.5f, 1.5f});
+
+        String[] headers = new String[]{"药品名称", "上苗数量"};
+        for (String header : headers) {
+            PdfPCell cell = new PdfPCell(new Paragraph(header, headerFont));
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            cell.setBackgroundColor(new BaseColor(220, 220, 220));
+            cell.setPadding(3);
+            table.addCell(cell);
+        }
+
+        for (DrugRecordRequest record : vacDrugRecordList) {
+            table.addCell(createTableCell(record.getProductName(), chineseFont));
+            table.addCell(createTableCell(String.valueOf(record.getTotalNum()), chineseFont));
+        }
+
+        document.add(table);
+        document.close();
+        HttpHeaders httpheaders = new HttpHeaders();
+        httpheaders.setContentType(MediaType.APPLICATION_PDF);
+        httpheaders.setContentDispositionFormData("attachment", "upRecord.pdf");
+        return ResponseEntity.ok()
+                .headers(httpheaders)
+                .body(outputStream.toByteArray());
+    }
+
+    @Override
+    public ResponseEntity<byte[]> getDrugRecordDetailPdf(Date createTimeStart, Date createTimeEnd) throws DocumentException, IOException {
+        Document document = new Document(PageSize.A4.rotate());
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        PdfWriter.getInstance(document, outputStream);
+        document.open();
+        Font chineseFont = loadChineseFont(fontPath);
+        Font titleFont = new Font(chineseFont.getBaseFont(), 16, Font.BOLD);
+        Font headerFont = new Font(chineseFont.getBaseFont(), 12, Font.BOLD);
+
+        String title = dateFormat.format(createTimeStart) + " —— " + dateFormat.format(createTimeEnd) + " 上苗记录详情";
+        Paragraph titleParagraph = new Paragraph(title, titleFont);
+        titleParagraph.setAlignment(Element.ALIGN_CENTER);
+        titleParagraph.setSpacingAfter(10f);
+        document.add(titleParagraph);
+
+        List<VacDrugRecord> vacDrugRecordList = vacDrugRecordService.drugRecordListByCreateTime(createTimeStart, createTimeEnd);
+        PdfPTable table = new PdfPTable(6);
+        table.setWidthPercentage(100);
+        table.setSpacingBefore(10f);
+        table.setHeaderRows(1);
+        table.setWidths(new float[]{2.5f, 1.5f, 2.5f, 2f, 2f, 2f});
+
+        String[] headers = {"药品名称", "仓位号", "电子监管码", "批号", "有效期", "上苗时间"};
+        for (String header : headers) {
+            PdfPCell cell = new PdfPCell(new Paragraph(header, headerFont));
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            cell.setBackgroundColor(new BaseColor(220, 220, 220));
+            cell.setPadding(5);
+            table.addCell(cell);
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        for (VacDrugRecord record : vacDrugRecordList) {
+            table.addCell(createTableCell(record.getProductName(), chineseFont));
+            table.addCell(createTableCell(record.getMachineNo(), chineseFont));
+            table.addCell(createTableCell(record.getSupervisedCode(), chineseFont));
+            table.addCell(createTableCell(record.getBatchNo(), chineseFont));
+            table.addCell(createTableCell(record.getExpiredAt() == null ? "" : dateFormat.format(record.getExpiredAt()), chineseFont));
+            table.addCell(createTableCell(record.getCreateTime() == null ? "" : record.getCreateTime().format(formatter), chineseFont));
+        }
+
+        document.add(table);
+        document.close();
+        HttpHeaders httpheaders = new HttpHeaders();
+        httpheaders.setContentType(MediaType.APPLICATION_PDF);
+        httpheaders.setContentDispositionFormData("attachment", "upRecordDetail.pdf");
         return ResponseEntity.ok()
                 .headers(httpheaders)
                 .body(outputStream.toByteArray());

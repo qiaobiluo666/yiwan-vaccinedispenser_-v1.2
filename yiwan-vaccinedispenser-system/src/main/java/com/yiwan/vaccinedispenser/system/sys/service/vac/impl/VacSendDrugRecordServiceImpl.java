@@ -3,6 +3,7 @@ package com.yiwan.vaccinedispenser.system.sys.service.vac.impl;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yiwan.vaccinedispenser.core.web.Result;
@@ -12,11 +13,13 @@ import com.yiwan.vaccinedispenser.system.domain.model.vac.VacSendDrugRecord;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacWorkbench;
 import com.yiwan.vaccinedispenser.system.sys.dao.VacDrugRecordMapper;
 import com.yiwan.vaccinedispenser.system.sys.dao.VacSendDrugRecordMapper;
+import com.yiwan.vaccinedispenser.system.sys.data.ConfigData;
 import com.yiwan.vaccinedispenser.system.sys.data.RedisDrugListData;
 import com.yiwan.vaccinedispenser.system.sys.data.request.vac.SendDrugRecordRequest;
 import com.yiwan.vaccinedispenser.system.sys.service.vac.VacDrugRecordService;
 import com.yiwan.vaccinedispenser.system.sys.service.vac.VacDrugService;
 import com.yiwan.vaccinedispenser.system.sys.service.vac.VacSendDrugRecordService;
+import com.yiwan.vaccinedispenser.system.dispensing.ConfigFunction;
 import com.yiwan.vaccinedispenser.system.sys.service.vac.VacWorkbenchService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -54,6 +57,9 @@ public class VacSendDrugRecordServiceImpl extends ServiceImpl<VacSendDrugRecordM
 
     @Autowired
     private VacDrugService vacDrugService;
+
+    @Autowired
+    private ConfigFunction configFunction;
 
     @Override
     public Page<VacSendDrugRecord> getList(SendDrugRecordRequest request) {
@@ -134,7 +140,7 @@ public class VacSendDrugRecordServiceImpl extends ServiceImpl<VacSendDrugRecordM
     public void sendDrugRecordAdd(RedisDrugListData drugListData, Integer status, String desc) {
         log.info(JSON.toJSONString(drugListData));
         //获取最早的入药记录
-        VacDrugRecord vacDrugRecord = vacDrugRecordService.getListByMachineIdAndProductNo(drugListData.getMachineId(), drugListData.getProductNo());
+        VacDrugRecord vacDrugRecord = vacDrugRecordService.getListByMachineIdAndProductNoAndExpiredAt(drugListData.getMachineId(), drugListData.getProductNo(),drugListData.getExpiredAt());
         log.info(JSON.toJSONString(vacDrugRecord));
         VacWorkbench vacWorkbench =vacWorkbenchService.getByWorkbenchNum(drugListData.getWorkbenchNum());
         log.info(JSON.toJSONString(vacWorkbench));
@@ -323,6 +329,112 @@ public class VacSendDrugRecordServiceImpl extends ServiceImpl<VacSendDrugRecordM
             default:
                 return "";
         }
+    }
+
+    @Override
+    public List<SendDrugRecordRequest> getDrugBoxStatistics() {
+
+
+        List<SendDrugRecordRequest> result = new ArrayList<>();
+        
+        // 统计每个productNo的上药数量
+        List<Map<String, Object>> statistics = vacSendDrugRecordMapper.countGroupedByProductNo();
+        
+        for (Map<String, Object> stat : statistics) {
+            String productNo = (String) stat.get("productNo");
+            String statProductName = (String) stat.get("productName");
+            Integer totalNum = ((Number) stat.get("totalNum")).intValue();
+            
+            // 根据productNo找到对应的VacDrug
+            VacDrug vacDrug = vacDrugService.vacDrugGetByproductNo(productNo);
+            if (vacDrug != null) {
+                SendDrugRecordRequest request = new SendDrugRecordRequest();
+                request.setProductNo(productNo);
+                request.setProductName(vacDrug.getProductName());
+                request.setTotalNum(totalNum);
+                // 添加长宽高信息
+                request.setVaccineLong(vacDrug.getVaccineLong());
+                request.setVaccineWide(vacDrug.getVaccineWide());
+                request.setVaccineHigh(vacDrug.getVaccineHigh());
+                
+                // 计算仓位最大容量
+                if (vacDrug.getVaccineLong() != null) {
+                    try {
+                        ConfigData configData = configFunction.getAutoDrugConfigData();
+                        if (configData != null && configData.getLineLong() != null) {
+                            int vacLong = vacDrug.getVaccineLong();
+                            int num = configData.getLineLong() / (vacLong + 5);
+                            if (5 * num > vacLong * 1.5) {
+                                num = num + 1;
+                            }
+                            request.setMaxCapacity(num);
+                        }
+                    } catch (Exception e) {
+                        log.error("计算仓位最大容量异常: {}", e.getMessage());
+                    }
+                }
+                
+                result.add(request);
+            }
+        }
+
+        log.info(JSON.toJSONString(result));
+
+        return result;
+    }
+
+    @Override
+    public List<SendDrugRecordRequest> getDrugBoxStatistics(Date createTimeStart, Date createTimeEnd, String workbenchName, String productNo) {
+        List<Map<String, Object>> statistics = this.baseMapper.selectMaps(
+                new QueryWrapper<VacSendDrugRecord>()
+                        .select("product_no AS productNo", "MIN(product_name) AS productName", "COUNT(*) AS totalNum")
+                        .eq("deleted", 0)
+                        .ge(createTimeStart != null, "create_time", createTimeStart)
+                        .le(createTimeEnd != null, "create_time", createTimeEnd)
+                        .eq(StringUtils.isNotBlank(workbenchName), "workbench_name", workbenchName)
+                        .eq(StringUtils.isNotBlank(productNo), "product_no", productNo)
+                        .groupBy("product_no")
+        );
+
+        List<SendDrugRecordRequest> result = new ArrayList<>();
+        for (Map<String, Object> stat : statistics) {
+            String pn = (String) stat.get("productNo");
+            String statProductName = (String) stat.get("productName");
+            Integer totalNum = ((Number) stat.get("totalNum")).intValue();
+            VacDrug vacDrug = vacDrugService.vacDrugGetByproductNo(pn);
+            if (vacDrug != null) {
+                SendDrugRecordRequest request = new SendDrugRecordRequest();
+                request.setProductNo(pn);
+                request.setProductName(vacDrug.getProductName());
+                request.setTotalNum(totalNum);
+                request.setVaccineLong(vacDrug.getVaccineLong());
+                request.setVaccineWide(vacDrug.getVaccineWide());
+                request.setVaccineHigh(vacDrug.getVaccineHigh());
+                if (vacDrug.getVaccineLong() != null) {
+                    try {
+                        ConfigData configData = configFunction.getAutoDrugConfigData();
+                        if (configData != null && configData.getLineLong() != null) {
+                            int vacLong = vacDrug.getVaccineLong();
+                            int num = configData.getLineLong() / (vacLong + 5);
+                            if (5 * num > vacLong * 1.5) {
+                                num = num + 1;
+                            }
+                            request.setMaxCapacity(num);
+                        }
+                    } catch (Exception e) {
+                        log.error("计算仓位最大容量异常: {}", e.getMessage());
+                    }
+                }
+                result.add(request);
+            } else {
+                SendDrugRecordRequest request = new SendDrugRecordRequest();
+                request.setProductNo(pn);
+                request.setProductName(statProductName);
+                request.setTotalNum(totalNum);
+                result.add(request);
+            }
+        }
+        return result;
     }
 }
 

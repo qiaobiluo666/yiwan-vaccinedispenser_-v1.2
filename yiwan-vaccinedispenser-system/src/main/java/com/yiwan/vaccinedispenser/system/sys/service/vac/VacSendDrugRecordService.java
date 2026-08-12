@@ -57,4 +57,20 @@ public interface VacSendDrugRecordService extends IService<VacSendDrugRecord>{
 
 
     List<SendDrugRecordRequest>   countToday();
+
+
+
+    //统计上药的药盒的数量、尺寸  根据整个来计算仓位分布
+    List<SendDrugRecordRequest> getDrugBoxStatistics();
+    
+
+    //统计上药的药盒的数量、尺寸（带条件）
+    List<SendDrugRecordRequest> getDrugBoxStatistics(Date createTimeStart, Date createTimeEnd, String workbenchName, String productNo);
+
+
+
+
+
+
+
 }

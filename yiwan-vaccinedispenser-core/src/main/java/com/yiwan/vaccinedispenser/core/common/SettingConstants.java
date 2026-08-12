@@ -81,7 +81,7 @@ public class SettingConstants {
     public static final int IO_DROP_WAIT_TIME = 16;
 
     //等待药品掉落光栅传感器时间
-    public static final int DRUG_BELT_WAIT_TIME = 12000;
+    public static final int DRUG_BELT_WAIT_TIME = 16000;
 
     //等待药品掉到运输皮带时间
     public static final int WORK_DRUG_BELT_WAIT_TIME = 10000;
@@ -159,6 +159,21 @@ public class SettingConstants {
 
     //运输皮带上下抬升的伺服编号
     public static final  int CABINET_A_MOVE_BELT_TO_RETURN_NUM = 9;
+
+//    //抬升挡片打开输出编号
+//    public static final  int CABINET_A_LIFT_BLANK_OPEN_NUM = 15;
+//
+//    //运输皮带上下抬升的伺服编号
+//    public static final  int CABINET_A_LIFT_BLANK_CLOSE_NUM = 16;
+
+
+    //抬升挡片打开输出编号  浦沿专用
+    public static final  int CABINET_A_LIFT_BLANK_OPEN_NUM = 12;
+    //运输皮带上下抬升的伺服编号 浦沿专用
+    public static final  int CABINET_A_LIFT_BLANK_CLOSE_NUM = 13;
+
+
+
 
     //B柜滑台传感器信号 编号
     public static final  int SENSOR_CABINET_B_TABLE_NUM = 18;

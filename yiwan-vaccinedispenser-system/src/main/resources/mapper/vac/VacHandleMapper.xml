@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.yiwan.vaccinedispenser.system.sys.dao.VacHandleMapper">
+
+    <resultMap id="BaseResultMap" type="com.yiwan.vaccinedispenser.system.domain.model.vac.VacHandle">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="len_min" property="lenMin" jdbcType="INTEGER"/>
+        <result column="len_max" property="lenMax" jdbcType="INTEGER"/>
+        <result column="step_extend_dis" property="stepExtendDis" jdbcType="INTEGER"/>
+        <result column="step_lift_dis" property="stepLiftDis" jdbcType="INTEGER"/>
+        <result column="create_by" property="createBy" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_by" property="updateBy" jdbcType="VARCHAR"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+        <result column="deleted" property="deleted" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, len_min, len_max, step_extend_dis, step_lift_dis,
+        create_by, create_time, update_by, update_time, deleted
+    </sql>
+
+</mapper>

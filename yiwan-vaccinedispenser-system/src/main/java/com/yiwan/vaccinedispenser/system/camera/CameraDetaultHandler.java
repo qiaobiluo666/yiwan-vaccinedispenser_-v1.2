@@ -33,7 +33,6 @@ public class CameraDetaultHandler extends SimpleChannelInboundHandler<String> {
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
 		super.channelActive(ctx);
-		log.info("[{}] 连接成功", name);
 	}
 
 	@Override

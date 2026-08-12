@@ -3,7 +3,6 @@ package com.yiwan.vaccinedispenser.system.sys.service.vac.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -19,6 +18,8 @@ import com.yiwan.vaccinedispenser.core.websocket.WebsocketService;
 import com.yiwan.vaccinedispenser.system.dispensing.ConfigFunction;
 import com.yiwan.vaccinedispenser.system.dispensing.DispensingFunction;
 import com.yiwan.vaccinedispenser.system.dispensing.DispensingHandFunction;
+import com.yiwan.vaccinedispenser.system.dispensing.PlcDispensingFunction;
+import com.yiwan.vaccinedispenser.system.plc.manager.PlcSendService;
 import com.yiwan.vaccinedispenser.system.dispensing.SendDrugFunction;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.*;
 import com.yiwan.vaccinedispenser.system.sys.dao.VacBoxSpecMapper;
@@ -46,7 +47,9 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.text.Collator;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Function;
@@ -68,6 +71,9 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
     private VacDrugService vacDrugService;
 
     @Autowired
+    private VacHandleService vacHandleService;
+
+    @Autowired
     private VacIoService vacIoService;
 
     @Autowired
@@ -84,8 +90,13 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
     @Autowired
     private DispensingFunction dispensingFunction;
 
-    @Autowired
-    private DispensingHandFunction dispensingHandFunction;
+    @Autowired(required = false)
+    private PlcDispensingFunction plcDispensingFunction;
+
+    @Autowired(required = false)
+    private PlcSendService plcSendService;
+
+
 
     @Autowired
     private ZcyFunction zcyFunction;
@@ -99,6 +110,12 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
 
     @Value("${app.sendIsOpen}")
     private  String isSendOpen;
+
+    @Value("${plc.enable:false}")
+    private boolean plcEnabled;
+
+    @Value("${netty.enable:false}")
+    private boolean nettyEnabled;
 
     @Autowired
     private VacMachineExceptionService vacMachineExceptionService;
@@ -165,10 +182,12 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
                 })
                 .collect(Collectors.toList());
         return Result.success(vacMachineRequests);
+
     }
 
     @Override
     public Result vacMachineLockerList() {
+
         ConfigSetting configSetting = configFunction.getSettingConfigData();
         ConfigSendData configSendData = configFunction.getSendDrugConfigData();
         List<VacMachine> vacMachineList = vacMachineMapper.selectList( new LambdaQueryWrapper<VacMachine>()
@@ -445,6 +464,47 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
         log.warn("没有仓位上：{},{},{}",vacDrug.getProductName(),request.getProductNo(),request.getBatchNo());
         return null;
 
+    }
+
+    @Override
+    public DrugRecordRequest findBoxExcludeMachineIds(List<Long> boxSepcIds, Integer num, DrugRecordRequest request, Set<Long> excludeMachineIds) {
+        log.info("获取政采云request(排除已预留仓位)：{}",JSON.toJSONString(request));
+        VacDrug vacDrug = vacDrugService.vacDrugGetByproductNo(request.getProductNo());
+
+        //同效期同批次的仓位不放排除（本来就是同一个仓位继续装药）
+        List<VacMachine> vacMachineList = getExpiredAtBoxNoBatchNo(boxSepcIds, num, request.getExpiredAt(), request.getProductNo(), request.getBatchNo());
+        if (!vacMachineList.isEmpty()) {
+            VacMachine vacMachineData = vacMachineList.get(0);
+            log.info("自动上药 同效期仓位 :{} 同批次：{} 数量：{}", vacMachineData.getBoxNo(), vacMachineData.getBatchNo(), vacMachineData.getVaccineNum());
+            return getDrugRecordRequestHaveNum(request, vacMachineData, vacDrug);
+        }
+
+        //同效期无批次的仓位也不放排除
+        List<VacMachine> vacMachineList1 = getBoxNoNullBatchNo(boxSepcIds, request.getProductNo(), request.getExpiredAt(), num);
+        if (!vacMachineList1.isEmpty()) {
+            VacMachine vacMachineData1 = vacMachineList1.get(0);
+            log.info("自动上药 老仓位 同效期  没有batchNo：{}", vacMachineData1.getBoxNo());
+            return getDrugRecordRequestZeroNum(request, vacMachineData1, vacDrug);
+        }
+
+        //新仓位才做排除，防止并发抢同一个空仓
+        List<VacMachine> vacMachineList2 = getNewBoxNo(boxSepcIds, request.getProductNo());
+        vacMachineList2 = filterExcluded(vacMachineList2, excludeMachineIds);
+        if (!vacMachineList2.isEmpty()) {
+            VacMachine vacMachineData2 = vacMachineList2.get(0);
+            log.info("自动上药 新仓位：{}", vacMachineData2.getBoxNo());
+            return getDrugRecordRequestZeroNum(request, vacMachineData2, vacDrug);
+        }
+
+        log.warn("没有仓位上：{},{},{}", vacDrug.getProductName(), request.getProductNo(), request.getBatchNo());
+        return null;
+    }
+
+    private List<VacMachine> filterExcluded(List<VacMachine> list, Set<Long> excludeMachineIds) {
+        if (excludeMachineIds == null || excludeMachineIds.isEmpty() || list == null || list.isEmpty()) {
+            return list != null ? list : new ArrayList<>();
+        }
+        return list.stream().filter(m -> !excludeMachineIds.contains(m.getId())).toList();
     }
 
 
@@ -753,7 +813,8 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
             }else {
                 //测试使用
                 drugRecordData = vacDrugService.sendDrugTest(code);
-                drugRecordData.setExpiredAt(new Date());
+                drugRecordData.setExpiredAt(Date.from(LocalDate.now().atStartOfDay()
+                        .atZone(ZoneId.systemDefault()).toInstant()));
                 drugRecordData.setBatchNo("测试编号");
                 drugRecordData.setPrice(String.valueOf(321));
                 drugRecordData.setTag("测试标签");
@@ -799,48 +860,56 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
                     log.error(msg);
                     vacMachineExceptionService.sendException(SettingConstants.MachineException.HAND.code,drugRecordData.getProductName(),msg);
                 }
-                int lineNum = drugRecordRequest.getLineNum();
-                int ledNum = drugRecordRequest.getLedNum();
 
-                // 如果上次灯和新灯不同，则熄灭上次的灯
-                if (lastLineNum != -1 && lastLedNum != -1 && (lastLineNum != lineNum || lastLedNum != ledNum)) {
-                    sendDrugFunction.led(lastLineNum, lastLedNum, CabinetConstants.LedMode.NOT_OUTPUT);
-                    log.info("熄灭上次 LED: 行 {}, 灯 {}", lastLineNum, lastLedNum);
+                //PLC模式：将坐标发给PLC（width=0，人工上苗不关心宽度）
+                boolean isPlcMode = plcDispensingFunction != null;
+                if (isPlcMode) {
+                    int lineNum = drugRecordRequest.getLineNum();
+                    int positionNum =  drugRecordRequest.getPositionNum();
+                    log.info("[PLC] 人工上苗 | 层={} | 序号={}", drugRecordRequest.getLineNum(), drugRecordRequest.getPositionNum());
+                    plcDispensingFunction.plcManualFeed(lineNum, positionNum, 0);
+                    sendDrugFunction.addDrugRecord(drugRecordRequest,1);
+
+                } else {
+
+                    int lineNum = drugRecordRequest.getLineNum();
+                    int ledNum = drugRecordRequest.getLedNum();
+
+                    // 如果上次灯和新灯不同，则熄灭上次的灯
+                    if (lastLineNum != -1 && lastLedNum != -1 && (lastLineNum != lineNum || lastLedNum != ledNum)) {
+                        sendDrugFunction.led(lastLineNum, lastLedNum, CabinetConstants.LedMode.NOT_OUTPUT);
+                        log.info("熄灭上次 LED: 行 {}, 灯 {}", lastLineNum, lastLedNum);
+                    }
+
+
+                    VacUntil.sleep(200);
+                    sendDrugFunction.led(lineNum,ledNum,CabinetConstants.LedMode.OUTPUT);
+                    VacUntil.sleep(200);
+                    // 记录当前亮灯的位置和最后操作时间到 Redis
+                    long currentTime = System.currentTimeMillis();
+                    valueOperations.set(RedisKeyConstant.handDrugStatus.HAND_LAST_LED_NUM_STATUS, lineNum + "_" + ledNum);
+                    valueOperations.set(RedisKeyConstant.handDrugStatus.HAND_LAST_OPERATION_TIME, String.valueOf(currentTime));
+
+                    //Netty模式：直接记录上药（人工放入）
+                    sendDrugFunction.addDrugRecord(drugRecordRequest,1);
+
+                    // 10 秒后检查是否需要熄灭灯
+                    scheduler.schedule(() -> {
+                        String lastLed = valueOperations.get(RedisKeyConstant.handDrugStatus.HAND_LAST_LED_NUM_STATUS);
+                        String lastOperationTimeStr = valueOperations.get(RedisKeyConstant.handDrugStatus.HAND_LAST_OPERATION_TIME);
+                        if (lastLed != null && lastLed.equals(lineNum + "_" + ledNum) ){
+                            assert lastOperationTimeStr != null;
+                            long lastOperationTime = Long.parseLong(lastOperationTimeStr);
+                            if (System.currentTimeMillis() - lastOperationTime >= 10000) {
+                                sendDrugFunction.led(lineNum, ledNum, CabinetConstants.LedMode.NOT_OUTPUT);
+                                log.info("灯光熄灭 (10s 超时): 行 {}, 灯 {}", lineNum, ledNum);
+                                valueOperations.set(RedisKeyConstant.handDrugStatus.HAND_LAST_LED_NUM_STATUS, ""); // 清除记录
+                            }
+                        }
+                    }, 10, TimeUnit.SECONDS);
                 }
 
 
-                VacUntil.sleep(200);
-                sendDrugFunction.led(lineNum,ledNum,CabinetConstants.LedMode.OUTPUT);
-                VacUntil.sleep(200);
-                // 记录当前亮灯的位置和最后操作时间到 Redis
-                long currentTime = System.currentTimeMillis();
-                valueOperations.set(RedisKeyConstant.handDrugStatus.HAND_LAST_LED_NUM_STATUS, lineNum + "_" + ledNum);
-                valueOperations.set(RedisKeyConstant.handDrugStatus.HAND_LAST_OPERATION_TIME, String.valueOf(currentTime));
-
-                // 3 秒后允许再次扫码
-                scheduler.schedule(() -> {
-                    valueOperations.set(RedisKeyConstant.handDrugStatus.HAND_START_STATUS, "true");
-                    log.info("允许再次扫码");
-                }, 3, TimeUnit.SECONDS);
-
-
-                //机械手上有药，仓位药品数量+1，新增上药记录
-                sendDrugFunction.addDrugRecord(drugRecordRequest,1);
-
-                // 10 秒后检查是否需要熄灭灯
-                scheduler.schedule(() -> {
-                    String lastLed = valueOperations.get(RedisKeyConstant.handDrugStatus.HAND_LAST_LED_NUM_STATUS);
-                    String lastOperationTimeStr = valueOperations.get(RedisKeyConstant.handDrugStatus.HAND_LAST_OPERATION_TIME);
-                    if (lastLed != null && lastLed.equals(lineNum + "_" + ledNum) ){
-                        assert lastOperationTimeStr != null;
-                        long lastOperationTime = Long.parseLong(lastOperationTimeStr);
-                        if (System.currentTimeMillis() - lastOperationTime >= 10000) {
-                            sendDrugFunction.led(lineNum, ledNum, CabinetConstants.LedMode.NOT_OUTPUT);
-                            log.info("灯光熄灭 (10s 超时): 行 {}, 灯 {}", lineNum, ledNum);
-                            valueOperations.set(RedisKeyConstant.handDrugStatus.HAND_LAST_LED_NUM_STATUS, ""); // 清除记录
-                        }
-                    }
-                }, 10, TimeUnit.SECONDS);
 
             }else {
                 String msg = "手动上药异常：没有仓位可以装这个药";
@@ -921,7 +990,8 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
             }else {
                 //测试使用
                 drugRecordData = vacDrugService.sendDrugTest(code);
-                drugRecordData.setExpiredAt(new Date());
+                drugRecordData.setExpiredAt(Date.from(LocalDate.now().atStartOfDay()
+                        .atZone(ZoneId.systemDefault()).toInstant()));
                 drugRecordData.setBatchNo("测试编号");
                 drugRecordData.setPrice(String.valueOf(321));
                 drugRecordData.setTag("测试标签");
@@ -968,63 +1038,86 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
                     throw new ServiceException(msg);
                 }
 
+                boolean isPlcMode = plcDispensingFunction != null;
 
+                if (isPlcMode) {
+                    //PLC模式：将坐标发给PLC，由PLC执行机械手动作
+                    int width = vacDrug.getVaccineWide();
+                    log.info("[PLC] 手动上苗 | 层={} | 序号={} | 宽度={}", drugRecordRequest.getLineNum(), drugRecordRequest.getPositionNum(), width);
+                    plcDispensingFunction.plcManualFeed(drugRecordRequest.getLineNum(), drugRecordRequest.getPositionNum(), width);
 
-                sendDrugFunction.cabinetAStepInit(CabinetConstants.CabinetAStepMode.CLAMP);
-                sendDrugFunction.waitCabinetAStepEnd(1);
-
-                //先去初始位置 13310,1950
-                sendDrugFunction.moveHandServo(configData.getHandDrugX(),configData.getHandDrugZ());
-
-                //提前走夹药一段距离
-                int longs = vacDrug.getVaccineWide()*100;
-                if((configData.getHandLen()-longs-configData.getEarly())>0){
-                    int earlyDis = configData.getHandLen()-longs-configData.getEarly();
-                    sendDrugFunction.cabinetAStepPosition(CabinetConstants.CabinetAStepMode.CLAMP,earlyDis);
-                    sendDrugFunction.waitCabinetAStepEnd(1);
-                }
-
-                //检测传感器药品是否触发 10s
-                boolean flag = false;
-                String sensorIsPuts= null;
-                long timeouts = System.currentTimeMillis();
-                while ((System.currentTimeMillis() - timeouts) < SettingConstants.WAIT_BLOCK_TIME){
-                    sendDrugFunction.intPut(CabinetConstants.Cabinet.CAB_A,CabinetConstants.InPutCommand.QUERY,SettingConstants.SENSOR_CABINET_A_HAND_NUM);
-                    VacUntil.sleep(200);
-                    //判断机械手底部传感器信号是否被触发
-                    sensorIsPuts = valueOperations.get(RedisKeyConstant.sensor.HAND_SENSOR);
-                    assert sensorIsPuts != null;
-                    //如果传感器触发 一直等待 不触发结束
-                    if(sensorIsPuts.equals(CabinetConstants.SensorStatus.NORMAL.code)){
-                        flag =true;
-                        break;
+                    //等待PLC进药完成（最多等30秒，通过Redis A_FILL_DONE 标志判断）
+                    long deadline = System.currentTimeMillis() + 30_000;
+                    while (System.currentTimeMillis() < deadline) {
+                        if ("true".equals(valueOperations.get(RedisKeyConstant.statusWord3.A_FILL_DONE))) {
+                            log.info("[PLC] 手动上苗完成 | 层={} | 序号={}", drugRecordRequest.getLineNum(), drugRecordRequest.getPositionNum());
+                            break;
+                        }
+                        VacUntil.sleep(200);
                     }
-                }
-
-                if(flag){
-
-                    //掉药
-                    int clampDis = configData.getHandLen()-wide-configData.getGap();
-                    int dropDis = configData.getHandLen()-wide;
-                    log.info("夹住距离:{}",clampDis);
-                    boolean isSuccess = sendDrugFunction.dropDrugHandle(clampDis,dropDis,drugRecordRequest);
-
-                    if(!isSuccess){
-                        String msg = String.format("自动上药异常：药物异常报警,%s 药没掉入药仓",drugRecordRequest.getProductName());
+                    if (!"true".equals(valueOperations.get(RedisKeyConstant.statusWord3.A_FILL_DONE))) {
+                        String msg = "PLC手动上苗超时，请检查PLC状态";
                         log.error(msg);
+                        vacMachineExceptionService.sendException(SettingConstants.MachineException.HAND.code, drugRecordData.getProductName(), msg);
                         return Result.fail(msg);
                     }
+                    //PLC完成进药后PlcStatusDispatcher自动调addDrugRecord，这里不重复记录
+                    log.info("PLC手动上药成功：{}", JSON.toJSONString(drugRecordRequest));
 
-                    //机械手上有药，仓位药品数量+1，新增上药记录
-                    sendDrugFunction.addDrugRecord(drugRecordRequest,1);
-                    //A柜机械手 步进电机 回原
-                    sendDrugFunction.cabinetAStepInit(CabinetConstants.CabinetAStepMode.BLOCK);
-                    //A柜 步进电机 回原
-                    sendDrugFunction.cabinetAStepInit(CabinetConstants.CabinetAStepMode.BLOCK);
+                } else {
+                    //Netty模式：手动上药 机械手控制
+                    //先去初始位置 13310,1950
+                    sendDrugFunction.moveHandServo(configData.getHandDrugX(),configData.getHandDrugZ());
+
+                    //提前走夹药一段距离
+                    int longs = vacDrug.getVaccineWide()*100;
+                    if((configData.getHandLen()-longs-configData.getEarly())>0){
+                        int earlyDis = configData.getHandLen()-longs-configData.getEarly();
+                        sendDrugFunction.cabinetAStepPosition(CabinetConstants.CabinetAStepMode.CLAMP,earlyDis);
+                        sendDrugFunction.waitCabinetAStepEnd(1);
+                    }
+
+                    //检测传感器药品是否触发 10s
+                    boolean flag = false;
+                    String sensorIsPuts= null;
+                    long timeouts = System.currentTimeMillis();
+                    while ((System.currentTimeMillis() - timeouts) < SettingConstants.WAIT_BLOCK_TIME){
+                        sendDrugFunction.intPut(CabinetConstants.Cabinet.CAB_A,CabinetConstants.InPutCommand.QUERY,SettingConstants.SENSOR_CABINET_A_HAND_NUM);
+                        VacUntil.sleep(200);
+                        //判断机械手底部传感器信号是否被触发
+                        sensorIsPuts = valueOperations.get(RedisKeyConstant.sensor.HAND_SENSOR);
+                        assert sensorIsPuts != null;
+                        //如果传感器触发 一直等待 不触发结束
+                        if(sensorIsPuts.equals(CabinetConstants.SensorStatus.NORMAL.code)){
+                            flag =true;
+                            break;
+                        }
+                    }
+
+                    if(flag){
+                        //掉药
+                        int clampDis = configData.getHandLen()-wide-configData.getGap();
+                        int dropDis = configData.getHandLen()-wide;
+                        log.info("夹住距离:{}",clampDis);
+                        boolean isSuccess = sendDrugFunction.dropDrugHandle(clampDis,dropDis,drugRecordRequest);
+
+                        if(!isSuccess){
+                            String msg = String.format("自动上药异常：药物异常报警,%s 药没掉入药仓",drugRecordRequest.getProductName());
+                            log.error(msg);
+                            return Result.fail(msg);
+                        }
+
+                        //机械手上有药，仓位药品数量+1，新增上药记录
+                        sendDrugFunction.addDrugRecord(drugRecordRequest,1);
+                        //A柜机械手 步进电机 回原
+                        sendDrugFunction.cabinetAStepInit(CabinetConstants.CabinetAStepMode.BLOCK);
+                        //A柜 步进电机 回原
+                        sendDrugFunction.cabinetAStepInit(CabinetConstants.CabinetAStepMode.BLOCK);
+                    }
+
+                    //机械手回原
+                    sendDrugFunction.moveHandServoInit(configData);
                 }
-
-                //机械手回原
-                sendDrugFunction.moveHandServoInit(configData);
 
             }else {
                 String msg = "手动上药异常：没有仓位可以装这个药";
@@ -1110,7 +1203,8 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
             }else {
                 //测试使用
                 drugRecordData = vacDrugService.sendDrugTest(code);
-                drugRecordData.setExpiredAt(new Date());
+                drugRecordData.setExpiredAt(Date.from(LocalDate.now().atStartOfDay()
+                        .atZone(ZoneId.systemDefault()).toInstant()));
                 drugRecordData.setBatchNo("测试编号");
                 drugRecordData.setPrice(String.valueOf(321));
                 drugRecordData.setTag("测试标签");
@@ -1240,12 +1334,17 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
     @Override
     public Result machineInventoryCount(MachineInventoryRequest request) throws Exception {
 
+        boolean isPlcMode = plcDispensingFunction != null;
+
         LambdaQueryWrapper<VacMachine> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(VacMachine::getDeleted,0)
-                .isNotNull(VacMachine::getCountX)
-                .isNotNull(VacMachine::getCountZ);
+        queryWrapper.eq(VacMachine::getDeleted,0);
+        if (!isPlcMode) {
+            queryWrapper.isNotNull(VacMachine::getCountX)
+                    .isNotNull(VacMachine::getCountZ);
+        }
+
         if(request!=null){
-            if(request.getLineList()!=null&&!request.getBoxNoList().isEmpty()){
+            if(request.getLineList()!=null&&!request.getLineList().isEmpty()){
                 queryWrapper.in(VacMachine::getLineNum,request.getLineList());
             }
 
@@ -1256,11 +1355,11 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
             }
         }
 
-
+        queryWrapper.orderByAsc(VacMachine::getBoxNo);
         List<VacMachine> vacMachineList = vacMachineMapper.selectList(
-               queryWrapper
+                queryWrapper
         );
-        log.info(JSON.toJSONString(vacMachineList));
+
         String msg;
         ConfigSetting configSetting = configFunction.getSettingConfigData();
         boolean isUpdate  = configSetting.getInventoryUpdate();
@@ -1289,18 +1388,26 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
         }
 
         valueOperations.set(RedisKeyConstant.DRUG_INVENTORY_START,"true");
+        //先把库存盘点状态重置（仅PLC模式）
+        if (plcSendService != null) {
+            plcSendService.sendACabinetInventoryClear();
+        }
+
 
 
         for(VacMachine record :vacMachineList){
-
+            log.info("开始盘点{}库存",record.getBoxNo());
             if("false".equals(valueOperations.get(RedisKeyConstant.DRUG_INVENTORY_START))){
                 log.info("库存盘点已停止");
-                ConfigData configData = configFunction.getAutoDrugConfigData();
-                sendDrugFunction.moveHandServoInit(configData);
+                if (!isPlcMode) {
+                    ConfigData configData = configFunction.getAutoDrugConfigData();
+                    sendDrugFunction.moveHandServoInit(configData);
+                }
                 return Result.success("库存盘点已停止");
             }
 
             log.info("==============================================测距开始=================================================");
+            log.info(JSON.toJSONString(record));
             //判断是不是在发药中 如果发药中停止自动盘点
             String drugStr = listOps.index(RedisKeyConstant.SEND_LIST,0);
             if (drugStr!=null){
@@ -1330,7 +1437,12 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
             }
 
             //测距
-            Integer disNum = moveInventoryDis(record.getCountX(),record.getCountZ(),configSetting);
+            Integer disNum;
+            if (isPlcMode) {
+                disNum = moveInventoryDisPlc(record.getLineNum(), record.getPositionNum(), 0,configSetting,record.getBoxNo());
+            } else {
+                disNum = moveInventoryDis(record.getCountX(), record.getCountZ(), configSetting);
+            }
 
             if(disNum==null){
                 continue;
@@ -1340,75 +1452,6 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
             int less =3;
             log.info("less:{}   add:{}",less,add);
             List<Integer> disNumList = new ArrayList<>();
-//            //距离大于板长+100 则为空仓
-//            if(disNum>(bank-150)){
-//
-//                //距离大于这个值  而且机器数据为1只药 设为空仓
-//                if(record.getProductNo()!=null && record.getVaccineNum()<2){
-//                    Integer num =  getInventoryNum(disNum,bank,record.getProductNo());
-//                    if(num!=1){
-//                        int count =50*less;
-//                        //移动一下重新测距
-//                        for(int i=1;i<less;i++){
-//                            count =count-50;
-//                            if(record.getCountX()-count<0){
-//                                continue;
-//                            }
-//                            disNum = moveInventoryDis(record.getCountX()-count,record.getCountZ(),configSetting);
-//                            if(disNum==null){
-//                                continue;
-//                            }
-//                            if(bank>disNum){
-//                                disNumList.add(disNum);
-//                            }
-//                        }
-//                        count=0;
-//                        //移动一下重新测距
-//                        for(int i=1;i<add;i++){
-//                            count =count+50;
-//                            disNum = moveInventoryDis(record.getCountX()+count,record.getCountZ(),configSetting);
-//                            if(disNum==null){
-//                                continue;
-//                            }
-//                            if(bank>disNum){
-//                                disNumList.add(disNum);
-//                            }
-//                        }
-//
-//                        boolean flag= false;
-//                        if(!disNumList.isEmpty()){
-//                            log.info("disNumList:{}",disNumList);
-//                            for (Integer item: disNumList){
-//
-//                                 num =  getInventoryNum(item,bank,record.getProductNo());
-//                                if(num==1){
-//                                    flag =true;
-//                                    break;
-//                                }
-//
-//                            }
-//                        }
-//
-//                        if(!flag){
-//                            msg = String.format("仓位：%s , 疫苗:%s ,原来数量：%s 设置为空仓 测试距离：%s ",record.getBoxNo(),record.getProductName(),record.getVaccineNum(),disNum);
-//                            vacMachineExceptionService.sendException(SettingConstants.MachineException.COUNTWARING.code,"",msg);
-//                            //如果是空仓  仓位上还有数据 清空仓位
-//                            record.setVaccineId(null);
-//                            record.setVaccineNum(null);
-//                            record.setVaccineUseNum(null);
-//                            record.setProductName(null);
-//                            record.setProductNo(null);
-//                            record.setExpiredAt(null);
-//                            log.info("仓位：{} 为空仓",record.getBoxNo());
-//                            if(isUpdate){
-//                                vacMachineMapper.updateNullById(record);
-//                            }
-//                        }
-//                    }
-//                    }
-//
-//                continue;
-//            }
 
             //如果空仓 仓位上没数据   找到最近的那条数据 对比长度  如果长度相差不大 则 恢复原来的数据 如果长度相差过大 则 禁掉该仓位
             if(record.getProductNo()==null){
@@ -1432,16 +1475,16 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
 
                 int num =  getInventoryNum(disNum,bank,vacDrugRecord.getProductNo());
                 if(num==1||num ==2){
-                   msg = String.format("仓位：%s,系统数据已经清空，检测到还有药品，添加：疫苗名称：%s，数量：%s，效期：%s",record.getBoxNo(),record.getProductName(),num,record.getExpiredAt());
-                   log.info(msg);
-                   vacMachineExceptionService.sendException(SettingConstants.MachineException.COUNTWARING.code,"",msg);
-                   if(isUpdate){
-                       vacMachineMapper.updateNullById(record);
-                   }
+                    msg = String.format("仓位：%s,系统数据已经清空，检测到还有药品，添加：疫苗名称：%s，数量：%s，效期：%s",record.getBoxNo(),record.getProductName(),num,record.getExpiredAt());
+                    log.info(msg);
+                    vacMachineExceptionService.sendException(SettingConstants.MachineException.COUNTWARING.code,"",msg);
+                    if(isUpdate){
+                        vacMachineMapper.updateNullById(record);
+                    }
                 }else if(num>2) {
-                       msg =  String.format("仓位：%s,空仓！传感器数据误差太大，空仓检测超过2只",record.getBoxNo());
-                       log.error(msg);
-                       vacMachineExceptionService.sendException(SettingConstants.MachineException.COUNTWARING.code,"",msg);
+                    msg =  String.format("仓位：%s,空仓！传感器数据误差太大，空仓检测超过2只",record.getBoxNo());
+                    log.error(msg);
+                    vacMachineExceptionService.sendException(SettingConstants.MachineException.COUNTWARING.code,"",msg);
                 }else {
                     log.info("仓位：{} 为空仓",record.getBoxNo());
                 }
@@ -1457,40 +1500,69 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
                     numList.add(num);
                     boolean flag= false;
                     //移动一下重新测距
-                    int count =50*less;
-                    for(int i=1;i<less;i++){
-                        if(record.getCountX()-count<0){
-                            continue;
-                        }
-                        count =count-50;
-                        disNum = moveInventoryDis(record.getCountX()-count,record.getCountZ(),configSetting);
-
-                        if(disNum==null){
-                            continue;
-                        }
-                        num =  getInventoryNum(disNum,bank,record.getProductNo());
-                        if(num==record.getVaccineNum()){
-                            flag =true;
-                            break;
-                        }
-                        numList.add(num);
-                    }
-
-                    if(!flag){
-                        count=0;
-                        //移动一下重新测距
-                        for(int i=1;i<add;i++){
-                            count =count+50;
-                            disNum = moveInventoryDis(record.getCountX()+count,record.getCountZ(),configSetting);
-                            if(disNum==null){
+                    if (isPlcMode) {
+                        for (int i = 1; i <= less; i++) {
+                            disNum = moveInventoryDisPlc(record.getLineNum(), record.getPositionNum(), -i,configSetting,record.getBoxNo());
+                            if (disNum == null) {
                                 continue;
                             }
-                            num =  getInventoryNum(disNum,bank,record.getProductNo());
-                            if(num==record.getVaccineNum()){
-                                flag =true;
+                            num = getInventoryNum(disNum, bank, record.getProductNo());
+                            if (num == record.getVaccineNum()) {
+                                flag = true;
                                 break;
                             }
                             numList.add(num);
+                        }
+                    } else {
+                        int count = 50 * less;
+                        for (int i = 1; i < less; i++) {
+                            if (record.getCountX() - count < 0) {
+                                continue;
+                            }
+                            count = count - 50;
+                            disNum = moveInventoryDis(record.getCountX() - count, record.getCountZ(), configSetting);
+                            if (disNum == null) {
+                                continue;
+                            }
+                            num = getInventoryNum(disNum, bank, record.getProductNo());
+                            if (num == record.getVaccineNum()) {
+                                flag = true;
+                                break;
+                            }
+                            numList.add(num);
+                        }
+                    }
+
+                    if (!flag) {
+                        if (isPlcMode) {
+                            for (int i = 1; i <= add; i++) {
+                                disNum = moveInventoryDisPlc(record.getLineNum(), record.getPositionNum(), i,configSetting,record.getBoxNo());
+                                if (disNum == null) {
+                                    continue;
+                                }
+                                num = getInventoryNum(disNum, bank, record.getProductNo());
+                                if (num == record.getVaccineNum()) {
+                                    flag = true;
+                                    break;
+                                }
+                                numList.add(num);
+                            }
+                        } else {
+                            int count = 0;
+                            //移动一下重新测距
+                            for (int i = 1; i < add; i++) {
+                                count = count + 50;
+                                disNum = moveInventoryDis(record.getCountX() + count, record.getCountZ(), configSetting);
+                                if (disNum == null) {
+                                    continue;
+                                }
+                                num = getInventoryNum(disNum, bank, record.getProductNo());
+                                if (num == record.getVaccineNum()) {
+                                    flag = true;
+                                    break;
+                                }
+                                numList.add(num);
+                            }
                         }
                     }
 
@@ -1549,14 +1621,17 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
             log.info("==============================================测距结束=================================================");
         }
         //回到原位置
-        ConfigData configData = configFunction.getAutoDrugConfigData();
-        sendDrugFunction.moveHandServoInit(configData);
+        if (!isPlcMode) {
+            ConfigData configData = configFunction.getAutoDrugConfigData();
+            sendDrugFunction.moveHandServoInit(configData);
+        }
         valueOperations.set(RedisKeyConstant.DRUG_INVENTORY_START,"false");
         return Result.success();
     }
 
     @Override
     public Result machineInventoryError() throws Exception {
+
         log.info("=====================异常清理盘苗================================");
         //拿到异常处理的数据
         List<String> boxNoList = vacMachineExceptionService.getExceptionBoxNoListByError();
@@ -1564,10 +1639,12 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
         request.setBoxNoList(boxNoList);
         machineInventoryCount(request);
         return Result.success(request);
+
     }
 
 
     private Integer moveInventoryDis(Integer x, Integer z, ConfigSetting configSetting) throws IOException {
+
         //机械手走测距位置
         sendDrugFunction.moveHandServo(x,z);
         VacUntil.sleep(1000);
@@ -1590,10 +1667,71 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
 
     }
 
+    /**
+     * PLC模式：A柜盘苗测距（发送PLC指令+等待完成+返回距离）
+     *
+     * @param lineNum A柜层号 (1-10)
+     * @param positionNum A柜序号 (1-24)
+     * @param offset 偏移量 (1mm单位, 上下仓±3mm保护)
+     * @return 距离值(Integer), 超时或异常返回null
+     */
+    private Integer moveInventoryDisPlc(Integer lineNum, Integer positionNum, Integer offset, ConfigSetting configSetting,String boxNo) {
+        try {
+            boolean flag = false;
+            //复位盘苗完成标志，确认已清除后再启动盘苗
+            long inventoryDeadline = System.currentTimeMillis() + 5_000;
+            while (System.currentTimeMillis() < inventoryDeadline) {
+                if ("false".equals(valueOperations.get(RedisKeyConstant.statusWord3.A_INVENTORY_DONE))) {
+                    flag = true;
+                    break;
+                }
+            }
+            if(!flag){
+                String msg = "[PLC] "+boxNo+" 库存盘点PLC盘苗启动超时";
+                log.error(msg);
+            }
+
+            plcSendService.sendACabinetInventoryStart();
+            VacUntil.sleep(200);
+            //启动PLC盘苗
+            plcDispensingFunction.plcInventory(lineNum, positionNum, offset);
+
+            //等待PLC盘苗完成（最多等10秒，100ms×100）
+            long deadline = System.currentTimeMillis() + 8_000;
+            while (System.currentTimeMillis() < deadline) {
+                //如果盘苗完成
+                if (!"0".equals(valueOperations.get(RedisKeyConstant.statusWord3.A_INVENTORY_DONE))) {
+                    String distanceStr = valueOperations.get(RedisKeyConstant.PLC_INVENTORY_DISTANCE);
+                    if (distanceStr != null && !distanceStr.isEmpty()) {
+                        Integer disNum = Integer.parseInt(distanceStr);
+                        //距离为0说明PLC还没读到数据，继续等下一轮
+                        if (disNum == 0) {
+                            continue;
+                        }
+                        log.info("[PLC] 盘苗测距: 层={} 序号={} 距离={} 偏移={} ", lineNum, positionNum, disNum, configSetting.getInventoryCountValue());
+                        VacUntil.sleep(200);
+                        disNum = disNum - configSetting.getInventoryCountValue();
+                        log.info("=====库存盘点读取距离：{}",disNum);
+                        VacUntil.sleep(1000);
+                        return disNum;
+                    }
+                    //盘苗完成但距离还没写入，继续等下一轮
+                }
+            }
+            String msg = "[PLC] "+boxNo+" 库存盘点PLC盘苗超时或异常";
+            log.error(msg);
+
+            vacMachineExceptionService.sendException(SettingConstants.MachineException.COUNTWARING.code, "", msg);
+            return null;
+        } finally {
+        }
+    }
+
 
     private Integer getInventoryNum(Integer disNum ,Integer bank,String productNO){
         VacDrug vacDrug = vacDrugService.vacDrugGetByproductNo(productNO);
         int vacLong = vacDrug.getVaccineLong();
+        log.info("测距距离：{}",disNum);
         log.info("疫苗长度：{}",vacDrug.getVaccineLong());
         log.info("相差距离：{}",bank-disNum);
         double len = bank - disNum;
@@ -1616,9 +1754,119 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
 
     }
 
+    private boolean isPlcReturnAllowed() {
+        return "true".equals(valueOperations.get(RedisKeyConstant.statusWord3.A_RETURN_ALLOWED))
+                && !"true".equals(valueOperations.get(RedisKeyConstant.statusWord3.A_RETURN_RUNNING))
+                && !"true".equals(valueOperations.get(RedisKeyConstant.statusWord3.A_RETURN_DONE));
+    }
+
+    private boolean waitPlcReturnAllowed(long timeoutMillis) {
+        long startTime = System.currentTimeMillis();
+        while (!isPlcReturnAllowed()) {
+            if (System.currentTimeMillis() - startTime > timeoutMillis) {
+                return false;
+            }
+            VacUntil.sleep(200);
+        }
+        return true;
+    }
+
+    private Result autoBackVaccineByPlc(VacMachineRequest request) {
+        if (plcSendService == null) {
+            return Result.fail("PLC退苗服务未启用");
+        }
+        if ("true".equals(valueOperations.get(RedisKeyConstant.DRUG_RETURN))) {
+            return Result.fail("正在退苗，不能重复退苗");
+        }
+        if ("true".equals(valueOperations.get(RedisKeyConstant.statusWord3.A_RETURN_RUNNING))) {
+            return Result.fail("PLC正在退苗，不能重复下发退苗任务");
+        }
+        if (!"true".equals(valueOperations.get(RedisKeyConstant.statusWord3.A_RETURN_ALLOWED))) {
+            return Result.fail("PLC当前不允许退苗");
+        }
+
+        ConfigSendData configSendData = configFunction.getSendDrugConfigData();
+        LambdaQueryWrapper<VacMachine> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VacMachine::getDeleted, 0)
+                .eq(VacMachine::getProductNo, request.getProductNo())
+                .eq(VacMachine::getExpiredAt, request.getExpiredAt())
+                .orderByAsc(VacMachine::getBoxNo);
+        if (!request.getBackAll()) {
+            queryWrapper.eq(VacMachine::getBoxNo, request.getBoxNo());
+        }
+
+        List<VacMachine> vacMachineList = vacMachineMapper.selectList(queryWrapper);
+        if (vacMachineList.isEmpty()) {
+            return Result.fail("未找到需要退回的疫苗仓位");
+        }
+        if (configSendData.getReturnWorkNum() == null) {
+            return Result.fail("未配置退苗工作台");
+        }
+
+        valueOperations.set(RedisKeyConstant.DRUG_RETURN, "true");
+        try {
+            for (VacMachine data : vacMachineList) {
+                if (!waitPlcReturnAllowed(300000)) {
+                    return Result.fail("等待PLC允许退苗超时");
+                }
+                if (data.getLineNum() == null || data.getPositionNum() == null
+                        || data.getVaccineNum() == null || data.getVaccineNum() < 0) {
+                    return Result.fail("退苗仓位数据不完整");
+                }
+
+                int returnTimes = data.getVaccineNum() + 1;
+                log.info("[PLC] A柜退苗 | 工作台={} | 层号={} | 序号={} | 次数={} | 仓位={}",
+                        configSendData.getReturnWorkNum(), data.getLineNum(),
+                        data.getPositionNum(), returnTimes, data.getBoxNo());
+                valueOperations.set(RedisKeyConstant.PLC_RETURN_DONE, "false");
+                plcSendService.sendACabinetReturn(
+                        configSendData.getReturnWorkNum(), data.getLineNum(),
+                        data.getPositionNum(), returnTimes);
+
+                long timeout = System.currentTimeMillis();
+                while (!"true".equals(valueOperations.get(RedisKeyConstant.PLC_RETURN_DONE))) {
+                    if (System.currentTimeMillis() - timeout > 300000) {
+                        return Result.fail("PLC退苗完成等待超时");
+                    }
+                    VacUntil.sleep(200);
+                }
+                valueOperations.set(RedisKeyConstant.PLC_RETURN_DONE, "false");
+                data.setVaccineId(null);
+                data.setProductName(null);
+                data.setProductNo(null);
+                data.setVaccineNum(null);
+                data.setVaccineUseNum(null);
+                data.setExpiredAt(null);
+                data.setBatchNo(null);
+                data.setStatus(1);
+                vacMachineMapper.updateNullById(data);
+                log.info("[PLC] A柜退苗完成，已清空仓位数据 | 仓位={}", data.getBoxNo());
+            }
+            return Result.success();
+        } finally {
+            valueOperations.set(RedisKeyConstant.DRUG_RETURN, "false");
+        }
+    }
+
     @Override
     public Result autoBackVaccine(VacMachineRequest request) throws ExecutionException, InterruptedException {
+        if (request == null || request.getBackAll() == null
+                || request.getProductNo() == null || request.getExpiredAt() == null) {
+            return Result.fail("退苗参数不完整");
+        }
+        if (!request.getBackAll() && request.getBoxNo() == null) {
+            return Result.fail("单仓退苗必须指定仓位");
+        }
+        if (plcEnabled == nettyEnabled) {
+            return Result.fail(plcEnabled ? "PLC和Netty不能同时启用" : "PLC和Netty不能同时关闭");
+        }
+        if (plcEnabled) {
+            return autoBackVaccineByPlc(request);
+        }
 
+        ConfigSendData configSendData = configFunction.getSendDrugConfigData();
+        Integer ioTime = configSendData.getIoWaitTime();
+        Integer lastIoAddTime = configSendData.getLastIOAddTime();
         String isDrp = valueOperations.get(RedisKeyConstant.DRUG_RUN_START);
         String isErrorClean = valueOperations.get(RedisKeyConstant.DRUG_ERROR_START);
         if("true".equals(isDrp)){
@@ -1628,14 +1876,23 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
             return Result.fail("正在异常清理！不能退苗");
         }
 
+        String isInventoryStart = valueOperations.get(RedisKeyConstant.DRUG_INVENTORY_START);
+        if("true".equals(isInventoryStart)){
+            String msg = "正在库存盘点！";
+            log.warn(msg);
+            throw new ServiceException(msg);
+        }
+
+
+
         valueOperations.set(RedisKeyConstant.DRUG_RETURN,"true");
         while (true){
+
             //查找该疫苗的信息  同一个效期
             LambdaQueryWrapper<VacMachine> lambdaQueryWrapper = new LambdaQueryWrapper<>();
             lambdaQueryWrapper.eq(VacMachine::getDeleted,0)
                     .eq(VacMachine::getProductNo, request.getProductNo())
                     .eq(VacMachine::getExpiredAt, request.getExpiredAt())
-
                     .orderByAsc(VacMachine::getBoxNo);
 
             if(!request.getBackAll()){
@@ -1651,59 +1908,80 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
                 Integer beltNum =  (int) Math.ceil((double) data.getLineNum() / 2);
 
                 //掉药
-                dispensingFunction.dropDrug(data.getLineNum(),data.getPositionNum(),SettingConstants.IO_DROP_WAIT_TIME,data.getProductNo());
+                dispensingFunction.dropDrug(data.getLineNum(),data.getPositionNum(),ioTime,data.getProductNo(),data.getBoxNo(),lastIoAddTime);
                 //动皮带 到传感器接收到
 
                 //抬升去当前皮带 工作台默认为1
                 dispensingFunction.returnDrugGoToBelt(beltNum,false);
-
-                //发送小皮带运动 直到传感器触发 再暂停 指令
-                dispensingFunction.speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.SPEED,CabinetConstants.CabinetAServoStatus.BELT_STOP,50);
-
-                VacUntil.sleep(100);
-                //速度模式将药从皮带掉到光栅传感器
-                dispensingFunction.speedServo(beltNum,CabinetConstants.CabinetAServoCommand.SPEED,CabinetConstants.CabinetAServoStatus.COROTATION,500);
-
-                String sensorIsPut;
-                //等待掉药时间
-                long timeout = System.currentTimeMillis();
-                //判断是否掉药成功
-                boolean dropFlag = false;
-                valueOperations.set(RedisKeyConstant.sensor.BELT_SENSOR,CabinetConstants.SensorStatus.RESET.code);
-                while ((System.currentTimeMillis() - timeout) < SettingConstants.DRUG_BELT_WAIT_TIME){
-
-                    dispensingFunction.intPut(CabinetConstants.InPutCommand.QUERY,SettingConstants.SENSOR_CABINET_A_MOVE_BELT_NUM);
-                    VacUntil.sleep(500);
-                    //判断光栅传感器是否被触发
-                    sensorIsPut = valueOperations.get(RedisKeyConstant.sensor.BELT_SENSOR);
-                    assert sensorIsPut != null;
-
-                    if(sensorIsPut.equals(CabinetConstants.SensorStatus.NORMAL.code)){
-                        dropFlag = true;
-                        //皮带停止
-                        dispensingFunction.speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.PAUSE,CabinetConstants.CabinetAServoStatus.ZERO,50);
-                        break;
-                    }
-                }
-
-                //5层皮带伺服停止
-                dispensingFunction.speedServo(beltNum,CabinetConstants.CabinetAServoCommand.PAUSE,CabinetConstants.CabinetAServoStatus.ZERO,200);
-                VacUntil.sleep(200);
+                RedisDrugListData drugListData = new RedisDrugListData();
+                drugListData.setLineNum(data.getLineNum());
+                drugListData.setBeltNum(beltNum);
+                drugListData.setProductNo(data.getProductNo());
+                drugListData.setPositionNum(data.getPositionNum());
+                drugListData.setWorkbenchNum(configSendData.getReturnWorkNum());
+                Boolean dropFlag = dispensingFunction.stopDrugToLift( beltNum, configSendData,drugListData, configSendData.getIoWaitTime());
 
                 //传送小皮带回原位
                 dispensingFunction.returnDrugGoToBelt(beltNum,true);
 
-                //运动伺服 使疫苗落到运输皮带上
-                dispensingFunction.speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.SPEED,CabinetConstants.CabinetAServoStatus.COROTATION,150);
-                //C柜伺服先运动2秒 防止药盒夹扁
+//                //运动伺服 使疫苗落到运输皮带上
+//                dispensingFunction.speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.SPEED,CabinetConstants.CabinetAServoStatus.COROTATION,150);
+//                //C柜伺服先运动2秒 防止药盒夹扁
                 dispensingFunction.speedServoC(1,CabinetConstants.CabinetCServoCommand.SPEED,CabinetConstants.CabinetCServoStatus.COROTATION,150);
                 VacUntil.sleep(2000);
                 dispensingFunction.speedServoC(1,CabinetConstants.CabinetCServoCommand.PAUSE,CabinetConstants.CabinetCServoStatus.ZERO,150);
+                if("true".equals(configSendData.getHaveBlank())){
+                    //防止异常情况下清苗 皮带不动 再执行一次小皮带伺服运动指令
+                    dispensingFunction.speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.SPEED,CabinetConstants.CabinetAServoStatus.COROTATION,configSendData.getSmallBeltGoCSpeed());
+                    VacUntil.sleep(200);
+
+                    Thread thread = new Thread(() -> dispensingFunction.openLiftBlank(configSendData.getHaveBlankTime()));
+                    thread.start();
+                }
+
+                if("false".equals(configSendData.getHaveBlank())){
+                    //运动伺服 使疫苗落到运输皮带上
+                    dispensingFunction.speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.SPEED,CabinetConstants.CabinetAServoStatus.COROTATION,configSendData.getSmallBeltGoCSpeed());
+                }
+                int count =0;
+                long timeout = System.currentTimeMillis();
+
+                //等待药从小皮带掉到运输皮带
+                while ((System.currentTimeMillis() - timeout) < SettingConstants.WORK_DRUG_BELT_WAIT_TIME){
+
+                    dispensingFunction.intPut(CabinetConstants.InPutCommand.QUERY,SettingConstants.SENSOR_CABINET_A_MOVE_BELT_NUM);
+                    VacUntil.sleep(200);
+
+                    //判断光栅传感器是否被触发
+                    String sensorIsPut = valueOperations.get(RedisKeyConstant.sensor.BELT_SENSOR);
+                    String liftBlankIsOen = valueOperations.get(RedisKeyConstant.CABINET_A_LIFT_BLANK_IS_OPEN);
+                    assert sensorIsPut != null;
+                    if(sensorIsPut.equals(CabinetConstants.SensorStatus.RESET.code)){
+                        if(count>=3 && "true".equals(liftBlankIsOen)){
+                            break;
+                        }
+                        count++;
+                    }
+                }
+
+                VacUntil.sleep(300);
+                //电磁铁版本
+                dispensingFunction.speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.PAUSE,CabinetConstants.CabinetAServoStatus.ZERO,configSendData.getSmallBeltGoCSpeed());
+
+                //关闭挡片挡板
+                if("true".equals(configSendData.getHaveBlank())){
+                    dispensingFunction.closeLiftBlank(configSendData.getHaveBlankTime());
+                }
+
+                //光栅皮带不在小皮带上
+                valueOperations.set(RedisKeyConstant.CABINET_A_GS_BELT_HAVE_DRUG,"false");
 
                 //掉药数据 加入数据库
-                RedisDrugListData drugListData = new RedisDrugListData();
+                drugListData = new RedisDrugListData();
                 drugListData.setMachineId(data.getId());
                 drugListData.setWorkbenchNum(1);
+                drugListData.setWorkbenchNo("S01");
+                drugListData.setWorkbenchName("接种台1");
                 drugListData.setMachineNo(data.getBoxNo());
                 drugListData.setProductName(data.getProductName());
 
@@ -1727,7 +2005,7 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
 
         List<VacMachine> vacMachineList = vacMachineMapper.selectList(new LambdaQueryWrapper<VacMachine>().eq(VacMachine::getDeleted,0)
                 .isNotNull(VacMachine::getVaccineId)
-                        .gt(VacMachine::getVaccineUseNum,0)
+                .gt(VacMachine::getVaccineUseNum,0)
                 .in(VacMachine::getStatus, 1, 2)
                 .eq(VacMachine::getLineNum,lineNum).orderByDesc(VacMachine::getVaccineUseNum));
 
@@ -1806,6 +2084,7 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
 
     @Override
     public void handAutoX(OtherRequest request) {
+
         List<VacMachine> vacMachineList = vacMachineMapper.selectList(new LambdaQueryWrapper<VacMachine>()
                 .eq(VacMachine::getDeleted,0)
                 .eq(VacMachine::getLineNum,request.getHandLine()).orderByAsc(VacMachine::getBoxNo));
@@ -1823,14 +2102,20 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
                 currentAutoX += (vacBoxSpec.getLength() + 6)*10; // 更新 currentAutoX
             }
         }
+
     }
 
     @Override
     public List<SendBtnData> getSendBtnMSg() {
+
         List<SendBtnData> sendBtnDataList = new ArrayList<>();
         //获取所有信息
         List<InventoryResponse> inventoryResponseList = vacMachineMapper.inventoryList(null);
         for(InventoryResponse record:inventoryResponseList){
+            //筛选 status!=0 才能展示
+            if (record.getStatus() == null || record.getStatus() == 0) {
+                continue;
+            }
             SendBtnData sendBtnData = new SendBtnData();
             sendBtnData.setTotalNum(record.getTotalVaccineNum());
             sendBtnData.setProductName(getSendBtnProductName(record.getProductName()));
@@ -1840,18 +2125,19 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
             sendBtnDataList.add(sendBtnData);
         }
         return sendBtnDataList;
+
     }
 
     @Override
     public void machineSendDrugAlone(VacGetVaccine vacGetVaccine, UserBean userBean) throws Exception {
+
         vacGetVaccine.setTaskId(String.valueOf(UUID.randomUUID()));
-        //请求发起人
         vacGetVaccine.setRequestNo(userBean.getUserName());
-        ConfigSetting configSetting = configFunction.getSettingConfigData();
-        if("true".equals(configSetting.getIsIoDrop())){
+
+        if (plcDispensingFunction != null) {
+            plcDispensingFunction.plcAddDrugList(vacGetVaccine);
+        } else {
             dispensingFunction.addDrugList(vacGetVaccine);
-        }else {
-            dispensingHandFunction.dropHandDrugs();
         }
 
     }
@@ -1908,6 +2194,7 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
 
     @Override
     public void test2() {
+
         ConfigSendData configSendData = configFunction.getSendDrugConfigData();
         CabinetAServoRequest request = new CabinetAServoRequest();
         request.setWorkMode(CabinetConstants.Cabinet.CAB_A);
@@ -1923,10 +2210,12 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
             cabinetAService.servo(request);
             VacUntil.sleep(5000);
         }
+
     }
 
     @Override
     public void test3() {
+
         DropRequest dropRequest = new DropRequest();
         dropRequest.setWorkMode(CabinetConstants.Cabinet.CAB_A);
         dropRequest.setMode(CabinetConstants.IOMode.AUTO);
@@ -1949,6 +2238,84 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
         }
     }
 
+    /**
+     * PLC异常清苗任务号(寄存器71)规划：
+     * 0 全部任务(1～7按顺序执行) | 1～5 单根A柜导轨 | 6 送药轨道 | 7 轨道底部清苗
+     * 8～9 预留 | 10～35 A柜多导轨组合(所选导轨同步运行)
+     */
+    private int getPlcMachineCleanTaskNum(List<Integer> errorList) {
+        //所有轨道 → 0
+        if (errorList.contains(6)) {
+            return 0;
+        }
+        //送药轨道 → 6
+        if (errorList.contains(7) || errorList.contains(101) || errorList.contains(102)) {
+            return 6;
+        }
+        //轨道底部清苗 → 7
+        if (errorList.contains(8) || errorList.contains(103) || errorList.contains(104)) {
+            return 7;
+        }
+        //提取A柜导轨1～5(去重、升序)
+        List<Integer> tracks = new ArrayList<>();
+        for (Integer errorNum : errorList) {
+            if (errorNum != null && errorNum >= 1 && errorNum <= 5 && !tracks.contains(errorNum)) {
+                tracks.add(errorNum);
+            }
+        }
+        if (tracks.isEmpty()) {
+            return 0;
+        }
+        Collections.sort(tracks);
+        if (tracks.size() == 1) {
+            return tracks.get(0);
+        }
+        //多导轨组合 → 任务号10～35（固定编号表查表映射，非公式推导）
+        StringBuilder combinationKey = new StringBuilder();
+        for (int i = 0; i < tracks.size(); i++) {
+            if (i > 0) {
+                combinationKey.append(',');
+            }
+            combinationKey.append(tracks.get(i));
+        }
+        Integer taskNum = TRACK_COMBINATION_TASK_NUM.get(combinationKey.toString());
+        return taskNum != null ? taskNum : 0;
+    }
+
+    /**
+     * A柜多导轨组合 → 任务号映射表（寄存器71，任务号10～35）
+     */
+    private static final Map<String, Integer> TRACK_COMBINATION_TASK_NUM = new HashMap<>();
+
+    static {
+        TRACK_COMBINATION_TASK_NUM.put("1,2", 10);
+        TRACK_COMBINATION_TASK_NUM.put("1,3", 11);
+        TRACK_COMBINATION_TASK_NUM.put("1,4", 12);
+        TRACK_COMBINATION_TASK_NUM.put("1,5", 13);
+        TRACK_COMBINATION_TASK_NUM.put("2,3", 14);
+        TRACK_COMBINATION_TASK_NUM.put("2,4", 15);
+        TRACK_COMBINATION_TASK_NUM.put("2,5", 16);
+        TRACK_COMBINATION_TASK_NUM.put("3,4", 17);
+        TRACK_COMBINATION_TASK_NUM.put("3,5", 18);
+        TRACK_COMBINATION_TASK_NUM.put("4,5", 19);
+        TRACK_COMBINATION_TASK_NUM.put("1,2,3", 20);
+        TRACK_COMBINATION_TASK_NUM.put("1,2,4", 21);
+        TRACK_COMBINATION_TASK_NUM.put("1,2,5", 22);
+        TRACK_COMBINATION_TASK_NUM.put("1,3,4", 23);
+        TRACK_COMBINATION_TASK_NUM.put("1,3,5", 24);
+        TRACK_COMBINATION_TASK_NUM.put("1,4,5", 25);
+        TRACK_COMBINATION_TASK_NUM.put("2,3,4", 26);
+        TRACK_COMBINATION_TASK_NUM.put("2,3,5", 27);
+        TRACK_COMBINATION_TASK_NUM.put("2,4,5", 28);
+        TRACK_COMBINATION_TASK_NUM.put("3,4,5", 29);
+        TRACK_COMBINATION_TASK_NUM.put("1,2,3,4", 30);
+        TRACK_COMBINATION_TASK_NUM.put("1,2,3,5", 31);
+        TRACK_COMBINATION_TASK_NUM.put("1,2,4,5", 32);
+        TRACK_COMBINATION_TASK_NUM.put("1,3,4,5", 33);
+        TRACK_COMBINATION_TASK_NUM.put("2,3,4,5", 34);
+        TRACK_COMBINATION_TASK_NUM.put("1,2,3,4,5", 35);
+    }
+
     @Override
     public Result machineClean(IdListRequest request) {
 
@@ -1965,9 +2332,36 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
             return Result.fail("正在发苗！不能异常清除");
         }
 
-        valueOperations.set(RedisKeyConstant.DRUG_ERROR_START,"true");
+        if(plcEnabled == nettyEnabled){
+            return Result.fail(plcEnabled ? "PLC和Netty不能同时启用" : "PLC和Netty不能同时关闭");
+        }
+
         List<Integer> errorList = request.getErrorList();
+        if(errorList == null || errorList.isEmpty()){
+            return Result.fail("请选择需要异常清除的位置");
+        }
         ConfigSendData configSendData = configFunction.getSendDrugConfigData();
+        if(plcEnabled){
+            if(plcSendService == null){
+                return Result.fail("PLC服务未初始化，不能异常清除");
+            }
+            int taskNum = getPlcMachineCleanTaskNum(errorList);
+            //异常清苗送苗目的地 = 系统参数"异常清苗工作台"(ERROR_WORKBENCH_NUM)
+            Integer plcWorkNum = configSendData.getErrorWorkbenchNum();
+            if(plcWorkNum == null || plcWorkNum < 0 || plcWorkNum > 6){
+                return Result.fail("异常清苗工作台配置错误");
+            }
+            //送药轨道(任务号6)时，若异常清苗工作台为0，回退用退苗接种台，仍为0则默认1
+            if(taskNum == 6 && plcWorkNum == 0){
+                Integer returnWorkNum = configSendData.getReturnWorkNum();
+                plcWorkNum = (returnWorkNum != null && returnWorkNum > 0) ? returnWorkNum : 1;
+            }
+            valueOperations.set(RedisKeyConstant.DRUG_ERROR_START, "true");
+            plcSendService.sendMachineClean(taskNum, plcWorkNum);
+            return Result.success();
+        }
+
+        valueOperations.set(RedisKeyConstant.DRUG_ERROR_START,"true");
         ConfigSetting configSetting = configFunction.getSettingConfigData();
         int workNum = configSendData.getReturnWorkNum();
         RedisDrugListData drugListData = new RedisDrugListData();
@@ -1991,7 +2385,7 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
             valueOperations.set(RedisKeyConstant.DRUG_ERROR_START,"false");
             return Result.success();
 
-            }else if(errorList.size()==1&&errorList.contains(104)){
+        }else if(errorList.size()==1&&errorList.contains(104)){
             //第二条轨道退苗
             returnDrugWarn(configSendData.getReturnWorkNumTwo());
             log.info("疫苗清理异常结束");
@@ -2107,7 +2501,7 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
                                 log.info("异常清除已经停止");
                                 return Result.success("异常清除已经停止");
                             }
-                            dispensingFunction.moveBeltToC(drugListData,configSetting,configSendData);
+                            dispensingFunction.moveBeltToC(drugListData,configSetting,configSendData,false);
                         }else {
                             dispensingFunction.speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.PAUSE,CabinetConstants.CabinetAServoStatus.ZERO,150);
                             //如果没有检测到传感器有药 皮带清空
@@ -2137,7 +2531,6 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
 
         log.info("疫苗清理异常结束");
         valueOperations.set(RedisKeyConstant.DRUG_ERROR_START,"false");
-
         return Result.success();
     }
 
@@ -2171,12 +2564,42 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
         if(vacDrug==null || vacDrug.getVaccineLong() == null){
             return  times;
         }
+
+        if(vacDrug.getIoTime()!=null){
+            return vacDrug.getIoTime();
+        }
+
+
         VacIo vacIo = vacIoService.getVacIoByLen(vacDrug.getVaccineLong());
         if(vacIo == null){
             return times;
         }else {
             return vacIo.getIoTime();
         }
+    }
+
+    @Override
+    public StepDisConfig getStepDisByProduct(String productNo) {
+        //1. 查找 VacDrug
+        VacDrug vacDrug = vacDrugService.vacDrugGetByproductNo(productNo);
+        if (vacDrug != null) {
+            //2. VacDrug 中 stepExtendDis 和 stepLiftDis 都不为 null → 直接返回
+            if (vacDrug.getStepExtendDis() != null && vacDrug.getStepLiftDis() != null) {
+                return new StepDisConfig(vacDrug.getStepExtendDis(), vacDrug.getStepLiftDis());
+            }
+        }
+
+        //3. 根据长度查 VacHandle 区间
+        if (vacDrug != null && vacDrug.getVaccineLong() != null) {
+            VacHandle vacHandle = vacHandleService.getVacHandleByLen(vacDrug.getVaccineLong());
+            if (vacHandle != null && vacHandle.getStepExtendDis() != null && vacHandle.getStepLiftDis() != null) {
+                return new StepDisConfig(vacHandle.getStepExtendDis(), vacHandle.getStepLiftDis());
+            }
+        }
+
+        //4. 默认值
+        ConfigSendData configSendData = configFunction.getSendDrugConfigData();
+        return new StepDisConfig(configSendData.getHandUpDistance(), configSendData.getHandDropStepDis());
     }
 
     public static boolean isValidBoxSequence(String startBoxNo, String endBoxNo) {
@@ -2218,7 +2641,7 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
         //根据层数和起始仓位获取药仓数据
         LambdaQueryWrapper<VacMachine> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(VacMachine::getLineNum,data.getLineNum())
-                    .eq(VacMachine::getDeleted,0)
+                .eq(VacMachine::getDeleted,0)
                 .ge(VacMachine::getBoxNo,startBoxNo)
                 .le(VacMachine::getBoxNo,endBoxNo)
                 .orderByAsc(VacMachine::getBoxNo);
@@ -2303,6 +2726,7 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
         ConfigSendData configSendData = configFunction.getSendDrugConfigData();
 
         while (true){
+
             //输出
             OutPutRequest outPutRequest = new OutPutRequest();
             outPutRequest.setWorkMode(CabinetConstants.Cabinet.CAB_A);
@@ -2316,22 +2740,29 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
             VacUntil.sleep(2000);
             outPutRequest.setCommand(CabinetConstants.OutPutCommand.NOT_OUTPUT);
             cabinetAService.outPut(outPutRequest);
-            //关闭挡片
 
 
+            //跑6号皮带
+//            dispensingFunction.speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.SPEED,CabinetConstants.CabinetAServoStatus.BELT_STOP,configSendData.getSmallBeltStopSpeed());
+            dispensingFunction.speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.SPEED,CabinetConstants.CabinetAServoStatus.COROTATION,configSendData.getSmallBeltGoCSpeed());
 
 
-
-            dispensingFunction.speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.SPEED,CabinetConstants.CabinetAServoStatus.BELT_STOP,configSendData.getSmallBeltStopSpeed());
             int countSend = 0;
             String sensorIsPut;
+
+            valueOperations.set(RedisKeyConstant.sensor.BELT_SENSOR,CabinetConstants.SensorStatus.RESET.code);
+            VacUntil.sleep(200);
+
+
             //等待掉药时间
             long timeout = System.currentTimeMillis();
+
+
             //判断是否掉药成功
             boolean dropFlag = false;
             while ((System.currentTimeMillis() - timeout) < SettingConstants.DRUG_BELT_WAIT_TIME){
                 dispensingFunction.intPut(CabinetConstants.InPutCommand.QUERY,SettingConstants.SENSOR_CABINET_A_MOVE_BELT_NUM);
-                VacUntil.sleep(200);
+                VacUntil.sleep(400);
 
                 //判断光栅传感器是否被触发
                 sensorIsPut = valueOperations.get(RedisKeyConstant.sensor.BELT_SENSOR);
@@ -2347,6 +2778,7 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
 
             }
 
+
             if(!dropFlag){
                 //如果规定时间后，还是没有收到光栅触发的信号，电磁铁出问题 禁用该仓位
                 String errorMsg =  String.format("没有检测到药品");
@@ -2358,15 +2790,87 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
             outPutRequest.setCommand(CabinetConstants.OutPutCommand.OUTPUT);
             cabinetAService.outPut(outPutRequest);
 
-            dispensingFunction.
-            //运动伺服 使疫苗落到运输皮带上
-            speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.SPEED,CabinetConstants.CabinetAServoStatus.COROTATION,configSendData.getSmallBeltGoCSpeed());
+
+//            //运动伺服 使疫苗落到运输皮带上
+//            dispensingFunction.speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.SPEED,CabinetConstants.CabinetAServoStatus.COROTATION,configSendData.getSmallBeltGoCSpeed());
 
             VacUntil.sleep(2000);
             outPutRequest.setCommand(CabinetConstants.OutPutCommand.NOT_OUTPUT);
             cabinetAService.outPut(outPutRequest);
             VacUntil.sleep(200);
             dispensingFunction.speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.PAUSE,CabinetConstants.CabinetAServoStatus.COROTATION,configSendData.getSmallBeltGoCSpeed());
+
+
+        }
+
+    }
+
+    @Override
+    public void test5() {
+        DropRequest dropRequest = new DropRequest();
+        while (true){
+            dropRequest.setWorkMode(CabinetConstants.Cabinet.CAB_A);
+            dropRequest.setMode(CabinetConstants.IOMode.AUTO);
+            for(int i=1;i<=20;i++){
+                dropRequest.setCommand(1);
+                dropRequest.setIoNum(i);
+                dropRequest.setTimes(20);
+
+                cabinetAService.dropCommand(dropRequest);
+                VacUntil.sleep(100);
+                dropRequest.setCommand(2);
+                cabinetAService.dropCommand(dropRequest);
+                VacUntil.sleep(100);
+                dropRequest.setCommand(3);
+                cabinetAService.dropCommand(dropRequest);
+                VacUntil.sleep(100);
+
+                VacUntil.sleep(1000);
+
+
+                dropRequest.setCommand(4);
+                cabinetAService.dropCommand(dropRequest);
+                VacUntil.sleep(100);
+                dropRequest.setCommand(5);
+                cabinetAService.dropCommand(dropRequest);
+                VacUntil.sleep(100);
+                dropRequest.setCommand(6);
+                cabinetAService.dropCommand(dropRequest);
+                VacUntil.sleep(100);
+
+                VacUntil.sleep(1000);
+
+                dropRequest.setCommand(7);
+                cabinetAService.dropCommand(dropRequest);
+                VacUntil.sleep(100);
+                dropRequest.setCommand(8);
+                cabinetAService.dropCommand(dropRequest);
+                VacUntil.sleep(100);
+                dropRequest.setCommand(9);
+                cabinetAService.dropCommand(dropRequest);
+                VacUntil.sleep(100);
+
+
+                dropRequest.setCommand(10);
+                cabinetAService.dropCommand(dropRequest);
+                VacUntil.sleep(100);
+
+
+                VacUntil.sleep(1000);
+
+            }
+
+
+
+
+
+
+
+
+
+
+
+
         }
 
 
@@ -2376,8 +2880,151 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
 
 
 
+    }
+
+    @Override
+    public VacMachine getMachineByBoxNo(String boxNo) {
+        LambdaQueryWrapper<VacMachine> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VacMachine::getDeleted,0)
+                .eq(VacMachine::getBoxNo,boxNo);
+
+        List<VacMachine> vacMachineList =vacMachineMapper.selectList(queryWrapper);
+        if(!vacMachineList.isEmpty()){
+            return vacMachineList.get(0);
+        }else {
+            return null;
+        }
 
 
+
+
+    }
+
+    @Override
+    public VacMachine getMachineByLineNumAndPositionNum(Integer lineNum, Integer positionNum) {
+        LambdaQueryWrapper<VacMachine> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VacMachine::getDeleted, 0)
+                .eq(VacMachine::getLineNum, lineNum)
+                .eq(VacMachine::getPositionNum, positionNum);
+        List<VacMachine> vacMachineList = vacMachineMapper.selectList(queryWrapper);
+        return vacMachineList.isEmpty() ? null : vacMachineList.get(0);
+    }
+
+    @Override
+    public void test6() {
+
+        while (true){
+            ConfigSendData configSendData = configFunction.getSendDrugConfigData();
+            dispensingFunction.openLiftBlank(configSendData.getHaveBlankTime());
+
+            dispensingFunction.closeLiftBlank(configSendData.getHaveBlankTime());
+
+            VacUntil.sleep(1000);
+
+
+
+        }
+
+
+    }
+
+    @Override
+    public void test7() {
+        while (true){
+            boolean servoFlag  = false;
+            boolean stepFlag  = false;
+            valueOperations.set(RedisKeyConstant.handServo.Z,"false");
+            CabinetAServoRequest servoRequest = new CabinetAServoRequest();
+            servoRequest.setWorkMode(CabinetConstants.Cabinet.CAB_A);
+            servoRequest.setCommand(CabinetConstants.CabinetAServoCommand.POSITION);
+            servoRequest.setMode(8);
+            servoRequest.setStatus(CabinetConstants.CabinetAServoStatus.ZERO);
+            servoRequest.setDistance(0);
+            cabinetAService.servo(servoRequest);
+
+            long timeout = System.currentTimeMillis();
+            while ((System.currentTimeMillis() - timeout) < SettingConstants.SCAN_SERVO_WAIT_TIME) {
+
+                if("true".equals(valueOperations.get(RedisKeyConstant.handServo.Z))){
+                    servoFlag = true;
+                    break;
+                }
+                VacUntil.sleep(200);
+            }
+            if(!servoFlag){
+                log.error("伺服电机运行超时");
+                return;
+            }
+
+
+
+            //步进电机先回0
+            CabinetAStepRequest stepRequest = new CabinetAStepRequest();
+            stepRequest.setWorkMode(CabinetConstants.Cabinet.CAB_A);
+            stepRequest.setCommand(CabinetConstants.CabinetAStepCommand.POSITION);
+            stepRequest.setMode(CabinetConstants.CabinetAStepMode.CLAMP);
+            stepRequest.setStatus(CabinetConstants.CabinetAStepStatus.ZERO);
+            stepRequest.setDistance(1200);
+            cabinetAService.step(stepRequest);
+            VacUntil.sleep(100);
+            valueOperations.set(RedisKeyConstant.CABINET_A_CLAMP_STEP_STATUS,"false");
+            timeout = System.currentTimeMillis();
+            while ((System.currentTimeMillis() - timeout) < SettingConstants.SCAN_STEP_WAIT_TIME) {
+                if("true".equals(valueOperations.get(RedisKeyConstant.CABINET_A_CLAMP_STEP_STATUS))){
+                   stepFlag = true;
+                    break;
+                }
+                VacUntil.sleep(200);
+            }
+
+            if(!stepFlag){
+                log.error("步进电机超时");
+                return;
+            }
+
+
+             servoFlag  = false;
+             stepFlag  = false;
+            valueOperations.set(RedisKeyConstant.handServo.Z,"false");
+            servoRequest.setDistance(270);
+            cabinetAService.servo(servoRequest);
+
+             timeout = System.currentTimeMillis();
+            while ((System.currentTimeMillis() - timeout) < SettingConstants.SCAN_SERVO_WAIT_TIME) {
+
+                if("true".equals(valueOperations.get(RedisKeyConstant.handServo.Z))){
+                    servoFlag = true;
+                    break;
+                }
+                VacUntil.sleep(200);
+            }
+            if(!servoFlag){
+                log.error("伺服电机运行超时");
+                return;
+            }
+
+
+
+            //步进电机先回0
+            stepRequest.setDistance(0);
+            cabinetAService.step(stepRequest);
+            VacUntil.sleep(100);
+            valueOperations.set(RedisKeyConstant.CABINET_A_CLAMP_STEP_STATUS,"false");
+            timeout = System.currentTimeMillis();
+            while ((System.currentTimeMillis() - timeout) < SettingConstants.SCAN_STEP_WAIT_TIME) {
+                if("true".equals(valueOperations.get(RedisKeyConstant.CABINET_A_CLAMP_STEP_STATUS))){
+                    stepFlag = true;
+                    break;
+                }
+                VacUntil.sleep(200);
+            }
+
+            if(!stepFlag){
+                log.error("步进电机走0超时");
+                return;
+            }
+            VacUntil.sleep(1000);
+        }
 
     }
 
@@ -2700,8 +3347,30 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
 
         //禁止ACYW 小药盒上第10层
         if("81576000501".equals(productNo)){
-            queryWrapper.in(VacMachine::getLineNum, List.of(10));
-            queryWrapper.in(VacMachine::getBoxNo, Arrays.asList("A1001", "A1005", "A1010"));
+
+//            queryWrapper.in(VacMachine::getLineNum, List.of(10,8));
+
+            //拱宸桥
+//            queryWrapper.in(VacMachine::getBoxNo, Arrays.asList("A1001", "A1005", "A1010","A1020"));
+            //江南
+//            queryWrapper.in(VacMachine::getBoxNo, Arrays.asList("A1001", "A1005", "A1010","A1020"));
+            //浦沿
+//            queryWrapper.in(VacMachine::getBoxNo, Arrays.asList("A1001", "A1005", "A1010"));
+            //义乌江东
+            queryWrapper.in(VacMachine::getBoxNo, Arrays.asList("A0809", "A0812", "A0813","A0822","A1009","A1012","A1013","A1022"));
+//            清港
+//            queryWrapper.in(VacMachine::getBoxNo, List.of("A1017","A1015","A1011"));
+            //  西门
+//            queryWrapper.in(VacMachine::getBoxNo, List.of("A1001","A1005","A1010","A1020"));
+            // 望春
+//            queryWrapper.in(VacMachine::getBoxNo, List.of("A1001","A1005","A1010","A1020","A1023"));
+            // 咸祥
+//            queryWrapper.in(VacMachine::getLineNum, List.of(10));
+//            //古林
+//            queryWrapper.in(VacMachine::getBoxNo, List.of("A1001","A1005","A1010","A1020","A1023"));
+            ///首南
+//            queryWrapper.in(VacMachine::getBoxNo, List.of("A1001","A1012","A1013","A1022"));
+
             queryWrapper.orderByDesc(VacMachine::getLineNum);
 
         }else if("82926000101".equals(productNo)){
@@ -2713,7 +3382,13 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
                 queryWrapper.notIn(VacMachine::getBoxNo, Arrays.asList("A1001", "A1005", "A1010"));
             }
             queryWrapper .apply("line_num % 2 = 0");
+        }else if("01109000910".equals(productNo)){
+
+            queryWrapper.notIn(VacMachine::getLineNum, List.of(1,2));
+            queryWrapper.orderByDesc(VacMachine::getLineNum);
+
         }
+
         else {
             queryWrapper.orderByAsc(VacMachine::getLineNum);
             if (boxSepcIds != null && boxSepcIds.contains(14L)) {
@@ -2744,7 +3419,7 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
         request.setAutoZ(vacMachineData.getAutoZ());
         request.setLedNum(vacMachineData.getLedNum());
         request.setLineNum(vacMachineData.getLineNum());
-
+        request.setPositionNum(vacMachineData.getPositionNum());
         return request;
     }
 
@@ -2769,7 +3444,7 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
         request.setAutoZ(vacMachineData.getAutoZ());
         request.setLedNum(vacMachineData.getLedNum());
         request.setLineNum(vacMachineData.getLineNum());
-
+        request.setPositionNum(vacMachineData.getPositionNum());
         return request;
     }
 
@@ -2803,47 +3478,54 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
         request.setAutoZ(vacMachineData.getAutoZ());
         request.setLedNum(vacMachineData.getLedNum());
         request.setLineNum(vacMachineData.getLineNum());
+        request.setPositionNum(vacMachineData.getPositionNum());
         return request;
     }
 
 
 
-    private String  getSendBtnProductName(String productName){
-        String[] parts = productName.split("-", 4); // 最多分割成4部分
-        return parts[0] + "-" + parts[1] + "-" + parts[2];
+    private String getSendBtnProductName(String productName) {
+        if (productName == null) {
+            return "";
+        }
+        String[] parts = productName.split("-", 4);
+        if (parts.length >= 3) {
+            return parts[0] + "-" + parts[1] + "-" + parts[2];
+        }
+        return productName;
     }
 
     @Override
     public List<String> getBatchListNum(List<String> batchNoList) {
         // 创建返回结果列表
         List<String> result = new ArrayList<>();
-        
+
         if (batchNoList == null || batchNoList.isEmpty()) {
             return result;
         }
-        
+
         // 查询所有指定batchNo的vacMachine记录
         List<VacMachine> vacMachineList = vacMachineMapper.selectList(new LambdaQueryWrapper<VacMachine>()
                 .eq(VacMachine::getDeleted, 0)
                 .in(VacMachine::getBatchNo, batchNoList)
                 .isNotNull(VacMachine::getVaccineUseNum));
-        
+
         if (vacMachineList.isEmpty()) {
             return result;
         }
-        
+
         // 根据batchNo分组，求和vaccineUseNum
         Map<String, Integer> batchSumMap = vacMachineList.stream()
                 .collect(Collectors.groupingBy(
                         VacMachine::getBatchNo,
                         Collectors.summingInt(VacMachine::getVaccineUseNum)
                 ));
-        
+
         // 找到最小的总和值
         Optional<Integer> minSumOpt = batchSumMap.values().stream().min(Integer::compareTo);
         if (minSumOpt.isPresent()) {
             int minSum = minSumOpt.get();
-            
+
             // 将所有总和等于最小值的batchNo加入结果列表
             for (Map.Entry<String, Integer> entry : batchSumMap.entrySet()) {
                 if (entry.getValue() == minSum) {
@@ -2851,7 +3533,7 @@ public class VacMachineServiceImpl extends ServiceImpl<VacMachineMapper, VacMach
                 }
             }
         }
-        
+
         return result;
     }
 

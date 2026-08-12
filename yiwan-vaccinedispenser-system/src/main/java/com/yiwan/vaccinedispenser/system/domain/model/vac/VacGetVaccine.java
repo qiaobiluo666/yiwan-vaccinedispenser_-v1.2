@@ -1,6 +1,7 @@
 package com.yiwan.vaccinedispenser.system.domain.model.vac;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
 import lombok.Data;
@@ -10,6 +11,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author slh
@@ -45,6 +47,12 @@ public class VacGetVaccine extends Model<VacGetVaccine> {
      * 产品编码
      */
     private String productNo;
+
+    /**
+     * 产品编码列表（不持久化，用于多个产品编码匹配）
+     */
+    @TableField(exist = false)
+    private List<String> productNoList;
 
     /**
      * 产品名称

@@ -173,7 +173,8 @@ public class ZcyFunction {
                         vacGetVaccineData.setStatus("0");
                         vacGetVaccineData.setPrice(cmdListData.getPrice());
                         vacGetVaccineData.setTag(cmdListData.getTag());
-                        vacGetVaccineData.setProductNo(cmdListData.getProductNos().toString());
+                        vacGetVaccineData.setProductNo(String.join(",", cmdListData.getProductNos()));
+                        vacGetVaccineData.setProductNoList(cmdListData.getProductNos());
                         //将新处方加入数据库，直接进入发药中
                         VacGetVaccine vacGetVaccine1 = vacGetVaccineService.insertMsg(vacGetVaccineData, cmdListData.getProductNos());
                         if(vacGetVaccine1!=null){

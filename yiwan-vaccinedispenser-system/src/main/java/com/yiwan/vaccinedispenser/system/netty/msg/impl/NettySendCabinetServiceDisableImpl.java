@@ -15,7 +15,7 @@ public class NettySendCabinetServiceDisableImpl implements NettySendService {
 
     @Override
     public Result sendMsg(CabinetConstants.Cabinet cabinetType, byte[] msg, int frame) {
-        log.info("debug测试发送命令为：{}", NettyUtils.getFormatHexStr(msg));
+//        log.info("debug测试发送命令为：{}", NettyUtils.getFormatHexStr(msg));
         return Result.fail("debug测试发送命令为："+ NettyUtils.getFormatHexStr(msg));
     }
 

@@ -48,6 +48,8 @@ public class InterceptorConfig  extends WebMvcConfigurerAdapter {
                 .addPathPatterns("/workbench/add")
                 .addPathPatterns("/workbench/edit")
                 .addPathPatterns("/workbench/del")
+                // 步进配置
+                .addPathPatterns("/step/**")
 
 
 

@@ -12,6 +12,9 @@ import com.yiwan.vaccinedispenser.core.exception.ServiceException;
 import com.yiwan.vaccinedispenser.core.websocket.WebsocketService;
 import com.yiwan.vaccinedispenser.system.domain.model.system.SysConfig;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacGetVaccine;
+import com.yiwan.vaccinedispenser.system.domain.model.vac.VacDrugRecord;
+import com.yiwan.vaccinedispenser.system.plc.manager.PlcSendService;
+import com.yiwan.vaccinedispenser.system.plc.model.ACabinetDispenseRequest;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacMachine;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacMachineException;
 import com.yiwan.vaccinedispenser.system.sys.dao.VacMachineExceptionMapper;
@@ -28,6 +31,7 @@ import com.yiwan.vaccinedispenser.system.until.VacUntil;
 import com.yiwan.vaccinedispenser.system.zyc.ZcyFunction;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.ListOperations;
@@ -92,6 +96,9 @@ public class DispensingFunction {
     private ConfigFunction configFunction;
 
     @Autowired
+    private ObjectProvider<PlcSendService> plcSendServiceProvider;
+
+    @Autowired
     private VacMachineDrugService vacMachineDrugService;
 
     @Autowired
@@ -108,6 +115,7 @@ public class DispensingFunction {
 
         //最后一个发药结束10分钟后再关门
         valueOperations.set(RedisKeyConstant.CABINET_C_BLANK_OPEN_TIME, LocalDateTime.now().toString());
+
         ConfigSetting configSetting = configFunction.getSettingConfigData();
 
         //机器正在疫苗退回 不发药
@@ -155,7 +163,7 @@ public class DispensingFunction {
             }else if(Objects.equals(code,SettingConstants.MachineException.BELT.code)||(Objects.equals(code,SettingConstants.MachineException.SERVO.code))){
                 //皮带报警 或者伺服报警 整层禁用
                 lineNumList.add(data.getLineNum());
-            //抬升伺服报警 无法发药！
+                //抬升伺服报警 无法发药！
             }else if(Objects.equals(code,SettingConstants.MachineException.SENDDRUG.code)){
 
                 String msg = "发药伺服异常！无法正常发药";
@@ -178,60 +186,18 @@ public class DispensingFunction {
             }
         }
 
-        //////
-        /// 新修改的批次逻辑
-        //////////
         //符合仓位的列表
         List<VacMachine>  drugList = null;
-//        //根据batch查看符合机器标准的批次
-//        String key = String.format(RedisKeyConstant.BATCH_NO_LIST, vacGetVaccine.getProductNo());
-//
-//        List<String> batchNoLists = redisTemplate.opsForList().range(key, 0, -1);
-//        if (batchNoLists != null && !batchNoLists.isEmpty()) {
-//            for (String batchNo : batchNoLists) {
-//                //过滤掉 设备异常 导致的仓位 或者皮带问题
-//                LambdaQueryWrapper<VacMachine> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-//                lambdaQueryWrapper.eq(VacMachine::getDeleted,"0")
-//                        .eq(VacMachine::getProductNo,vacGetVaccine.getProductNo())
-//                        .gt(VacMachine::getVaccineUseNum,0)
-//                        .in(VacMachine::getStatus, 1, 2);
-//                if(!boxNoList.isEmpty()){
-//                    lambdaQueryWrapper.notIn(VacMachine::getBoxNo,boxNoList);
-//                }
-//
-//                if(!lineNumList.isEmpty()){
-//                    lambdaQueryWrapper.notIn(VacMachine::getLineNum,lineNumList);
-//                }
-//                lambdaQueryWrapper.eq(VacMachine::getBoxNo,batchNo);
-//                //先判断该药品是否有余量
-//                drugList =  vacMachineMapper.selectList(lambdaQueryWrapper);
-//                if(!drugList.isEmpty()){
-//                    break;
-//                }
-//            }
-//        }else {
-//            //过滤掉 设备异常 导致的仓位 或者皮带问题
-//            LambdaQueryWrapper<VacMachine> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-//            lambdaQueryWrapper.eq(VacMachine::getDeleted,"0")
-//                    .eq(VacMachine::getProductNo,vacGetVaccine.getProductNo())
-//                    .gt(VacMachine::getVaccineUseNum,0)
-//                    .in(VacMachine::getStatus, 1, 2);
-//            if(!boxNoList.isEmpty()){
-//                lambdaQueryWrapper.notIn(VacMachine::getBoxNo,boxNoList);
-//            }
-//
-//            if(!lineNumList.isEmpty()){
-//                lambdaQueryWrapper.notIn(VacMachine::getLineNum,lineNumList);
-//            }
-//            drugList =  vacMachineMapper.selectList(lambdaQueryWrapper);
-//        }
-
         //过滤掉 设备异常 导致的仓位 或者皮带问题
         LambdaQueryWrapper<VacMachine> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(VacMachine::getDeleted,"0")
-                .eq(VacMachine::getProductNo,vacGetVaccine.getProductNo())
                 .gt(VacMachine::getVaccineUseNum,0)
                 .in(VacMachine::getStatus, 1, 2);
+        if (vacGetVaccine.getProductNoList() != null && !vacGetVaccine.getProductNoList().isEmpty()) {
+            lambdaQueryWrapper.in(VacMachine::getProductNo, vacGetVaccine.getProductNoList());
+        } else {
+            lambdaQueryWrapper.eq(VacMachine::getProductNo, vacGetVaccine.getProductNo());
+        }
         if(!boxNoList.isEmpty()){
             lambdaQueryWrapper.notIn(VacMachine::getBoxNo,boxNoList);
         }
@@ -241,7 +207,7 @@ public class DispensingFunction {
         }
 
         drugList =  vacMachineMapper.selectList(lambdaQueryWrapper);
-
+        log.info(JSON.toJSONString(drugList));
         //////
         /// 新修改的批次逻辑
         //////////
@@ -261,192 +227,218 @@ public class DispensingFunction {
             redisDrugListDataError.setProductNo(vacGetVaccine.getProductNo());
             vacMachineExceptionService.dropException(SettingConstants.MachineException.SENDWARING.code,redisDrugListDataError,msg);
             throw new ServiceException(msg);
-            }else {
+        }else {
+            //获取发苗仓位
+            VacMachine vacMachine = getDrugVacMachineMsg(drugList);
 
-                // 获取五个发药队列的大小
-                Map<Integer, Long> beltQueueSizeMap = new HashMap<>();
-                for (int i = 1; i <= 5; i++) {
-                    Long listSize = listOps.size(String.format(RedisKeyConstant.DROP_LIST, i));
-                    beltQueueSizeMap.put(i, listSize);
-                }
+            int realBeltLine = (vacMachine.getLineNum() + 1) / 2;
 
-                // 多人份疫苗先发  选取有效期最早的
-                Optional<VacMachine> priorityVacMachine = drugList.stream()
-                        .filter(drug -> drug.getStatus() == 2)
-                        .min(Comparator.comparing(VacMachine::getExpiredAt));
+            //药品可使用量-1
+            vacMachine.setVaccineUseNum(vacMachine.getVaccineUseNum()-1);
+            //可用数量-1
+            vacMachineMapper.updateById(vacMachine);
 
-                VacMachine vacMachine;
-                if (priorityVacMachine.isPresent()) {
+            RedisDrugListData redisDrugListData = new RedisDrugListData();
+            BeanUtils.copyProperties(vacMachine,redisDrugListData);
+            redisDrugListData.setMachineStatus(vacMachine.getStatus());
+            redisDrugListData.setBoxNo(vacMachine.getBoxNo());
+            redisDrugListData.setProductName(vacMachine.getProductName());
+            redisDrugListData.setMachineId(vacMachine.getId());
+            //将发药工作台存入
+            redisDrugListData.setTaskId(vacGetVaccine.getTaskId());
+            redisDrugListData.setRequestNo(vacGetVaccine.getRequestNo());
+            redisDrugListData.setWorkbenchNum(vacGetVaccine.getWorkbenchNum());
+            redisDrugListData.setWorkbenchNo(vacGetVaccine.getWorkbenchNo());
+            redisDrugListData.setWorkbenchName(vacGetVaccine.getWorkbenchName());
+            //将皮带层数存入redis
+            redisDrugListData.setBeltNum(realBeltLine);
+            redisDrugListData.setUuid(UUID.randomUUID());
 
-                    // 直接选用 `status == 2` 的疫苗
-                    vacMachine = priorityVacMachine.get();
+            redisDrugListData.setVaccineNum(vacMachine.getVaccineNum());
+            redisDrugListData.setVaccineUseNum(vacMachine.getVaccineUseNum());
+            //将发药数据存入数据库
+            listOps.rightPush(String.format(RedisKeyConstant.DROP_LIST,realBeltLine),JSON.toJSONString(redisDrugListData));
+            listOps.rightPush(RedisKeyConstant.BELT_LIST,JSON.toJSONString(redisDrugListData));
 
-                } else {
+            //发药处方加入redis
+            listOps.rightPush(RedisKeyConstant.SEND_LIST,JSON.toJSONString(redisDrugListData));
 
-                    // 找到有效期最近的疫苗
-                    List<VacMachine> nearestExpiryDrugList = drugList.stream()
-                            .filter(drug -> drug.getExpiredAt() != null)
-                            .sorted(Comparator.comparing(VacMachine::getExpiredAt))
-                            .toList();
+            List<String> dropList = listOps.range(String.format(RedisKeyConstant.DROP_LIST,realBeltLine), 0, -1);
+            List<String> beltList = listOps.range(RedisKeyConstant.BELT_LIST, 0, -1);
+            List<String> sendList = listOps.range(RedisKeyConstant.SEND_LIST, 0, -1);
 
-                    // 获取最近的有效期
-                    Date nearestExpiryDate = nearestExpiryDrugList.get(0).getExpiredAt();
-
-                    // 筛选出所有有效期等于最近有效期的疫苗
-                    List<String> distinctBatchNos = nearestExpiryDrugList.stream()
-                            .filter(drug -> drug.getExpiredAt().equals(nearestExpiryDate))
-                            .map(VacMachine::getBatchNo)
-                            .filter(Objects::nonNull)
-                            .collect(Collectors.toCollection(LinkedHashSet::new))
-                            .stream()
-                            .toList();
-
-
-                    List<VacMachine> drugsWithNearestExpiry;
-                    //如果批号为空 直接按照有效期发苗
-                    if(distinctBatchNos.isEmpty()){
-
-                        drugsWithNearestExpiry = nearestExpiryDrugList.stream()
-                                .filter(drug -> drug.getExpiredAt().equals(nearestExpiryDate))
-                                .toList();
-
-                    }else {
-                        //找到同效期 数量最小的批号列表
-                        List<String> machineBatchNo = vacMachineService.getBatchListNum(distinctBatchNos);
-                        if(machineBatchNo!=null && !machineBatchNo.isEmpty()){
-                            distinctBatchNos = machineBatchNo;
-                        }
-                        log.info("同批次的最小数量批号：{}",machineBatchNo);
-                        //通过疫苗列表 查早 最早的记录
-                        String batchNo = vacDrugRecordService.getBatchNoEarly(distinctBatchNos);
-
-                        if(batchNo!=null){
-                            drugsWithNearestExpiry = nearestExpiryDrugList.stream()
-                                    .filter(drug -> drug.getExpiredAt().equals(nearestExpiryDate))
-                                    .filter(drug -> Objects.equals(drug.getBatchNo(), batchNo))
-                                    .toList();
-                        }else {
-                            drugsWithNearestExpiry = nearestExpiryDrugList.stream()
-                                    .filter(drug -> drug.getExpiredAt().equals(nearestExpiryDate))
-                                    .toList();
-                        }
-                    }
+            log.info("dropList   总数：{} {}",listOps.size(String.format(RedisKeyConstant.DROP_LIST,realBeltLine)),JSON.toJSONString(dropList));
+            log.info("beltList   总数：{} {}",listOps.size(RedisKeyConstant.BELT_LIST),JSON.toJSONString(beltList));
+            log.info("sendList   总数：{} {}",listOps.size(RedisKeyConstant.SEND_LIST),JSON.toJSONString(sendList));
 
 
-                    // 2. 如果有效期最近的疫苗有多个仓位，再根据皮带队列大小选择
-                    if (drugsWithNearestExpiry.size() > 1) {
-                        // 获取这些仓位对应的皮带层数
-                        Map<Integer, List<VacMachine>> beltLineToDrugsMap = drugsWithNearestExpiry.stream()
-                                .collect(Collectors.groupingBy(drug -> {
-                                    // 计算皮带层数：lineNum -> beltLine
-                                    return (drug.getLineNum() + 1) / 2;
-                                }));
+            Map<String, Object> commandData = new HashMap<>();
+            commandData.put("code", CommandEnums.DEVICE_STATUS_SEND_DRUG_LIST_START.getCode());
+            commandData.put("data", redisDrugListData);
+            websocketService.sendInfo(CommandEnums.SHOW_MSG_WEB.getCode(),commandData);
 
-                        // 找到皮带队列最小的层数
-                        int selectedBeltLine = beltLineToDrugsMap.keySet().stream()
-                                .min(Comparator.comparingLong(beltLine -> beltQueueSizeMap.getOrDefault(beltLine, Long.MAX_VALUE)))
-                                .orElseThrow(() -> new ServiceException("未找到合适的皮带层数！"));
-
-                        // 获取该皮带层数对应的所有仓位
-                        List<VacMachine> drugsInSelectedBeltLine = beltLineToDrugsMap.get(selectedBeltLine);
-
-                        // 3. 如果同一皮带层有多个仓位，选择 VaccineNum 最小的仓位
-                        if (drugsInSelectedBeltLine.size() > 1) {
-                            vacMachine = drugsInSelectedBeltLine.stream().min(Comparator.comparing(VacMachine::getVaccineNum))
-                                    .orElseThrow(() -> new ServiceException("未找到符合条件的仓位！"));
-                        } else {
-                            vacMachine = drugsInSelectedBeltLine.get(0);
-                        }
-                    } else {
-                        // 如果只有一个有效期最近的仓位，直接选择
-                        vacMachine = drugsWithNearestExpiry.get(0);
-                    }
-
-                }
-
-                int realBeltLine = (vacMachine.getLineNum() + 1) / 2;
-
-                //药品可使用量-1
-                vacMachine.setVaccineUseNum(vacMachine.getVaccineUseNum()-1);
-                //可用数量-1
-                vacMachineMapper.updateById(vacMachine);
-
-                RedisDrugListData redisDrugListData = new RedisDrugListData();
-                BeanUtils.copyProperties(vacMachine,redisDrugListData);
-                redisDrugListData.setMachineStatus(vacMachine.getStatus());
-                redisDrugListData.setBoxNo(vacMachine.getBoxNo());
-                redisDrugListData.setProductName(vacMachine.getProductName());
-                redisDrugListData.setMachineId(vacMachine.getId());
-                //将发药工作台存入
-                redisDrugListData.setTaskId(vacGetVaccine.getTaskId());
-                redisDrugListData.setRequestNo(vacGetVaccine.getRequestNo());
-                redisDrugListData.setWorkbenchNum(vacGetVaccine.getWorkbenchNum());
-                redisDrugListData.setWorkbenchNo(vacGetVaccine.getWorkbenchNo());
-                redisDrugListData.setWorkbenchName(vacGetVaccine.getWorkbenchName());
-                //将皮带层数存入redis
-                redisDrugListData.setBeltNum(realBeltLine);
-                redisDrugListData.setUuid(UUID.randomUUID());
-                //将发药数据存入数据库
-                listOps.rightPush(String.format(RedisKeyConstant.DROP_LIST,realBeltLine),JSON.toJSONString(redisDrugListData));
-                listOps.rightPush(RedisKeyConstant.BELT_LIST,JSON.toJSONString(redisDrugListData));
-
-                //发药处方加入redis
-                listOps.rightPush(RedisKeyConstant.SEND_LIST,JSON.toJSONString(redisDrugListData));
-
-                List<String> dropList = listOps.range(String.format(RedisKeyConstant.DROP_LIST,realBeltLine), 0, -1);
-                List<String> beltList = listOps.range(RedisKeyConstant.BELT_LIST, 0, -1);
-                List<String> sendList = listOps.range(RedisKeyConstant.SEND_LIST, 0, -1);
-
-                log.info("dropList   总数：{} {}",listOps.size(String.format(RedisKeyConstant.DROP_LIST,realBeltLine)),JSON.toJSONString(dropList));
-                log.info("beltList   总数：{} {}",listOps.size(RedisKeyConstant.BELT_LIST),JSON.toJSONString(beltList));
-                log.info("sendList   总数：{} {}",listOps.size(RedisKeyConstant.SEND_LIST),JSON.toJSONString(sendList));
-
-
-                Map<String, Object> commandData = new HashMap<>();
-                commandData.put("code", CommandEnums.DEVICE_STATUS_SEND_DRUG_LIST_START.getCode());
-                commandData.put("data", redisDrugListData);
-                websocketService.sendInfo(CommandEnums.SHOW_MSG_WEB.getCode(),commandData);
-
-                //机器配有挡片 则检查挡片是否开启
-                if("true".equals(configSetting.getCBlank())){
-                    //开启挡片
-                    Thread thread = new Thread(this::openBlank);
-                    thread.start();
-                }
-                log.info("添加发药处方：{}",JSON.toJSONStringWithDateFormat(
-                        redisDrugListData,
-                        "yyyy-MM-dd HH:mm:ss",
-                        SerializerFeature.WriteDateUseDateFormat
-                ));
+            //机器配有挡片 则检查挡片是否开启
+            if("true".equals(configSetting.getCBlank())){
+                //开启挡片
+                Thread thread = new Thread(this::openBlank);
+                thread.start();
             }
+            log.info("添加发药处方：{}",JSON.toJSONStringWithDateFormat(
+                    redisDrugListData,
+                    "yyyy-MM-dd HH:mm:ss",
+                    SerializerFeature.WriteDateUseDateFormat
+            ));
+        }
     }
 
     /**
      * 根据redis 判断是否掉药  掉药--药品停在皮带边缘
      */
-    public void dropDrugs(Integer num,Integer ioTime){
+    public VacMachine getDrugVacMachineMsg(List<VacMachine> drugList){
+
+        // 获取五个发药队列的大小
+        Map<Integer, Long> beltQueueSizeMap = new HashMap<>();
+        for (int i = 1; i <= 5; i++) {
+            Long listSize = listOps.size(String.format(RedisKeyConstant.DROP_LIST, i));
+            beltQueueSizeMap.put(i, listSize);
+        }
+
+        // 多人份疫苗先发  选取有效期最早的
+        Optional<VacMachine> priorityVacMachine = drugList.stream()
+                .filter(drug -> drug.getStatus() == 2)
+                .min(Comparator.comparing(VacMachine::getExpiredAt));
+        VacMachine vacMachine;
+        if (priorityVacMachine.isPresent()) {
+
+            // 直接选用 `status == 2` 的疫苗
+            vacMachine = priorityVacMachine.get();
+
+        } else {
+
+            // 找到有效期最近的疫苗
+            List<VacMachine> nearestExpiryDrugList = drugList.stream()
+                    .filter(drug -> drug.getExpiredAt() != null)
+                    .sorted(Comparator.comparing(VacMachine::getExpiredAt))
+                    .toList();
+
+            // 获取最近有效期（sorted后的第一个）
+            Date nearestExpiryDate = nearestExpiryDrugList.get(0).getExpiredAt();
+            log.info("[发药] 最早有效期={} | 候选仓位数={}", nearestExpiryDate, nearestExpiryDrugList.size());
+
+            // 筛选出所有有效期等于最近有效期的疫苗
+            List<String> distinctBatchNos = nearestExpiryDrugList.stream()
+                    .filter(drug -> drug.getExpiredAt().equals(nearestExpiryDate))
+                    .map(VacMachine::getBatchNo)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toCollection(LinkedHashSet::new))
+                    .stream()
+                    .toList();
+
+
+            List<VacMachine> drugsWithNearestExpiry;
+            //如果批号为空 直接按照有效期发苗
+            if(distinctBatchNos.isEmpty()){
+
+                drugsWithNearestExpiry = nearestExpiryDrugList.stream()
+                        .filter(drug -> drug.getExpiredAt().equals(nearestExpiryDate))
+                        .toList();
+
+            }else {
+                //找到同效期 数量最小的批号列表
+                List<String> machineBatchNo = vacMachineService.getBatchListNum(distinctBatchNos);
+                if(machineBatchNo!=null && !machineBatchNo.isEmpty()){
+                    distinctBatchNos = machineBatchNo;
+                }
+                log.info("同批次的最小数量批号：{}", machineBatchNo);
+                //通过疫苗列表 找最早的记录
+                String batchNo = vacDrugRecordService.getBatchNoEarly(distinctBatchNos);
+
+                if(batchNo!=null){
+                    drugsWithNearestExpiry = nearestExpiryDrugList.stream()
+                            .filter(drug -> drug.getExpiredAt().equals(nearestExpiryDate))
+                            .filter(drug -> Objects.equals(drug.getBatchNo(), batchNo))
+                            .toList();
+                }else {
+                    drugsWithNearestExpiry = nearestExpiryDrugList.stream()
+                            .filter(drug -> drug.getExpiredAt().equals(nearestExpiryDate))
+                            .toList();
+                }
+            }
+
+
+            // 2. 如果有效期最近的疫苗有多个仓位，再根据皮带队列大小选择
+            if (drugsWithNearestExpiry.size() > 1) {
+                // 获取这些仓位对应的皮带层数
+                Map<Integer, List<VacMachine>> beltLineToDrugsMap = drugsWithNearestExpiry.stream()
+                        .collect(Collectors.groupingBy(drug -> {
+                            // 计算皮带层数：lineNum -> beltLine
+                            return (drug.getLineNum() + 1) / 2;
+                        }));
+
+                // 找到皮带队列最小的层数
+                int selectedBeltLine = beltLineToDrugsMap.keySet().stream()
+                        .min(Comparator.comparingLong(beltLine -> beltQueueSizeMap.getOrDefault(beltLine, Long.MAX_VALUE)))
+                        .orElseThrow(() -> new ServiceException("未找到合适的皮带层数！"));
+
+                // 获取该皮带层数对应的所有仓位
+                List<VacMachine> drugsInSelectedBeltLine = beltLineToDrugsMap.get(selectedBeltLine);
+
+                // 3. 如果同一皮带层有多个仓位，选择 VaccineNum 最小的仓位
+                if (drugsInSelectedBeltLine.size() > 1) {
+                    vacMachine = drugsInSelectedBeltLine.stream().min(Comparator.comparing(VacMachine::getVaccineNum))
+                            .orElseThrow(() -> new ServiceException("未找到符合条件的仓位！"));
+                } else {
+                    vacMachine = drugsInSelectedBeltLine.get(0);
+                }
+            } else {
+                // 如果只有一个有效期最近的仓位，直接选择
+                vacMachine = drugsWithNearestExpiry.get(0);
+            }
+
+        }
+
+
+
+        return vacMachine;
+    }
+
+
+
+
+
+
+    /**
+     * 根据redis 判断是否掉药  掉药--药品停在皮带边缘
+     */
+    public void dropDrugs(Integer num){
+        ConfigSendData configSendData = configFunction.getSendDrugConfigData();
+        Integer ioTime = configSendData.getIoWaitTime();
+        Integer lastIoAddTime = configSendData.getLastIOAddTime();
 
         String beltHaveDrug  = valueOperations.get(String.format(RedisKeyConstant.CABINET_A_BELT_HAVE_DRUG,num));
         //如果皮带上没有药
 //        if("false".equals(beltHaveDrug)&&"true".equals(canDropDrug)) {
         if("false".equals(beltHaveDrug)){
-                //拿到发药信息
-                String drugStr = listOps.index(String.format(RedisKeyConstant.DROP_LIST, num), 0);
-                if (drugStr != null) {
-                    valueOperations.set(RedisKeyConstant.DRUG_RUN_START,"true");
-    //                valueOperations.set(String.format(RedisKeyConstant.CABINET_A_DRUG_LIST,num),"true");
+            //拿到发药信息
+            String drugStr = listOps.index(String.format(RedisKeyConstant.DROP_LIST, num), 0);
+            if (drugStr != null) {
+                valueOperations.set(RedisKeyConstant.DRUG_RUN_START,"true");
+                //                valueOperations.set(String.format(RedisKeyConstant.CABINET_A_DRUG_LIST,num),"true");
 
-                    RedisDrugListData drugListData = JSON.parseObject(drugStr, RedisDrugListData.class);
-                    //层数 IO站号
-                    Integer sensorNum = drugListData.getLineNum();
-                    Integer beltNum = drugListData.getBeltNum();
-                    log.info("掉药信息：仓位：{} 掉药:{}", drugListData.getBoxNo(), drugListData.getProductName());
-                    dropDrug(sensorNum, drugListData.getPositionNum(), ioTime,drugListData.getProductNo());
-                    VacUntil.sleep(300);
-                    //将发药信息队列 移除一条
-                    listOps.leftPop(String.format(RedisKeyConstant.DROP_LIST, num));
-                    //皮带上有药
-                    valueOperations.set(String.format(RedisKeyConstant.CABINET_A_BELT_HAVE_DRUG, beltNum), "true");
+                RedisDrugListData drugListData = JSON.parseObject(drugStr, RedisDrugListData.class);
+                //层数 IO站号
+                Integer sensorNum = drugListData.getLineNum();
+                Integer beltNum = drugListData.getBeltNum();
+                log.info("掉药信息：仓位：{} 掉药:{}", drugListData.getBoxNo(), drugListData.getProductName());
+
+
+
+                dropDrug(sensorNum, drugListData.getPositionNum(), ioTime,drugListData.getProductNo(),drugListData.getBoxNo(),lastIoAddTime);
+                VacUntil.sleep(300);
+                //将发药信息队列 移除一条
+                listOps.leftPop(String.format(RedisKeyConstant.DROP_LIST, num));
+                //皮带上有药
+                valueOperations.set(String.format(RedisKeyConstant.CABINET_A_BELT_HAVE_DRUG, beltNum), "true");
 
             }
         }
@@ -456,22 +448,24 @@ public class DispensingFunction {
     /**
      * 移动皮带
      */
-    public void moveBelt(Integer ioTime) throws Exception {
+    public void moveBelt() throws Exception {
 
         ConfigSetting configSetting = configFunction.getSettingConfigData();
         ConfigSendData configSendData = configFunction.getSendDrugConfigData();
+        Integer ioTime = configSendData.getIoWaitTime();
         intPut(CabinetConstants.InPutCommand.QUERY,SettingConstants.SENSOR_CABINET_A_MOVE_BELT_NUM);
-        VacUntil.sleep(200);
+        VacUntil.sleep(500);
         //判断光栅传感器是否触发
         String sensorIsPut = valueOperations.get(RedisKeyConstant.sensor.BELT_SENSOR);
         if(sensorIsPut == null){
 
-       //设置光栅信号 状态为不触发
-        valueOperations.set(RedisKeyConstant.sensor.BELT_SENSOR,CabinetConstants.SensorStatus.RESET.code);
+            //设置光栅信号 状态为不触发
+            valueOperations.set(RedisKeyConstant.sensor.BELT_SENSOR,CabinetConstants.SensorStatus.RESET.code);
 
-       }else if(sensorIsPut.equals(CabinetConstants.SensorStatus.RESET.code)){
+        }else if(sensorIsPut.equals(CabinetConstants.SensorStatus.RESET.code)){
 
-           //如果传感器没触发 说明光栅皮带没药
+            log.info("传感器没触发");
+            //如果传感器没触发 说明光栅皮带没药
             String moveMsgStr = listOps.index(RedisKeyConstant.BELT_LIST,0);
             RedisDrugListData drugListData = JSON.parseObject(moveMsgStr, RedisDrugListData.class);
             assert drugListData != null;
@@ -480,7 +474,6 @@ public class DispensingFunction {
             String gsBeltHaveDrug = valueOperations.get(RedisKeyConstant.CABINET_A_GS_BELT_HAVE_DRUG);
 
             //光栅皮带上没有药
-//            if("true".equals(GsBeltHaveDrug)){
             if("false".equals(gsBeltHaveDrug)){
                 valueOperations.set(RedisKeyConstant.CABINET_A_GS_BELT_HAVE_DRUG,"true");
                 //光栅的小皮带和皮带上的药一起掉
@@ -489,66 +482,16 @@ public class DispensingFunction {
                 //传送小皮带走到皮带层
                 goToBelt(beltNum,drugListData.getWorkbenchNum(),false);
 
-
-                //TODO 先走速度模式  等稳定了再走位置模式
-                //速度模式将药从皮带掉到光栅传感器
-                speedServo(beltNum,CabinetConstants.CabinetAServoCommand.SPEED,CabinetConstants.CabinetAServoStatus.COROTATION,configSendData.getBeltSendSpeed());
-                VacUntil.sleep(200);
-
-                //小皮带检测到药停止
-                speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.SPEED,CabinetConstants.CabinetAServoStatus.BELT_STOP,configSendData.getSmallBeltStopSpeed());
-                VacUntil.sleep(200);
-                int countSend = 0;
-                //等待掉药时间
-                long timeout = System.currentTimeMillis();
-                //判断是否掉药成功
-                boolean dropFlag = false;
-                boolean dropAgain = false;
-                while ((System.currentTimeMillis() - timeout) < SettingConstants.DRUG_BELT_WAIT_TIME){
-
-                    intPut(CabinetConstants.InPutCommand.QUERY,SettingConstants.SENSOR_CABINET_A_MOVE_BELT_NUM);
-                    VacUntil.sleep(200);
-
-                    if(!dropAgain&&(System.currentTimeMillis() - timeout)>5000){
-                        log.info("再次掉药测试");
-                        Integer sensorNum = drugListData.getLineNum();
-                        beltNum = drugListData.getBeltNum();
-                        dropDrug(sensorNum, drugListData.getPositionNum(), ioTime,drugListData.getProductNo());
-                        VacUntil.sleep(300);
-                        dropAgain =true;
-
-                    }
-
-
-                    //判断光栅传感器是否被触发
-                    sensorIsPut = valueOperations.get(RedisKeyConstant.sensor.BELT_SENSOR);
-                    assert sensorIsPut != null;
-                    if(sensorIsPut.equals(CabinetConstants.SensorStatus.NORMAL.code)){
-                        countSend++;
-                        if(countSend>=3){
-                            dropFlag = true;
-                            //皮带停止
-//                        speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.PAUSE,CabinetConstants.CabinetAServoStatus.ZERO,300);
-                            break;
-                        }
-
-                    }
-
-                }
-
-                //皮带伺服停止
-                speedServo(beltNum,CabinetConstants.CabinetAServoCommand.PAUSE,CabinetConstants.CabinetAServoStatus.ZERO,configSendData.getBeltSendSpeed());
-
-
+                Boolean dropFlag = stopDrugToLift( beltNum, configSendData,  drugListData, ioTime);
                 //传送小皮带回原位
                 goToBelt(beltNum,drugListData.getWorkbenchNum(),true);
-
                 if(dropFlag){
+
                     valueOperations.set(RedisKeyConstant.SEND_DRUG_ERROR,"0");
                     //将出药记录加入数据库
                     log.info("发药正常：{}",JSON.toJSONString(drugListData));
                     dropRecordAndMachine(drugListData,1,"发药正常");
-                    moveBeltToC(drugListData,configSetting,configSendData);
+                    moveBeltToC(drugListData,configSetting,configSendData,false);
 
                 }else {
 
@@ -591,17 +534,95 @@ public class DispensingFunction {
                 intPut(CabinetConstants.InPutCommand.QUERY,SettingConstants.SENSOR_CABINET_A_MOVE_BELT_NUM);
             }
         }else {
-            String msg = "传送小皮带上有药 有异常";
-            vacMachineExceptionService.dropException(SettingConstants.MachineException.SENDDRUG.code,null,msg);
+            String msg = "传送小皮带上有药 有异常 自动清除到斜坡皮带";
+            vacMachineExceptionService.dropException(SettingConstants.MachineException.SENDWARING.code,null,msg);
             log.error(msg);
+
+            int workNum = configSendData.getReturnWorkNum();
+            RedisDrugListData drugListData = new RedisDrugListData();
+            drugListData.setWorkbenchNum(workNum);
+            drugListData.setProductName("清苗疫苗");
+            drugListData.setTaskId(String.valueOf(UUID.randomUUID()));
+            drugListData.setRequestNo("requestNo");
+            drugListData.setWorkbenchNo("69");
+
+            listOps.leftPush(RedisKeyConstant.SEND_LIST, String.valueOf(drugListData));
+
+            moveBeltToC(drugListData,configSetting,configSendData,true);
+            VacUntil.sleep(200);
+
         }
 
     }
 
 
+    public Boolean stopDrugToLift(Integer beltNum,ConfigSendData configSendData, RedisDrugListData drugListData,Integer ioTime){
+
+        Integer lastIoAddTime = configSendData.getLastIOAddTime();
+        //速度模式将药从皮带掉到光栅传感器
+        speedServo(beltNum,CabinetConstants.CabinetAServoCommand.SPEED,CabinetConstants.CabinetAServoStatus.COROTATION,configSendData.getBeltSendSpeed());
+        VacUntil.sleep(200);
+
+        if("false".equals(configSendData.getHaveBlank())){
+            //小皮带检测到药停止
+            speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.SPEED,CabinetConstants.CabinetAServoStatus.BELT_STOP,configSendData.getSmallBeltStopSpeed());
+            VacUntil.sleep(200);
+        }else {
+            //一直转动小皮带
+            speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.SPEED,CabinetConstants.CabinetAServoStatus.COROTATION,configSendData.getSmallBeltGoCSpeed());
+            VacUntil.sleep(200);
+        }
+
+        int countSend = 0;
+        //等待掉药时间
+        long timeout = System.currentTimeMillis();
+        //判断是否掉药成功
+        boolean dropFlag = false;
+        boolean dropAgain = false;
+        while ((System.currentTimeMillis() - timeout) < SettingConstants.DRUG_BELT_WAIT_TIME){
+
+            intPut(CabinetConstants.InPutCommand.QUERY,SettingConstants.SENSOR_CABINET_A_MOVE_BELT_NUM);
+            VacUntil.sleep(200);
+
+            if(!dropAgain&&(System.currentTimeMillis() - timeout)>8000){
+                log.info("再次掉药测试");
+                Integer sensorNum = drugListData.getLineNum();
+                beltNum = drugListData.getBeltNum();
+                dropDrug(sensorNum, drugListData.getPositionNum(), ioTime,drugListData.getProductNo(),drugListData.getBoxNo(),lastIoAddTime);
+                VacUntil.sleep(300);
+                dropAgain =true;
+
+            }
+
+            //判断光栅传感器是否被触发
+            String sensorIsPut = valueOperations.get(RedisKeyConstant.sensor.BELT_SENSOR);
+            assert sensorIsPut != null;
+            if(sensorIsPut.equals(CabinetConstants.SensorStatus.NORMAL.code)){
+                countSend++;
+                if(countSend>=3){
+                    dropFlag = true;
+                    //皮带停止
+//                        speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.PAUSE,CabinetConstants.CabinetAServoStatus.ZERO,300);
+                    break;
+                }
+
+            }
+
+        }
+
+        //皮带伺服停止
+        speedServo(beltNum,CabinetConstants.CabinetAServoCommand.PAUSE,CabinetConstants.CabinetAServoStatus.ZERO,configSendData.getBeltSendSpeed());
+
+
+        return dropFlag;
+    }
+
+
+
+
 
     //运输小皮带运输疫苗到工作台
-    public void moveBeltToC(RedisDrugListData drugListData,ConfigSetting configSetting,ConfigSendData configSendData){
+    public void moveBeltToC(RedisDrugListData drugListData,ConfigSetting configSetting,ConfigSendData configSendData,boolean isError){
 
         boolean pyFlag = false;
         boolean flag = false;
@@ -609,6 +630,7 @@ public class DispensingFunction {
         String isBlankOpen = null,isStop;
         valueOperations.set(RedisKeyConstant.CABINET_C_BELT_STOP,"false");
         valueOperations.set(RedisKeyConstant.CABINET_C_BLOCK_STATUS,"close");
+
         //等待C柜斜坡皮带停止
         while ((System.currentTimeMillis() - timeout) < SettingConstants.FIND_BELT_STOP_WAIT_TIME) {
             //查询皮带状态
@@ -622,70 +644,71 @@ public class DispensingFunction {
             VacUntil.sleep(200);
             isStop = valueOperations.get(RedisKeyConstant.CABINET_C_BELT_STOP);
 
-        //C柜是否有挡片
-        if("true".equals(configSetting.getCBlank())){
-            if(SettingConstants.PU_YAN_HOSPITAL_NAME.equals(configSetting.getHospitalName())){
-                if(!pyFlag){
-                    openPuYanBlank();
-                    pyFlag=true;
-                    VacUntil.sleep(1000);
+            //C柜是否有挡片
+            if("true".equals(configSetting.getCBlank())){
+                if(SettingConstants.PU_YAN_HOSPITAL_NAME.equals(configSetting.getHospitalName())){
+                    if(!pyFlag){
+                        openPuYanBlank();
+                        pyFlag=true;
+                        VacUntil.sleep(1000);
+                    }
+                    if("true".equals(isStop)){
+                        log.info("C柜皮带已经停止了！");
+                        flag = true;
+                        break;
+                    }
+
+                } else if (SettingConstants.SHOU_NAN_HOSPITAL_NAME.equals(configSetting.getHospitalName())) {
+
+                    intPutCabinetC(CabinetConstants.InPutCommand.QUERY,27);
+                    VacUntil.sleep(500);
+
+                    String sensorIsPut = valueOperations.get(String.format(RedisKeyConstant.sensor.SENSOR_CABINET_C_NUM, 27));
+                    if ("false".equals(sensorIsPut)){
+                        openShouNanBlank();
+                        intPutCabinetC(CabinetConstants.InPutCommand.QUERY,27);
+                        VacUntil.sleep(200);
+                        sensorIsPut = valueOperations.get(String.format(RedisKeyConstant.sensor.SENSOR_CABINET_C_NUM, 27));
+                    }
+
+                    if("true".equals(isStop)&&"true".equals(sensorIsPut)){
+                        log.info("C柜皮带已经停止了！");
+                        log.info("C柜首南挡片已经打开！");
+                        flag = true;
+                        break;
+                    }
+
+
+                } else {
+
+                    //查询挡片状态
+                    moveBlock(CabinetConstants.CabinetCSendDrugBlockStatus.QUERY);
+
+                    VacUntil.sleep(200);
+                    isBlankOpen = valueOperations.get(RedisKeyConstant.CABINET_C_BLOCK_STATUS);
+                    //如果挡片打开 和 皮带停止
+                    if("true".equals(isStop)&&"open".equals(isBlankOpen)){
+                        log.info("C柜皮带已经停止了！");
+                        log.info("C柜挡片已经打开！");
+                        flag = true;
+                        break;
+                    }
+
+                    if(!"open".equals(isBlankOpen)){
+                        log.info("正在打开C柜挡片！");
+                        moveBlock(CabinetConstants.CabinetCSendDrugBlockStatus.OPEN);
+                    }
+
+                    VacUntil.sleep(200);
                 }
+
+            }else {
                 if("true".equals(isStop)){
                     log.info("C柜皮带已经停止了！");
-                    break;
-                }
-
-            } else if (SettingConstants.SHOU_NAN_HOSPITAL_NAME.equals(configSetting.getHospitalName())) {
-
-                intPutCabinetC(CabinetConstants.InPutCommand.QUERY,27);
-                VacUntil.sleep(500);
-
-                String sensorIsPut = valueOperations.get(String.format(RedisKeyConstant.sensor.SENSOR_CABINET_C_NUM, 27));
-                if ("false".equals(sensorIsPut)){
-                    openShouNanBlank();
-                    intPutCabinetC(CabinetConstants.InPutCommand.QUERY,27);
-                    VacUntil.sleep(200);
-                     sensorIsPut = valueOperations.get(String.format(RedisKeyConstant.sensor.SENSOR_CABINET_C_NUM, 27));
-                }
-
-                if("true".equals(isStop)&&"true".equals(sensorIsPut)){
-                    log.info("C柜皮带已经停止了！");
-                    log.info("C柜首南挡片已经打开！");
                     flag = true;
                     break;
                 }
-
-
-            } else {
-
-                //查询挡片状态
-                moveBlock(CabinetConstants.CabinetCSendDrugBlockStatus.QUERY);
-
-                VacUntil.sleep(200);
-                isBlankOpen = valueOperations.get(RedisKeyConstant.CABINET_C_BLOCK_STATUS);
-                //如果挡片打开 和 皮带停止
-                if("true".equals(isStop)&&"open".equals(isBlankOpen)){
-                    log.info("C柜皮带已经停止了！");
-                    log.info("C柜挡片已经打开！");
-                    flag = true;
-                    break;
-                }
-
-                if(!"open".equals(isBlankOpen)){
-                    log.info("正在打开C柜挡片！");
-                    moveBlock(CabinetConstants.CabinetCSendDrugBlockStatus.OPEN);
-                }
-
-                VacUntil.sleep(200);
             }
-
-        }else {
-            if("true".equals(isStop)){
-                log.info("C柜皮带已经停止了！");
-                flag = true;
-                break;
-            }
-             }
         }
 
 
@@ -705,8 +728,21 @@ public class DispensingFunction {
         //电磁铁版本
         if ("true".equals(configSetting.getIsIoDrop())){
 
-            //运动伺服 使疫苗落到运输皮带上
-            speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.SPEED,CabinetConstants.CabinetAServoStatus.COROTATION,configSendData.getSmallBeltGoCSpeed());
+
+            if("true".equals(configSendData.getHaveBlank())){
+                //防止异常情况下清苗 皮带不动 再执行一次小皮带伺服运动指令
+                speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.SPEED,CabinetConstants.CabinetAServoStatus.COROTATION,configSendData.getSmallBeltGoCSpeed());
+                VacUntil.sleep(200);
+
+                Thread thread = new Thread(() -> openLiftBlank(configSendData.getHaveBlankTime()));
+                thread.start();
+            }
+
+            if("false".equals(configSendData.getHaveBlank())){
+                //运动伺服 使疫苗落到运输皮带上
+                speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.SPEED,CabinetConstants.CabinetAServoStatus.COROTATION,configSendData.getSmallBeltGoCSpeed());
+            }
+
             //将药发送到工作台
             moveWork(drugListData.getWorkbenchNum());
 
@@ -721,9 +757,10 @@ public class DispensingFunction {
 
                 //判断光栅传感器是否被触发
                 String sensorIsPut = valueOperations.get(RedisKeyConstant.sensor.BELT_SENSOR);
+                String liftBlankIsOen = valueOperations.get(RedisKeyConstant.CABINET_A_LIFT_BLANK_IS_OPEN);
                 assert sensorIsPut != null;
                 if(sensorIsPut.equals(CabinetConstants.SensorStatus.RESET.code)){
-                    if(count>=3){
+                    if(count>=3 && "true".equals(liftBlankIsOen)){
                         break;
                     }
                     count++;
@@ -733,10 +770,19 @@ public class DispensingFunction {
             VacUntil.sleep(300);
             //电磁铁版本
             speedServo(SettingConstants.CABINET_A_MOVE_BELT_TO_C_NUM,CabinetConstants.CabinetAServoCommand.PAUSE,CabinetConstants.CabinetAServoStatus.ZERO,configSendData.getSmallBeltGoCSpeed());
+
+            //关闭挡片挡板
+            if("true".equals(configSendData.getHaveBlank())){
+                closeLiftBlank(configSendData.getHaveBlankTime());
+            }
+
             //光栅皮带不在小皮带上
             valueOperations.set(RedisKeyConstant.CABINET_A_GS_BELT_HAVE_DRUG,"false");
-            //将该发药队列移除
-            listOps.leftPop(RedisKeyConstant.BELT_LIST);
+            if(!isError){
+                //将该发药队列移除
+                listOps.leftPop(RedisKeyConstant.BELT_LIST);
+            }
+
 
         }else {
 
@@ -811,12 +857,26 @@ public class DispensingFunction {
 //        valueOperations.set(String.format(RedisKeyConstant.CABINET_A_BELT_HAVE_DRUG,drugDataList.getBeltNum()),"false");
     }
 
+
+
+
+
+
+
+
     //IO 掉药指令
-    public void dropDrug(Integer command,Integer ioNum ,Integer times,String productNo){
+    public void dropDrug(Integer command,Integer ioNum ,Integer times,String productNo,String boxNO,Integer lastIoAddTime){
         //获取不同长度IO的间隔时间
         times = vacMachineService.getVacIoTimeByProduct(productNo,times);
+        VacMachine vacMachine = vacMachineService.getMachineByBoxNo(boxNO);
+        if(vacMachine!=null){
+            if(vacMachine.getVaccineNum()<=1){
+                times = times+lastIoAddTime;
+            }
+        }
 
 
+        log.info("io时间：{}",times);
         //开始掉药
         DropRequest dropRequest =new DropRequest();
         dropRequest.setWorkMode(CabinetConstants.Cabinet.CAB_A);
@@ -969,8 +1029,13 @@ public class DispensingFunction {
                 case 5 -> distance = configSendData.getBelt5();
             }
         }
+
+
         //伺服运动
         positionServo(SettingConstants.CABINET_A_MOVE_BELT_TO_RETURN_NUM,distance);
+
+
+
     }
 
     //疫苗退回的控制抬升
@@ -1014,13 +1079,55 @@ public class DispensingFunction {
         cabinetCService.sendDrug(request);
     }
 
+    /**
+     * 按设备通信模式执行定时开启 C 柜挡片。
+     * PLC 模式写入寄存器 51，Netty 模式沿用原有挡片控制逻辑。
+     */
+    public void openBlankByDeviceMode(boolean plcEnabled, boolean nettyEnabled) {
+        if (plcEnabled) {
+            PlcSendService plcSendService = plcSendServiceProvider.getIfAvailable();
+            if (plcSendService == null) {
+                log.error("PLC已启用，但PlcSendService未创建，无法执行C柜定时砸门开");
+                return;
+            }
+            plcSendService.sendCCabinetSmashDoorOpen();
+            return;
+        }
+        if (nettyEnabled) {
+            openBlank();
+            return;
+        }
+        log.warn("PLC和Netty均未启用，跳过C柜定时砸门开任务");
+    }
+
+    /**
+     * 按设备通信模式执行定时关闭 C 柜挡片。
+     * PLC 模式写入寄存器 52，Netty 模式沿用原有挡片控制逻辑。
+     */
+    public void closeBlankByDeviceMode(boolean plcEnabled, boolean nettyEnabled) {
+        if (plcEnabled) {
+            PlcSendService plcSendService = plcSendServiceProvider.getIfAvailable();
+            if (plcSendService == null) {
+                log.error("PLC已启用，但PlcSendService未创建，无法执行C柜定时砸门关");
+                return;
+            }
+            plcSendService.sendCCabinetSmashDoorClose();
+            return;
+        }
+        if (nettyEnabled) {
+            closeBlank();
+            return;
+        }
+        log.warn("PLC和Netty均未启用，跳过C柜定时砸门关任务");
+    }
+
     //打开挡片
     public void openBlank(){
         ConfigSetting configSetting = configFunction.getSettingConfigData();
         //浦沿挡片
         if(SettingConstants.PU_YAN_HOSPITAL_NAME.equals(configSetting.getHospitalName())){
-                openPuYanBlank();
-        //首南挡片
+            openPuYanBlank();
+            //首南挡片
         }else if(SettingConstants.SHOU_NAN_HOSPITAL_NAME.equals(configSetting.getHospitalName())){
             openShouNanBlank();
         } else {
@@ -1175,7 +1282,7 @@ public class DispensingFunction {
                 sensorIsPut = valueOperations.get(String.format(RedisKeyConstant.sensor.SENSOR_CABINET_C_NUM, 27));
                 assert sensorIsPut != null;
 
-                 if("true".equals(sensorIsPut)){
+                if("true".equals(sensorIsPut)){
                     //停止输出
                     isOpenFlag = true;
 
@@ -1256,5 +1363,180 @@ public class DispensingFunction {
 
         }
     }
+
+
+
+
+
+
+    //打开抬升小挡板
+    public void openLiftBlank(Integer time){
+        valueOperations.set(RedisKeyConstant.CABINET_A_LIFT_BLANK_IS_OPEN,"false");
+        // 【关键】清空Redis中的旧时间，防止旧时间导致直接跳过等待
+        redisTemplate.delete(RedisKeyConstant.CABINET_A_LIFT_BLANK_IS_OPEN_TIME);
+        log.info("清空Redis旧确认时间，准备接收新的下位机确认");
+
+        OutPutRequest outPutRequest = new OutPutRequest();
+        outPutRequest.setWorkMode(CabinetConstants.Cabinet.CAB_A);
+        outPutRequest.setCommand(CabinetConstants.OutPutCommand.OUTPUT);
+
+        //开启
+        outPutRequest.setMode(SettingConstants.CABINET_A_LIFT_BLANK_OPEN_NUM);
+        outPutRequest.setCabinet(CabinetConstants.Cabinet.CAB_A);
+        cabinetAService.outPut(outPutRequest);
+        log.info("发送抬升小挡板开启指令，设定等待时间: {}ms", time);
+
+        long ACK_TIMEOUT = time * 2L; // 等待下位机响应的超时时间（设定时间的2倍）
+        long waitAckStartTime = System.currentTimeMillis();
+        String openTimeStr = null;
+
+        // 等待下位机写入新的确认时间
+        log.info("等待下位机返回确认...");
+        while (true) {
+            openTimeStr = valueOperations.get(RedisKeyConstant.CABINET_A_LIFT_BLANK_IS_OPEN_TIME);
+
+            // 如果收到了下位机的成功信号，退出等待
+            if (openTimeStr != null && !openTimeStr.isEmpty()) {
+                log.info("收到下位机开启确认信号");
+                break;
+            }
+
+            // 超时保护
+            if (System.currentTimeMillis() - waitAckStartTime > ACK_TIMEOUT) {
+                log.warn("等待下位机开启确认超时！（超时时间: {}ms）", ACK_TIMEOUT);
+                break;
+            }
+
+            VacUntil.sleep(50); // 短暂等待后重试
+        }
+
+        // 如果最终还是没有确认信号（超时），直接关闭挡板并退出
+        if (openTimeStr == null || openTimeStr.isEmpty()) {
+            log.error("未收到下位机开启确认，强制关闭挡板");
+            outPutRequest.setCommand(CabinetConstants.OutPutCommand.NOT_OUTPUT);
+            cabinetAService.outPut(outPutRequest);
+            valueOperations.set(RedisKeyConstant.CABINET_A_LIFT_BLANK_IS_OPEN,"true");
+            return;
+        }
+
+        // 【关键】从下位机确认时间开始，等待设定的开启时间（time毫秒）
+        long startTime = System.currentTimeMillis();
+        long MAX_WAIT_TIMEOUT = time * 2L;
+
+        try {
+            long openTime = Long.parseLong(openTimeStr);
+            log.info("从下位机确认时间开始，等待 {}ms", time);
+
+            while (true) {
+                long now = System.currentTimeMillis();
+
+                // 核心逻辑：从下位机确认时间开始算，超过time毫秒 → 退出
+                if (now - openTime >= time) {
+                    break;
+                }
+
+                // 全局最大保护
+                if (now - startTime > MAX_WAIT_TIMEOUT) {
+                    log.warn("开启时间超时保护触发");
+                    break;
+                }
+
+                VacUntil.sleep(50);
+            }
+        } catch (Exception e) {
+            log.error("解析开启时间异常: {}", e.getMessage());
+        }
+
+        // 关闭挡板
+        outPutRequest.setCommand(CabinetConstants.OutPutCommand.NOT_OUTPUT);
+        cabinetAService.outPut(outPutRequest);
+        valueOperations.set(RedisKeyConstant.CABINET_A_LIFT_BLANK_IS_OPEN,"true");
+        log.info("抬升小挡板开启完成，共耗时: {}ms", System.currentTimeMillis() - startTime);
+    }
+
+
+    //关闭抬升小挡板
+    public void closeLiftBlank(Integer time){
+        OutPutRequest outPutRequest = new OutPutRequest();
+        outPutRequest.setWorkMode(CabinetConstants.Cabinet.CAB_A);
+        outPutRequest.setCommand(CabinetConstants.OutPutCommand.OUTPUT);
+
+        // 【关键】清空Redis中的旧时间，防止旧时间导致直接跳过等待
+        redisTemplate.delete(RedisKeyConstant.CABINET_A_LIFT_BLANK_IS_CLOSE_TIME);
+        log.info("清空Redis旧确认时间，准备接收新的下位机确认");
+
+        //关闭
+        outPutRequest.setMode(SettingConstants.CABINET_A_LIFT_BLANK_CLOSE_NUM);
+        outPutRequest.setCabinet(CabinetConstants.Cabinet.CAB_A);
+        cabinetAService.outPut(outPutRequest);
+        log.info("发送抬升小挡板关闭指令，设定等待时间: {}ms", time);
+
+        long ACK_TIMEOUT = time * 2L; // 等待下位机响应的超时时间（设定时间的2倍）
+        long waitAckStartTime = System.currentTimeMillis();
+        String closeTimeStr = null;
+
+        // 等待下位机写入新的确认时间
+        log.info("等待下位机返回确认...");
+        while (true) {
+            closeTimeStr = valueOperations.get(RedisKeyConstant.CABINET_A_LIFT_BLANK_IS_CLOSE_TIME);
+
+            // 如果收到了下位机的成功信号，退出等待
+            if (closeTimeStr != null && !closeTimeStr.isEmpty()) {
+                log.info("收到下位机关闭确认信号");
+                break;
+            }
+
+            // 超时保护
+            if (System.currentTimeMillis() - waitAckStartTime > ACK_TIMEOUT) {
+                log.warn("等待下位机关闭确认超时！（超时时间: {}ms）", ACK_TIMEOUT);
+                break;
+            }
+
+            VacUntil.sleep(50); // 短暂等待后重试
+        }
+
+        // 如果最终还是没有确认信号（超时），直接关闭输出并退出
+        if (closeTimeStr == null || closeTimeStr.isEmpty()) {
+            log.error("未收到下位机关闭确认");
+            outPutRequest.setCommand(CabinetConstants.OutPutCommand.NOT_OUTPUT);
+            cabinetAService.outPut(outPutRequest);
+            return;
+        }
+
+        // 【关键】从下位机确认时间开始，等待设定的关闭时间（time毫秒）
+        long startTime = System.currentTimeMillis();
+        long MAX_WAIT_TIMEOUT = time * 2L;
+
+        try {
+            long closeTime = Long.parseLong(closeTimeStr);
+            log.info("从下位机确认时间开始，等待 {}ms", time);
+
+            while (true) {
+                long now = System.currentTimeMillis();
+
+                // 核心逻辑：从确认时间开始算，超过time毫秒 → 退出
+                if (now - closeTime >= time) {
+                    break;
+                }
+
+                // 全局最大保护
+                if (now - startTime > MAX_WAIT_TIMEOUT) {
+                    log.warn("关闭时间超时保护触发");
+                    break;
+                }
+
+                VacUntil.sleep(50);
+            }
+        } catch (Exception e) {
+            log.error("解析关闭时间异常: {}", e.getMessage());
+        }
+
+        // 关闭输出
+        outPutRequest.setCommand(CabinetConstants.OutPutCommand.NOT_OUTPUT);
+        cabinetAService.outPut(outPutRequest);
+        log.info("抬升小挡板关闭完成，共耗时: {}ms", System.currentTimeMillis() - startTime);
+    }
+
+
 
 }

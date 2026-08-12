@@ -129,4 +129,10 @@ public interface VacSendDrugRecordMapper extends BaseMapper<VacSendDrugRecord> {
     List<SendDrugRecordRequest> countToday(
     );
 
+    @Select("SELECT product_no AS productNo, MIN(product_name) AS productName, COUNT(*) AS totalNum " +
+            "FROM vac_send_drug_record " +
+            "WHERE deleted = 0 " +
+            "GROUP BY product_no")
+    List<Map<String, Object>> countGroupedByProductNo();
+
 }

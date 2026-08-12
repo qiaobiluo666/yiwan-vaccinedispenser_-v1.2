@@ -80,4 +80,16 @@ public class SendDrugRecordRequest implements Serializable {
     //上药总数量
     private Integer totalNum;
 
+    //疫苗长度
+    private Integer vaccineLong;
+
+    //疫苗宽度
+    private Integer vaccineWide;
+
+    //疫苗高度
+    private Integer vaccineHigh;
+
+    //仓位最大容量
+    private Integer maxCapacity;
+
 }

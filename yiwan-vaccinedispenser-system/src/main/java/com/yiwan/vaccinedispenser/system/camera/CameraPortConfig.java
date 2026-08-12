@@ -25,4 +25,7 @@ public class CameraPortConfig {
 
     @Value("${camera.enable}")
     private boolean enabled;
+
+    @Value("${camera.netty.enable:true}")
+    private boolean cameraNettyEnable;
 }

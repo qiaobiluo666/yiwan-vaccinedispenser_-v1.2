@@ -65,12 +65,8 @@ public class SendDrugThreadManager {
             while (running) {
                 try {
                     sendDrugFunction.goTable(configData);
-                } catch (ExecutionException | InterruptedException e) {
-                    e.printStackTrace();
-                    log.error("测距线程报错：",e);
-
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+                } catch (Exception e) {
+                    log.error("测距线程报错：", e);
                 }
                 VacUntil.sleep(500);
             }
@@ -116,15 +112,13 @@ public class SendDrugThreadManager {
                     sendDrugFunction.sendDrug(configData,configSetting);
 //                    testSend.sendDrug(configData);
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    log.error("上药线程报错：",e);
+                    log.error("上药线程报错：", e);
                     //关闭气泵
                     try {
-                        sendDrugFunction.servoTableReturn(configData,"线程报错退回");
-                    } catch (IOException ex) {
-                        throw new RuntimeException(ex);
+                        sendDrugFunction.servoTableReturn(configData, "线程报错退回");
+                    } catch (Exception ignored) {
+                        log.warn("上药线程退回异常", ignored);
                     }
-
                 }
                 VacUntil.sleep(500);
             }
@@ -185,6 +179,7 @@ public class SendDrugThreadManager {
 
     public void stop() throws IOException {
         ConfigData configData = configFunction.getAutoDrugConfigData();
+        valueOperations.set(RedisKeyConstant.autoDrug.AUTO_DRUG_START,"false");
 
         log.info("===============停止自动上药=================");
         String x =  valueOperations.get(RedisKeyConstant.CABINET_B_SERVO_ERROR);
@@ -195,7 +190,7 @@ public class SendDrugThreadManager {
             sendDrugFunction.servoTableReturn(configData,"停止上药");
         }
 
-        valueOperations.set(RedisKeyConstant.autoDrug.AUTO_DRUG_START,"false");
+
         sendDrugFunction.autoDrug(CabinetConstants.CabinetBApplyCommand.AUTO, CabinetConstants.CabinetBApplyMode.STOP, CabinetConstants.CabinetBApplyStatus.ZERO);
         running = false;
 

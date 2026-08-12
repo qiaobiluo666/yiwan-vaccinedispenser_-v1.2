@@ -1,10 +1,13 @@
 package com.yiwan.vaccinedispenser.system.sys.service.other.impl;
 
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacMachine;
+import com.yiwan.vaccinedispenser.system.domain.model.vac.VacDrugRecord;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacSendDrugRecord;
+import com.yiwan.vaccinedispenser.system.sys.data.request.vac.DrugRecordRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.request.vac.SendDrugRecordRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.response.vac.InventoryResponse;
 import com.yiwan.vaccinedispenser.system.sys.service.other.ExcelService;
+import com.yiwan.vaccinedispenser.system.sys.service.vac.VacDrugRecordService;
 import com.yiwan.vaccinedispenser.system.sys.service.vac.VacMachineService;
 import com.yiwan.vaccinedispenser.system.sys.service.vac.VacSendDrugRecordService;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +40,10 @@ public class ExcelServiceImpl implements ExcelService {
 
     @Autowired
     private VacSendDrugRecordService vacSendDrugRecordService;
+
+    @Autowired
+    private VacDrugRecordService vacDrugRecordService;
+
     @Override
     public ResponseEntity<byte[]> getInventoryExcel(String productName) throws  IOException {
         Workbook workbook = new XSSFWorkbook();
@@ -581,5 +588,503 @@ public class ExcelServiceImpl implements ExcelService {
 
     }
 
+    @Override
+    public ResponseEntity<byte[]> getDrugRecordExcel(Date createTimeStart, Date createTimeEnd) throws IOException {
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("上苗记录");
 
+        Font titleFont = workbook.createFont();
+        titleFont.setBold(true);
+        titleFont.setFontHeightInPoints((short) 16);
+        titleFont.setFontName("微软雅黑");
+
+        Font headerFont = workbook.createFont();
+        headerFont.setBold(true);
+        headerFont.setFontHeightInPoints((short) 12);
+        headerFont.setFontName("微软雅黑");
+
+        Font dataFont = workbook.createFont();
+        dataFont.setFontName("微软雅黑");
+
+        CellStyle titleStyle = workbook.createCellStyle();
+        titleStyle.setFont(titleFont);
+        titleStyle.setAlignment(HorizontalAlignment.CENTER);
+        titleStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+
+        String title = new SimpleDateFormat("yyyy-MM-dd").format(createTimeStart) + " — " +
+                new SimpleDateFormat("yyyy-MM-dd").format(createTimeEnd) + " 上苗记录";
+        Row titleRow = sheet.createRow(0);
+        titleRow.setHeightInPoints(30);
+        Cell titleCell = titleRow.createCell(0);
+        titleCell.setCellValue(title);
+        titleCell.setCellStyle(titleStyle);
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 1));
+
+        CellStyle headerStyle = workbook.createCellStyle();
+        headerStyle.setFont(headerFont);
+        headerStyle.setAlignment(HorizontalAlignment.CENTER);
+        headerStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        headerStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+        headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        headerStyle.setBorderTop(BorderStyle.THIN);
+        headerStyle.setBorderBottom(BorderStyle.THIN);
+        headerStyle.setBorderLeft(BorderStyle.THIN);
+        headerStyle.setBorderRight(BorderStyle.THIN);
+        headerStyle.setWrapText(true);
+
+        CellStyle dataStyle = workbook.createCellStyle();
+        dataStyle.setFont(dataFont);
+        dataStyle.setAlignment(HorizontalAlignment.CENTER);
+        dataStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        dataStyle.setBorderTop(BorderStyle.THIN);
+        dataStyle.setBorderBottom(BorderStyle.THIN);
+        dataStyle.setBorderLeft(BorderStyle.THIN);
+        dataStyle.setBorderRight(BorderStyle.THIN);
+        dataStyle.setWrapText(true);
+
+        Row headerRow = sheet.createRow(1);
+        headerRow.setHeightInPoints(25);
+        String[] tableHeaders = {"药品名称", "上苗数量(支)"};
+
+        for (int i = 0; i < tableHeaders.length; i++) {
+            Cell cell = headerRow.createCell(i);
+            cell.setCellValue(tableHeaders[i]);
+            cell.setCellStyle(headerStyle);
+        }
+
+        List<DrugRecordRequest> recordList = vacDrugRecordService.drugRecordTotalListByCreateTime(createTimeStart, createTimeEnd);
+        int rowNum = 2;
+        for (DrugRecordRequest record : recordList) {
+            Row row = sheet.createRow(rowNum++);
+            row.setHeightInPoints(22);
+
+            row.createCell(0).setCellValue(record.getProductName());
+            row.getCell(0).setCellStyle(dataStyle);
+
+            row.createCell(1).setCellValue(record.getTotalNum());
+            row.getCell(1).setCellStyle(dataStyle);
+        }
+
+        sheet.setColumnWidth(0, 50 * 256);
+        sheet.setColumnWidth(1, 20 * 256);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        workbook.write(out);
+        workbook.close();
+        byte[] bytes = out.toByteArray();
+
+        String fileName = URLEncoder.encode(title + ".xlsx", StandardCharsets.UTF_8);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentDispositionFormData("attachment", fileName);
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(bytes);
+    }
+
+    @Override
+    public ResponseEntity<byte[]> getDrugRecordDetailExcel(Date createTimeStart, Date createTimeEnd) throws IOException {
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("上苗记录详情");
+
+        Font titleFont = workbook.createFont();
+        titleFont.setBold(true);
+        titleFont.setFontHeightInPoints((short) 16);
+        titleFont.setFontName("微软雅黑");
+
+        Font headerFont = workbook.createFont();
+        headerFont.setBold(true);
+        headerFont.setFontHeightInPoints((short) 12);
+        headerFont.setFontName("微软雅黑");
+
+        Font dataFont = workbook.createFont();
+        dataFont.setFontName("微软雅黑");
+
+        CellStyle titleStyle = workbook.createCellStyle();
+        titleStyle.setFont(titleFont);
+        titleStyle.setAlignment(HorizontalAlignment.CENTER);
+        titleStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+
+        String title = new SimpleDateFormat("yyyy-MM-dd").format(createTimeStart) + " — " +
+                new SimpleDateFormat("yyyy-MM-dd").format(createTimeEnd) + " 上苗记录详情";
+        Row titleRow = sheet.createRow(0);
+        titleRow.setHeightInPoints(30);
+        Cell titleCell = titleRow.createCell(0);
+        titleCell.setCellValue(title);
+        titleCell.setCellStyle(titleStyle);
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 5));
+
+        CellStyle headerStyle = workbook.createCellStyle();
+        headerStyle.setFont(headerFont);
+        headerStyle.setAlignment(HorizontalAlignment.CENTER);
+        headerStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        headerStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+        headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        headerStyle.setBorderTop(BorderStyle.THIN);
+        headerStyle.setBorderBottom(BorderStyle.THIN);
+        headerStyle.setBorderLeft(BorderStyle.THIN);
+        headerStyle.setBorderRight(BorderStyle.THIN);
+        headerStyle.setWrapText(true);
+
+        CellStyle dataStyle = workbook.createCellStyle();
+        dataStyle.setFont(dataFont);
+        dataStyle.setAlignment(HorizontalAlignment.CENTER);
+        dataStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        dataStyle.setBorderTop(BorderStyle.THIN);
+        dataStyle.setBorderBottom(BorderStyle.THIN);
+        dataStyle.setBorderLeft(BorderStyle.THIN);
+        dataStyle.setBorderRight(BorderStyle.THIN);
+        dataStyle.setWrapText(true);
+
+        CellStyle dateCellStyle = workbook.createCellStyle();
+        dateCellStyle.cloneStyleFrom(dataStyle);
+        CreationHelper creationHelper = workbook.getCreationHelper();
+        dateCellStyle.setDataFormat(creationHelper.createDataFormat().getFormat("yyyy-MM-dd"));
+
+        CellStyle dateTimeCellStyle = workbook.createCellStyle();
+        dateTimeCellStyle.cloneStyleFrom(dataStyle);
+        dateTimeCellStyle.setDataFormat(creationHelper.createDataFormat().getFormat("yyyy-MM-dd HH:mm:ss"));
+
+        Row headerRow = sheet.createRow(1);
+        headerRow.setHeightInPoints(25);
+        String[] tableHeaders = {"药品名称", "仓位号", "电子监管码", "批号", "有效期", "上苗时间"};
+
+        for (int i = 0; i < tableHeaders.length; i++) {
+            Cell cell = headerRow.createCell(i);
+            cell.setCellValue(tableHeaders[i]);
+            cell.setCellStyle(headerStyle);
+        }
+
+        List<VacDrugRecord> recordList = vacDrugRecordService.drugRecordListByCreateTime(createTimeStart, createTimeEnd);
+        int rowNum = 2;
+        for (VacDrugRecord record : recordList) {
+            Row row = sheet.createRow(rowNum++);
+            row.setHeightInPoints(22);
+
+            row.createCell(0).setCellValue(record.getProductName());
+            row.getCell(0).setCellStyle(dataStyle);
+
+            row.createCell(1).setCellValue(record.getMachineNo());
+            row.getCell(1).setCellStyle(dataStyle);
+
+            row.createCell(2).setCellValue(record.getSupervisedCode());
+            row.getCell(2).setCellStyle(dataStyle);
+
+            row.createCell(3).setCellValue(record.getBatchNo());
+            row.getCell(3).setCellStyle(dataStyle);
+
+            Cell expCell = row.createCell(4);
+            if (record.getExpiredAt() != null) {
+                expCell.setCellValue(record.getExpiredAt());
+                expCell.setCellStyle(dateCellStyle);
+            } else {
+                expCell.setCellStyle(dataStyle);
+            }
+
+            Cell createTimeCell = row.createCell(5);
+            if (record.getCreateTime() != null) {
+                createTimeCell.setCellValue(record.getCreateTime());
+                createTimeCell.setCellStyle(dateTimeCellStyle);
+            } else {
+                createTimeCell.setCellStyle(dataStyle);
+            }
+        }
+
+        sheet.setColumnWidth(0, 40 * 256);
+        sheet.setColumnWidth(1, 15 * 256);
+        sheet.setColumnWidth(2, 30 * 256);
+        sheet.setColumnWidth(3, 20 * 256);
+        sheet.setColumnWidth(4, 20 * 256);
+        sheet.setColumnWidth(5, 22 * 256);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        workbook.write(out);
+        workbook.close();
+        byte[] bytes = out.toByteArray();
+
+        String fileName = URLEncoder.encode(title + ".xlsx", StandardCharsets.UTF_8);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentDispositionFormData("attachment", fileName);
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(bytes);
+    }
+
+    @Override
+    public ResponseEntity<byte[]> getDrugBoxStatisticsExcel() throws IOException {
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("药盒统计");
+
+        // 字体设置
+        Font titleFont = workbook.createFont();
+        titleFont.setBold(true);
+        titleFont.setFontHeightInPoints((short) 16);
+        titleFont.setFontName("微软雅黑");
+
+        Font headerFont = workbook.createFont();
+        headerFont.setBold(true);
+        headerFont.setFontHeightInPoints((short) 12);
+        headerFont.setFontName("微软雅黑");
+
+        Font dataFont = workbook.createFont();
+        dataFont.setFontName("微软雅黑");
+
+        // 标题样式
+        CellStyle titleStyle = workbook.createCellStyle();
+        titleStyle.setFont(titleFont);
+        titleStyle.setAlignment(HorizontalAlignment.CENTER);
+        titleStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+
+        // 标题内容
+        String title = new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + " 药盒统计";
+        Row titleRow = sheet.createRow(0);
+        titleRow.setHeightInPoints(30);
+        Cell titleCell = titleRow.createCell(0);
+        titleCell.setCellValue(title);
+        titleCell.setCellStyle(titleStyle);
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 6)); // 合并标题单元格
+
+        // 表头样式
+        CellStyle headerStyle = workbook.createCellStyle();
+        headerStyle.setFont(headerFont);
+        headerStyle.setAlignment(HorizontalAlignment.CENTER);
+        headerStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        headerStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+        headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        headerStyle.setBorderTop(BorderStyle.THIN);
+        headerStyle.setBorderBottom(BorderStyle.THIN);
+        headerStyle.setBorderLeft(BorderStyle.THIN);
+        headerStyle.setBorderRight(BorderStyle.THIN);
+        headerStyle.setWrapText(true);
+
+        // 数据单元格样式
+        CellStyle dataStyle = workbook.createCellStyle();
+        dataStyle.setFont(dataFont);
+        dataStyle.setAlignment(HorizontalAlignment.CENTER);
+        dataStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        dataStyle.setBorderTop(BorderStyle.THIN);
+        dataStyle.setBorderBottom(BorderStyle.THIN);
+        dataStyle.setBorderLeft(BorderStyle.THIN);
+        dataStyle.setBorderRight(BorderStyle.THIN);
+        dataStyle.setWrapText(true);
+
+        // 表头
+        String[] tableHeaders = {"产品编码", "产品名称", "上药数量", "疫苗长度(mm)", "疫苗宽度(mm)", "疫苗高度(mm)", "仓位最大容量"};
+        Row headerRow = sheet.createRow(1);
+        headerRow.setHeightInPoints(25);
+        for (int i = 0; i < tableHeaders.length; i++) {
+            Cell cell = headerRow.createCell(i);
+            cell.setCellValue(tableHeaders[i]);
+            cell.setCellStyle(headerStyle);
+        }
+
+        // 数据
+        List<SendDrugRecordRequest> statistics = vacSendDrugRecordService.getDrugBoxStatistics();
+        int rowNum = 2;
+        for (SendDrugRecordRequest record : statistics) {
+            Row row = sheet.createRow(rowNum++);
+            
+            // 产品编码
+            Cell productNoCell = row.createCell(0);
+            productNoCell.setCellValue(record.getProductNo());
+            productNoCell.setCellStyle(dataStyle);
+            
+            // 产品名称
+            Cell productNameCell = row.createCell(1);
+            productNameCell.setCellValue(record.getProductName());
+            productNameCell.setCellStyle(dataStyle);
+            
+            // 上药数量
+            Cell totalNumCell = row.createCell(2);
+            if (record.getTotalNum() != null) {
+                totalNumCell.setCellValue(record.getTotalNum());
+            }
+            totalNumCell.setCellStyle(dataStyle);
+            
+            // 疫苗长度
+            Cell vaccineLongCell = row.createCell(3);
+            if (record.getVaccineLong() != null) {
+                vaccineLongCell.setCellValue(record.getVaccineLong());
+            }
+            vaccineLongCell.setCellStyle(dataStyle);
+            
+            // 疫苗宽度
+            Cell vaccineWideCell = row.createCell(4);
+            if (record.getVaccineWide() != null) {
+                vaccineWideCell.setCellValue(record.getVaccineWide());
+            }
+            vaccineWideCell.setCellStyle(dataStyle);
+            
+            // 疫苗高度
+            Cell vaccineHighCell = row.createCell(5);
+            if (record.getVaccineHigh() != null) {
+                vaccineHighCell.setCellValue(record.getVaccineHigh());
+            }
+            vaccineHighCell.setCellStyle(dataStyle);
+            
+            // 仓位最大容量
+            Cell maxCapacityCell = row.createCell(6);
+            if (record.getMaxCapacity() != null) {
+                maxCapacityCell.setCellValue(record.getMaxCapacity());
+            }
+            maxCapacityCell.setCellStyle(dataStyle);
+        }
+
+        // 设置列宽
+        sheet.setColumnWidth(0, 20 * 256);
+        sheet.setColumnWidth(1, 40 * 256);
+        sheet.setColumnWidth(2, 15 * 256);
+        sheet.setColumnWidth(3, 15 * 256);
+        sheet.setColumnWidth(4, 15 * 256);
+        sheet.setColumnWidth(5, 15 * 256);
+        sheet.setColumnWidth(6, 15 * 256);
+
+        // 写入内存流
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        workbook.write(out);
+        workbook.close();
+        byte[] bytes = out.toByteArray();
+
+        // 设置下载响应
+        String fileName = URLEncoder.encode(title + ".xlsx", StandardCharsets.UTF_8);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentDispositionFormData("attachment", fileName);
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(bytes);
+    }
+
+    @Override
+    public ResponseEntity<byte[]> getDrugBoxStatisticsExcel(Date createTimeStart, Date createTimeEnd, String workbenchName, String productNo) throws IOException {
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("药盒统计");
+
+        Font titleFont = workbook.createFont();
+        titleFont.setBold(true);
+        titleFont.setFontHeightInPoints((short) 16);
+        titleFont.setFontName("微软雅黑");
+
+        Font headerFont = workbook.createFont();
+        headerFont.setBold(true);
+        headerFont.setFontHeightInPoints((short) 12);
+        headerFont.setFontName("微软雅黑");
+
+        Font dataFont = workbook.createFont();
+        dataFont.setFontName("微软雅黑");
+
+        CellStyle titleStyle = workbook.createCellStyle();
+        titleStyle.setFont(titleFont);
+        titleStyle.setAlignment(HorizontalAlignment.CENTER);
+        titleStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+
+        String title = new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + " 药盒统计";
+        Row titleRow = sheet.createRow(0);
+        titleRow.setHeightInPoints(30);
+        Cell titleCell = titleRow.createCell(0);
+        titleCell.setCellValue(title);
+        titleCell.setCellStyle(titleStyle);
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 6));
+
+        CellStyle headerStyle = workbook.createCellStyle();
+        headerStyle.setFont(headerFont);
+        headerStyle.setAlignment(HorizontalAlignment.CENTER);
+        headerStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        headerStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+        headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        headerStyle.setBorderTop(BorderStyle.THIN);
+        headerStyle.setBorderBottom(BorderStyle.THIN);
+        headerStyle.setBorderLeft(BorderStyle.THIN);
+        headerStyle.setBorderRight(BorderStyle.THIN);
+        headerStyle.setWrapText(true);
+
+        CellStyle dataStyle = workbook.createCellStyle();
+        dataStyle.setFont(dataFont);
+        dataStyle.setAlignment(HorizontalAlignment.CENTER);
+        dataStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        dataStyle.setBorderTop(BorderStyle.THIN);
+        dataStyle.setBorderBottom(BorderStyle.THIN);
+        dataStyle.setBorderLeft(BorderStyle.THIN);
+        dataStyle.setBorderRight(BorderStyle.THIN);
+        dataStyle.setWrapText(true);
+
+        String[] tableHeaders = {"产品编码", "产品名称", "上药数量", "疫苗长度(mm)", "疫苗宽度(mm)", "疫苗高度(mm)", "仓位最大容量"};
+        Row headerRow = sheet.createRow(1);
+        headerRow.setHeightInPoints(25);
+        for (int i = 0; i < tableHeaders.length; i++) {
+            Cell cell = headerRow.createCell(i);
+            cell.setCellValue(tableHeaders[i]);
+            cell.setCellStyle(headerStyle);
+        }
+
+        List<SendDrugRecordRequest> statistics = vacSendDrugRecordService.getDrugBoxStatistics(createTimeStart, createTimeEnd, workbenchName, productNo);
+        int rowNum = 2;
+        for (SendDrugRecordRequest record : statistics) {
+            Row row = sheet.createRow(rowNum++);
+
+            Cell productNoCell = row.createCell(0);
+            productNoCell.setCellValue(record.getProductNo());
+            productNoCell.setCellStyle(dataStyle);
+
+            Cell productNameCell = row.createCell(1);
+            productNameCell.setCellValue(record.getProductName());
+            productNameCell.setCellStyle(dataStyle);
+
+            Cell totalNumCell = row.createCell(2);
+            if (record.getTotalNum() != null) {
+                totalNumCell.setCellValue(record.getTotalNum());
+            }
+            totalNumCell.setCellStyle(dataStyle);
+
+            Cell vaccineLongCell = row.createCell(3);
+            if (record.getVaccineLong() != null) {
+                vaccineLongCell.setCellValue(record.getVaccineLong());
+            }
+            vaccineLongCell.setCellStyle(dataStyle);
+
+            Cell vaccineWideCell = row.createCell(4);
+            if (record.getVaccineWide() != null) {
+                vaccineWideCell.setCellValue(record.getVaccineWide());
+            }
+            vaccineWideCell.setCellStyle(dataStyle);
+
+            Cell vaccineHighCell = row.createCell(5);
+            if (record.getVaccineHigh() != null) {
+                vaccineHighCell.setCellValue(record.getVaccineHigh());
+            }
+            vaccineHighCell.setCellStyle(dataStyle);
+
+            Cell maxCapacityCell = row.createCell(6);
+            if (record.getMaxCapacity() != null) {
+                maxCapacityCell.setCellValue(record.getMaxCapacity());
+            }
+            maxCapacityCell.setCellStyle(dataStyle);
+        }
+
+        sheet.setColumnWidth(0, 20 * 256);
+        sheet.setColumnWidth(1, 40 * 256);
+        sheet.setColumnWidth(2, 15 * 256);
+        sheet.setColumnWidth(3, 15 * 256);
+        sheet.setColumnWidth(4, 15 * 256);
+        sheet.setColumnWidth(5, 15 * 256);
+        sheet.setColumnWidth(6, 15 * 256);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        workbook.write(out);
+        workbook.close();
+        byte[] bytes = out.toByteArray();
+
+        String fileName = URLEncoder.encode(title + ".xlsx", StandardCharsets.UTF_8);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentDispositionFormData("attachment", fileName);
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(bytes);
+    }
 }

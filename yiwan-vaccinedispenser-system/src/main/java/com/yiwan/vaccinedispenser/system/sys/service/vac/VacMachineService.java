@@ -10,6 +10,7 @@ import com.yiwan.vaccinedispenser.system.domain.model.vac.VacMachine;
 import com.yiwan.vaccinedispenser.system.sys.data.AutoData;
 import com.yiwan.vaccinedispenser.system.sys.data.ConfigSetting;
 import com.yiwan.vaccinedispenser.system.sys.data.SendBtnData;
+import com.yiwan.vaccinedispenser.system.sys.data.StepDisConfig;
 import com.yiwan.vaccinedispenser.system.sys.data.request.IdListRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.request.OtherRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.request.vac.DrugRecordRequest;
@@ -19,6 +20,7 @@ import com.yiwan.vaccinedispenser.system.sys.data.request.vac.VacMachineRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.response.vac.InventoryResponse;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -61,8 +63,11 @@ public interface VacMachineService extends IService<VacMachine>{
 
 
 
-    //自动上药查找 对应的仓位
+    //自动上药查找 对应的仓位（测试模式）
     DrugRecordRequest findBoxTest(List<Long> boxSepcIds, Integer num, DrugRecordRequest request);
+
+    //自动上药查找 对应的仓位（排除指定machineId，用于PLC模式防止并发抢同一仓位）
+    DrugRecordRequest findBoxExcludeMachineIds(List<Long> boxSepcIds, Integer num, DrugRecordRequest request, Set<Long> excludeMachineIds);
 
 
 
@@ -163,6 +168,9 @@ public interface VacMachineService extends IService<VacMachine>{
     //根据产品编码 获取根据药盒长度的IO间隔时间
     Integer getVacIoTimeByProduct(String productNo,Integer times);
 
+    /** 根据产品编号获取步进距离配置（优先 VacDrug → VacHandle区间 → Config默认值） */
+    StepDisConfig getStepDisByProduct(String productNo);
+
     //自动校对仓位数据
     Result AutoProofread(AutoData data);
 
@@ -177,6 +185,20 @@ public interface VacMachineService extends IService<VacMachine>{
 
     //测试新款抬升demo
     void test4();
+
+    //IO10层板老化
+    void test5();
+
+    VacMachine getMachineByBoxNo(String boxNo);
+
+    VacMachine getMachineByLineNumAndPositionNum(Integer lineNum, Integer positionNum);
+
+
+
+    void test6();
+
+
+    void test7();
 
 
 }

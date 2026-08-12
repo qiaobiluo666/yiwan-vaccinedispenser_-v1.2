@@ -19,6 +19,8 @@ import com.yiwan.vaccinedispenser.system.dispensing.SendDrugFunction;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacDrug;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacGetVaccine;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacMachine;
+import com.yiwan.vaccinedispenser.system.plc.manager.PlcSendService;
+import com.yiwan.vaccinedispenser.system.plc.manager.PlcService;
 import com.yiwan.vaccinedispenser.system.sys.dao.VacGetVaccineMapper;
 import com.yiwan.vaccinedispenser.system.sys.dao.VacMachineMapper;
 import com.yiwan.vaccinedispenser.system.sys.data.AutoData;
@@ -119,6 +121,11 @@ class YuandiInjectiondispenserApplicationTests {
 	@Autowired
 	private UploadController uploadController;
 
+	@Autowired
+	private PlcService plcService;
+
+	@Autowired
+	private PlcSendService plcSendService;
 
 	@Test
 	void contextLoads() {
@@ -267,8 +274,8 @@ class YuandiInjectiondispenserApplicationTests {
 	@Test
 	void test5() throws Exception {
 		VacGetVaccine vacGetVaccine = new VacGetVaccine();
-		vacGetVaccine.setProductNo("79524002604");
-		vacGetVaccine.setProductName("进-轮毒五价-L-默沙东-1/2ml/支-液其他口1");
+		vacGetVaccine.setProductNo("01202000303");
+		vacGetVaccine.setProductName("乙脑");
 
 		vacGetVaccine.setTaskId(String.valueOf(UUID.randomUUID()));
 		vacGetVaccine.setRequestNo("requestNo");
@@ -437,10 +444,85 @@ class YuandiInjectiondispenserApplicationTests {
 		for(VacDrug vacDrugs :resultList){
 			vacDrugService.vacSaveOrUpdateDrug(vacDrugs);
 		}
+	}
 
 
+	@Test
+	void test45(){
+		vacSendDrugRecordService.getDrugBoxStatistics();
 
 
 	}
 
+	@Test
+	void test46(){
+		plcService.sendReadCommand(270,1);
+	}
+
+
+	@Test
+	void test47(){
+		//送药指令下发
+		plcSendService.sendACabinetDispenseCmd();
+	}
+
+	/**
+	 * 测试多个产品编码 productNoList 处理逻辑
+	 * 验证：productNo 逗号分隔格式 + .in 查询
+	 */
+	@Test
+	void test48() {
+		// 模拟政采云 JSON 中某条 cmdList 的 productNos 含多个编码
+		String json = "{\"success\":true,\"result\":[{\"cmdList\":[{\"price\":6880,\"tag\":null,\"class\":\"cn.gov.zcy.vaccine.vaccination.api.open.seedlings.dto.SeedlingMachineSubTaskDTO\",\"taskId\":\"09e58ebe98874a69b3bee5421a6c88a2\",\"productNos\":[\"01109000910\",\"01202000303\"]}],\"requestNo\":\"test-multi-productNo\",\"workbenchNo\":\"S04\"}],\"code\":null,\"message\":null}";
+
+		// === 模拟 ZcyFunction 中的解析逻辑 ===
+		JSONObject bodyJson = JSON.parseObject(json);
+		JSONArray resultArray = bodyJson.getJSONArray("result");
+		JSONObject resultObj = resultArray.getJSONObject(0);
+		JSONArray cmdListArray = resultObj.getJSONArray("cmdList");
+
+		// 解析 cmdList
+		com.yiwan.vaccinedispenser.system.sys.data.zyc.CmdListData cmdListData =
+				JSON.parseObject(cmdListArray.getJSONObject(0).toJSONString(),
+						com.yiwan.vaccinedispenser.system.sys.data.zyc.CmdListData.class);
+
+		// === 验证 productNos 包含多个编码 ===
+		List<String> productNos = cmdListData.getProductNos();
+		log.info("productNos: {}", productNos);
+		assert productNos.size() == 2 : "应包含2个产品编码";
+		assert productNos.contains("01109000910") : "应包含 01109000910";
+		assert productNos.contains("01202000303") : "应包含 01202000303";
+
+		// === 验证 productNo 逗号分隔格式 ===
+		String productNoStr = String.join(",", productNos);
+		log.info("productNo(入库格式): {}", productNoStr);
+		assert productNoStr.equals("01109000910,01202000303") : "应存为逗号分隔格式";
+
+		// === 验证 .in 查询（模拟三个发药函数的逻辑） ===
+		VacGetVaccine vacGetVaccine = new VacGetVaccine();
+		vacGetVaccine.setProductNo(productNoStr);
+		vacGetVaccine.setProductNoList(productNos);
+
+		LambdaQueryWrapper<VacMachine> wrapper = new LambdaQueryWrapper<>();
+		wrapper.eq(VacMachine::getDeleted, "0")
+				.gt(VacMachine::getVaccineUseNum, 0)
+				.in(VacMachine::getStatus, 1, 2);
+		if (vacGetVaccine.getProductNoList() != null && !vacGetVaccine.getProductNoList().isEmpty()) {
+			wrapper.in(VacMachine::getProductNo, vacGetVaccine.getProductNoList());
+			log.info("使用 .in 查询: productNoList={}", vacGetVaccine.getProductNoList());
+		} else {
+			wrapper.eq(VacMachine::getProductNo, vacGetVaccine.getProductNo());
+			log.info("使用 .eq 查询: productNo={}", vacGetVaccine.getProductNo());
+		}
+
+		// 执行查询并记录结果
+		List<VacMachine> drugList = vacMachineMapper.selectList(wrapper);
+		log.info("查询结果数: {}", drugList != null ? drugList.size() : 0);
+		if (drugList != null && !drugList.isEmpty()) {
+			drugList.forEach(d -> log.info("  仓位={} 产品编码={} 名称={}",
+					d.getBoxNo(), d.getProductNo(), d.getProductName()));
+		} else {
+			log.warn("未查到匹配仓位（可能数据库中无对应编码的库存）");
+		}
+	}
 }

@@ -29,6 +29,14 @@ public interface ExcelService {
     //发药详情导出
     ResponseEntity<byte[]> getSendDrugDetailExcel(Date createTimeStart, Date createTimeEnd ,String workbenchName) throws  IOException;
 
+    ResponseEntity<byte[]> getDrugRecordExcel(Date createTimeStart, Date createTimeEnd) throws IOException;
 
+    ResponseEntity<byte[]> getDrugRecordDetailExcel(Date createTimeStart, Date createTimeEnd) throws IOException;
+
+    //药盒统计导出
+    ResponseEntity<byte[]> getDrugBoxStatisticsExcel() throws  IOException;
+
+    //药盒统计导出（带条件）
+    ResponseEntity<byte[]> getDrugBoxStatisticsExcel(Date createTimeStart, Date createTimeEnd, String workbenchName, String productNo) throws  IOException;
 
 }

@@ -12,6 +12,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -20,6 +21,7 @@ import java.util.concurrent.Executors;
  */
 @Slf4j
 @Configuration
+@ConditionalOnExpression("${netty.enable:true}")
 public class CameraClientConfiguration {
 
     // 用一个固定的线程池

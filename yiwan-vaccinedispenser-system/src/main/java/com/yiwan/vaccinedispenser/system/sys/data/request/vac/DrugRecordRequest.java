@@ -81,6 +81,9 @@ public class DrugRecordRequest implements Serializable {
     //层数
     private Integer lineNum;
 
+    //仓位号
+    private Integer positionNum;
+
     /**
      * 当前页
      */

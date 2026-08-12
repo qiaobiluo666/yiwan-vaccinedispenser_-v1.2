@@ -7,9 +7,9 @@ import com.yiwan.vaccinedispenser.core.web.Result;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacDrugRecord;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacMachine;
 import com.yiwan.vaccinedispenser.system.sys.data.request.vac.DrugRecordRequest;
-import com.yiwan.vaccinedispenser.system.sys.data.request.vac.SendDrugRecordRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.zyc.InventoryReportData;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -31,7 +31,7 @@ public interface VacDrugRecordService extends IService<VacDrugRecord>{
     //获取最早的入药记录
     VacDrugRecord getListByMachineIdAndProductNo(Long machineId,String productNo);
 
-
+    VacDrugRecord getListByMachineIdAndProductNoAndExpiredAt(Long machineId,String productNo,Date expiredAt);
     //获取最近的入药记录
     VacDrugRecord getLastByMachineId(Long machineId);
 
@@ -63,6 +63,10 @@ public interface VacDrugRecordService extends IService<VacDrugRecord>{
 
 
     void updateBatchNo();
+
+    List<VacDrugRecord> drugRecordListByCreateTime(Date createTimeStart, Date createTimeEnd);
+
+    List<DrugRecordRequest> drugRecordTotalListByCreateTime(Date createTimeStart, Date createTimeEnd);
 
 
 }

@@ -269,13 +269,13 @@ public class CabinetBMsg {
         //B柜伺服报警 自动上药停止
         if (("03".equals(bytesStr[11])&&"03".equals(bytesStr[7])&&"0B".equals(bytesStr[6]))|| ("02".equals(bytesStr[11])&&"0D".equals(bytesStr[12]))){
             valueOperations.set(RedisKeyConstant.CABINET_B_SERVO_ERROR,"true");
-            String msg = "自动上药伺服报警，结束自动上药 ";
-            log.error(msg+ NettyUtils.StringListToString(bytesStr));
+            String msg = "自动上药伺服报警，结束自动上药 "+NettyUtils.StringListToString(bytesStr);
+            log.error(msg);
             sendDrugThreadManager.stop();
             vacMachineExceptionService.sendException(SettingConstants.MachineException.SEND.code, msg);
             Map<String, Object> commandData = new HashMap<>();
             commandData.put("code", CommandEnums.DEVICE_STATUS_SEND_DRUG_LIST_ERROR.getCode());
-            commandData.put("data", msg);
+            commandData.put("data", msg + NettyUtils.StringListToString(bytesStr));
             websocketService.sendInfo(CommandEnums.MACHINE_STATUS_COMMAND.getCode(),commandData);
 
         }

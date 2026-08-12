@@ -1,15 +1,10 @@
 
 spring:
   datasource:
-
-    type: com.zaxxer.hikari.HikariDataSource  #com.alibaba.druid.pool.DruidDataSource
+    type: com.zaxxer.hikari.HikariDataSource
+#    url: jdbc:mysql://127.0.0.1:3306/vaccine_dispenser_qinggang?useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true&characterEncoding=utf8
 #    url: jdbc:mysql://127.0.0.1:3306/vaccine_dispenser_puyan?useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true&characterEncoding=utf8
-#    url: jdbc:mysql://127.0.0.1:3306/vaccine_dispenser_ximen?useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true&characterEncoding=utf8
-#    url: jdbc:mysql://127.0.0.1:3306/vaccine_dispenser_wangchun?useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true&characterEncoding=utf8
-#    url: jdbc:mysql://127.0.0.1:3306/vaccine_dispenser_init?useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true&characterEncoding=utf8
-    url: jdbc:mysql://127.0.0.1:3306/vaccine_dispenser_gongchenqiao?useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true&characterEncoding=utf8
-#    url: jdbc:mysql://127.0.0.1:3306/vaccine_dispenser_shounan?useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true&characterEncoding=utf8
-#    url: jdbc:mysql://127.0.0.1:3306/vaccine_dispenser_jiangdong?useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true&characterEncoding=utf8
+    url: jdbc:mysql://127.0.0.1:3306/vaccine_dispenser_shounan?useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true&characterEncoding=utf8
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: root
@@ -34,26 +29,34 @@ spring:
       max-request-size: 100MB
       max-file-size: 100MB
 
-
-## netty相关的配置
 netty:
-  ## (控制A、B柜子)是否启用netty_client服务，true表示启用。false禁用所有
+  enable: false
+
+plc:
   enable: true
+  auto-start: true
+  host: 192.168.1.6
+  port: 502
+  connect-timeout: 3000
+  re-connect-delay: 3000
+  max-retry: 10
+  poll-enabled: true
+  alarm-poll-enabled: false
+  #机器手模式
+  handle-mode: true
+
+plc-webvisu:
+  url: http://192.168.1.6:8080/webvisu.htm
+
 
 app:
   apiKey: 905121470
   privateKeyPath: ./yiwan-vaccinedispenser-admin/src/main/resources/private_key.pem
-  #发药政采云接口
   isOpen: false
-  #送药政采云接口
   sendIsOpen: false
-  #  apiEnvironment: https://convenient.wsjkw.zj.gov.cn/test/open/api
   apiEnvironment: http://59.202.53.246/open/api
   version: 1.0.0
 
-cabinetB:
-  ## true left +x -y   right -x -y
-  isX: true
 pdf:
   fontPath: ./yiwan-vaccinedispenser-admin/src/main/resources/fonts/simsun.ttf
 

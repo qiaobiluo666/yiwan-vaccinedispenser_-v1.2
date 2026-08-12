@@ -1,15 +1,18 @@
 package com.yiwan.vaccinedispenser.web.controller.vac;
 
 import com.alibaba.fastjson.JSON;
+import com.yiwan.vaccinedispenser.core.common.emun.RedisKeyConstant;
 import com.yiwan.vaccinedispenser.core.web.Result;
 import com.yiwan.vaccinedispenser.system.dispensing.SendDrugThreadManager;
-
+import com.yiwan.vaccinedispenser.system.plc.manager.PlcSendService;
 import com.yiwan.vaccinedispenser.system.sys.data.request.vac.VacMachineRequest;
 import com.yiwan.vaccinedispenser.system.sys.service.vac.VacMachineService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
@@ -29,12 +32,23 @@ public class DispensingController {
     @Autowired
     private VacMachineService vacMachineService;
 
+    @Autowired(required = false)
+    private PlcSendService plcSendService;
+
+    @Resource(name = "redisTemplate")
+    private RedisTemplate<String, String> redisTemplate;
+
     /**
      * 停止自动上药
      * */
     @GetMapping("/auto-drug-stop")
     public Result autoDrugStop() throws IOException {
-        sendDrugThreadManager.stop();
+
+        if (plcSendService != null) {
+            plcSendService.sendBCabinetFeedStop();
+        }else {
+            sendDrugThreadManager.stop();
+        }
         return Result.success();
     }
 
@@ -43,11 +57,16 @@ public class DispensingController {
      * */
     @GetMapping("/auto-drug-start")
     public Result autoDrugStart() throws IOException {
-
-        sendDrugThreadManager.sendDrug();
-        sendDrugThreadManager.goTable();
+        //开始上药前清理上药信息队列和预留仓位
+        redisTemplate.delete(RedisKeyConstant.PLC_SEND_DRUG_MSG);
+        redisTemplate.delete(RedisKeyConstant.PLC_RESERVED_MACHINES);
+        if (plcSendService != null) {
+            plcSendService.sendBCabinetFeedStart();
+        }else {
+            sendDrugThreadManager.sendDrug();
+            sendDrugThreadManager.goTable();
+        }
         return Result.success();
-
     }
 
 
@@ -84,7 +103,6 @@ public class DispensingController {
     @PostMapping("/auto-back-drug")
     public Result autoBackDrug(@RequestBody VacMachineRequest request) throws ExecutionException, InterruptedException {
         log.info(JSON.toJSONString(request));
-
         return vacMachineService.autoBackVaccine(request);
     }
 

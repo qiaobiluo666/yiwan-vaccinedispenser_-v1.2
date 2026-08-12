@@ -102,20 +102,25 @@ public class CabinetCMsg {
                                 String drugStr = listOps.index(RedisKeyConstant.SEND_LIST,0);
                                 if (drugStr!=null){
                                     log.info("去除一条信息");
-                                    RedisDrugListData drugListData = JSON.parseObject(drugStr,RedisDrugListData.class);
-                                    log.info("第{}个工作台 出药成功信息：{}",address,drugListData);
+                                    try {
+                                        RedisDrugListData drugListData = JSON.parseObject(drugStr,RedisDrugListData.class);
+                                        log.info("第{}个工作台 出药成功信息：{}",address,drugListData);
 
-                                    Map<String, Object> commandData = new HashMap<>();
-                                    commandData.put("code", CommandEnums.DEVICE_STATUS_SEND_DRUG_LIST_END.getCode());
-                                    commandData.put("data", drugListData);
-                                    websocketService.sendInfo(CommandEnums.SHOW_MSG_WEB.getCode(),commandData);
-                                    listOps.leftPop(RedisKeyConstant.SEND_LIST);
+                                        Map<String, Object> commandData = new HashMap<>();
+                                        commandData.put("code", CommandEnums.DEVICE_STATUS_SEND_DRUG_LIST_END.getCode());
+                                        commandData.put("data", drugListData);
+                                        websocketService.sendInfo(CommandEnums.SHOW_MSG_WEB.getCode(),commandData);
+                                        listOps.leftPop(RedisKeyConstant.SEND_LIST);
 
-                                    if("true".equals(configSetting.getZcySend())){
+                                        if("true".equals(configSetting.getZcySend())){
 
-                                        zcyFunction.sendResult(drugListData,"1");
+                                            zcyFunction.sendResult(drugListData,"1");
 
+                                        }
+                                    }catch (Exception e){
+                                        listOps.leftPop(RedisKeyConstant.SEND_LIST);
                                     }
+
 
                                 }
 
@@ -168,6 +173,7 @@ public class CabinetCMsg {
                                     commandData.put("data", drugStr);
                                     websocketService.sendInfo(CommandEnums.SHOW_MSG_WEB.getCode(),commandData);
                                     vacMachineExceptionService.dropException(SettingConstants.MachineException.SENDWARING.code,drugListData,msg);
+
                                     //删除一条数据
                                     listOps.leftPop(RedisKeyConstant.SEND_LIST);
 

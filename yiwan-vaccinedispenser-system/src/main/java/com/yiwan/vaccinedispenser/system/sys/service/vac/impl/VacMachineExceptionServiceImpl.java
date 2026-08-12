@@ -114,6 +114,7 @@ public class VacMachineExceptionServiceImpl extends ServiceImpl<VacMachineExcept
             LambdaQueryWrapper<VacMachineException> lambdaQueryWrapper = new LambdaQueryWrapper<>();
             lambdaQueryWrapper.eq(VacMachineException::getCode,code);
             lambdaQueryWrapper.eq(VacMachineException::getDescription,desc);
+            lambdaQueryWrapper.eq(VacMachineException::getDeleted,0);
             List<VacMachineException> vacMachineExceptionList = vacMachineExceptionMapper.selectList(lambdaQueryWrapper);
             if(!vacMachineExceptionList.isEmpty()){
              return;

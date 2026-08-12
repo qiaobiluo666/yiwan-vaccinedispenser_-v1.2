@@ -24,6 +24,15 @@ public interface RedisKeyConstant {
     //掉药回调队列
     String SEND_LIST = "Dispensing:sendEndList";
 
+
+
+    //PLC 发药队列
+    String PLC_SEND_LIST = "Dispensing:PlcSendList";
+
+    //PLC 当前正在发送的药品信息（供皮带异常重发使用）
+    String PLC_CURRENT_SEND_DRUG = "Dispensing:PlcCurrentSendDrug";
+
+
     //IP设置
     String IP_SET = "Machine:IPWorkMode";
 
@@ -60,9 +69,22 @@ public interface RedisKeyConstant {
     //A柜电磁阀输出是否完成
     String CABINET_A_IO_OUTPUT_STATUS =  "Machine:IOStatus:%s";
 
+
+    String CABINET_A_IO_OUTPUT_TEST_COUNT = "IOTestCount:%s:%s";
+
+    String CABINET_A_IO_OUTPUT_TEST_ERROR_COUNT = "IOTestErrorCount:%s:%s";
+
+
     //A柜是否进入发药队列
     String CABINET_A_DRUG_LIST = "Machine:drugHaveList:%s";
 
+
+    //抬升小挡板是否开启成功
+    String CABINET_A_LIFT_BLANK_IS_OPEN = "Machine:liftBlankIsOpen";
+
+    String CABINET_A_LIFT_BLANK_IS_OPEN_TIME = "Machine:liftBlankIsOpenTime";
+
+    String CABINET_A_LIFT_BLANK_IS_CLOSE_TIME = "Machine:liftBlankIsCloseTime";
 
     //A柜皮带上是否有药
     String CABINET_A_BELT_HAVE_DRUG = "Machine:beltHaveDrug:%s";
@@ -347,8 +369,57 @@ public interface RedisKeyConstant {
         String Z ="Machine:autoDrug:handServo:Z";
     }
 
+    interface bJudge{
+        String LENGTH = "Machine:bJudge:length";
+        String WIDTH = "Machine:bJudge:width";
+        String HEIGHT = "Machine:bJudge:height";
+    }
+
+    interface statusRequest{
+        String JUDGE_REQUEST = "Machine:status:judgeRequest";
+        String BARCODE_REQUEST = "Machine:status:barcodeRequest";
+    }
+
+    interface statusWord3{
+        String A_TASK_RECEIVED = "Machine:status:aTaskReceived";
+        String A_INVENTORY_DONE = "Machine:status:aInventoryDone";
+        String A_FILL_DONE = "Machine:status:aFillDone";
+        String A_RETURN_DONE = "Machine:status:aReturnDone";
+        String A_RETURN_ALLOWED = "Machine:status:aReturnAllowed";
+        String A_RETURN_RUNNING = "Machine:status:aReturnRunning";
+        String A_ABNORMAL_CLEAN_ALLOWED = "Machine:status:aAbnormalCleanAllowed";
+        String A_ABNORMAL_CLEAN_RUNNING = "Machine:status:aAbnormalCleanRunning";
+        String A_ABNORMAL_CLEAN_DONE = "Machine:status:aAbnormalCleanDone";
+        String A_ABNORMAL_CLEAN_OUTPUT_ERROR = "Machine:status:aAbnormalCleanOutputError";
+    }
+
+    interface statusWord4{
+        String C_SEND_DRUG_DONE = "Machine:status:cSendDrugDone";
+        String C_SMASH_DOOR_OPEN_DONE = "Machine:status:cSmashDoorOpenDone";
+        String C_SMASH_DOOR_CLOSE_DONE = "Machine:status:cSmashDoorCloseDone";
+    }
+
+
+    String PLC_SEND_DRUG_MSG = "Machine:PLC:autoDrug:msg";
+
+    String PLC_RETURN_DONE = "Machine:PLC:autoReturn:done";
+
+    /** PLC模式：A柜盘苗距离结果（单位1mm） */
+    String PLC_INVENTORY_DISTANCE = "Machine:PLC:inventory:distance";
+
+    /** PLC模式：A柜盘苗完成标记（"true"/"false"） */
+    String PLC_INVENTORY_DONE = "Machine:PLC:inventory:done";
+
+    /** PLC模式：A柜小皮带异常来源层 */
+    String PLC_BELT_ALARM_SRC_LAYER = "Machine:PLC:beltAlarmSrcLayer";
+
+    /** PLC模式：A柜小皮带异常来源序号 */
+    String PLC_BELT_ALARM_SRC_INDEX = "Machine:PLC:beltAlarmSrcIndex";
 
 
 
-
+    /**
+     * PLC模式：findBox后尚未写入数据库的预留仓位信息（Hash：key=machineId，field=productNo/batchNo/expiredAt）
+     */
+    String PLC_RESERVED_MACHINES = "Machine:PLC:reservedMachines";
 }

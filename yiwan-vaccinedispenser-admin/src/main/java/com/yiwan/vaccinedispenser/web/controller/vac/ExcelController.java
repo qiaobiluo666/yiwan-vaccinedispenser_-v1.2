@@ -59,8 +59,7 @@ public class ExcelController {
 
 
 
-    /**
-     *上药记录导出
+    /*
      */
     @GetMapping("/sendDrug")
     public ResponseEntity<byte[]> downloadSendDrugExcel(
@@ -92,8 +91,38 @@ public class ExcelController {
 
     }
 
+    @GetMapping("/drugRecord")
+    public ResponseEntity<byte[]> downloadDrugRecordExcel(
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date createTimeStart,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date createTimeEnd
+    ) throws Exception {
+        log.info("收到参数：{}，{}",createTimeStart,createTimeEnd);
+        return excelService.getDrugRecordExcel(createTimeStart,createTimeEnd);
+    }
+
+    @GetMapping("/drugRecord/detail")
+    public ResponseEntity<byte[]> downloadDrugRecordDetailExcel(
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date createTimeStart,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date createTimeEnd
+    ) throws Exception {
+        log.info("收到参数：{}，{}",createTimeStart,createTimeEnd);
+        return excelService.getDrugRecordDetailExcel(createTimeStart,createTimeEnd);
+    }
+
+    /**
+     * 药盒统计导出
+     */
+    @GetMapping("/drugBox/statistics")
+    public ResponseEntity<byte[]> downloadDrugBoxStatisticsExcel(
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date createTimeStart,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date createTimeEnd,
+            @RequestParam(required = false) String workbenchName,
+            @RequestParam(required = false) String productNo
+    ) throws Exception {
+        log.info("药盒统计导出，参数：{}，{}，{}，{}",createTimeStart,createTimeEnd,workbenchName,productNo);
+        return excelService.getDrugBoxStatisticsExcel(createTimeStart,createTimeEnd,workbenchName,productNo);
+    }
 
 
 
-
-}
+ }

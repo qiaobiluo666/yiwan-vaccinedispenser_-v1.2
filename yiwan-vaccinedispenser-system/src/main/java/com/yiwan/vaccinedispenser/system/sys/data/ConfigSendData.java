@@ -49,6 +49,9 @@ public class ConfigSendData {
     //退苗退回的工作台
     private Integer returnWorkNumTwo;
 
+    //异常清苗的工作台(异常清苗送苗目的地)
+    private Integer errorWorkbenchNum;
+
     //小皮带停止速度
     private Integer smallBeltStopSpeed;
 
@@ -58,7 +61,13 @@ public class ConfigSendData {
     //5层皮带送药速度
     private Integer beltSendSpeed;
 
+    //抬升皮带上是否有挡板
+    private String haveBlank;
 
+    //抬升皮带上挡板开合时间
+    private Integer haveBlankTime;
 
+    //最后一只药的时候io增加时间
+    private Integer lastIOAddTime;
 
 }
