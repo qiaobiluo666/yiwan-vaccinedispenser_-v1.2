@@ -296,6 +296,14 @@ public class PlcSendService {
         sendWriteSingleRegisterAsync(34, 1);
     }
 
+    /**
+     * B柜检测长宽厚报警确认 (地址229清零)
+     */
+    public void sendBCabinetJudgeAlarmAck() {
+        log.info("[PLC] B柜检测长宽厚报警确认 | 写入地址229=0");
+        sendWriteSingleRegisterAsync(229, 0);
+    }
+
     // ==================== 控制字3 (地址40~44，独立寄存器) ====================
 
     /**

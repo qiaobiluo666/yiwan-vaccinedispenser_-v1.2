@@ -7,10 +7,12 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yiwan.vaccinedispenser.core.common.emun.RedisKeyConstant;
+import com.yiwan.vaccinedispenser.core.exception.ServiceException;
 import com.yiwan.vaccinedispenser.core.web.Result;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacDrugRecord;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacMachine;
 import com.yiwan.vaccinedispenser.system.sys.dao.VacDrugRecordMapper;
+import com.yiwan.vaccinedispenser.system.sys.dao.VacMachineMapper;
 import com.yiwan.vaccinedispenser.system.sys.data.request.vac.DrugRecordRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.zyc.InventoryReportData;
 import com.yiwan.vaccinedispenser.system.sys.service.vac.VacDrugRecordService;
@@ -23,6 +25,7 @@ import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
@@ -40,6 +43,9 @@ public class VacDrugRecordServiceImpl extends ServiceImpl<VacDrugRecordMapper, V
 
     @Autowired
     private VacMachineService vacMachineService;
+
+    @Autowired
+    private VacMachineMapper vacMachineMapper;
 
     @Resource(name = "redisTemplate")
     private ListOperations<String, String> listOps;
@@ -115,6 +121,32 @@ public class VacDrugRecordServiceImpl extends ServiceImpl<VacDrugRecordMapper, V
         vacDrugRecord.setUpdateTime(LocalDateTime.now());
         vacDrugRecordMapper.insert(vacDrugRecord);
 
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int addAutoDrugRecordAndInventory(DrugRecordRequest request, int status, int maxCapacity) {
+        if (request == null || request.getMachineId() == null || maxCapacity <= 0) {
+            throw new IllegalArgumentException("自动上药入库参数不完整");
+        }
+
+        int machineRows = vacMachineMapper.incrementInventoryIfBelowMax(request, status, maxCapacity);
+        if (machineRows != 1) {
+            throw new ServiceException(String.format(
+                    "仓位%s(%s)库存提交失败：仓位不存在、已删除或已达到最大容量%d",
+                    request.getMachineNo(), request.getMachineId(), maxCapacity));
+        }
+
+        request.setStatus("0");
+        VacDrugRecord vacDrugRecord = new VacDrugRecord();
+        BeanUtils.copyProperties(request, vacDrugRecord);
+        vacDrugRecord.setCreateTime(LocalDateTime.now());
+        vacDrugRecord.setUpdateTime(LocalDateTime.now());
+        int recordRows = vacDrugRecordMapper.insert(vacDrugRecord);
+        if (recordRows != 1) {
+            throw new ServiceException("自动上药记录写入失败，仓位库存更新已回滚");
+        }
+        return machineRows;
     }
 
     @Override
@@ -234,12 +266,21 @@ public class VacDrugRecordServiceImpl extends ServiceImpl<VacDrugRecordMapper, V
     }
 
     @Override
-    public String getBatchNoEarly(List<String> batchNoList) {
+    public String getBatchNoEarly(List<String> batchNoList, List<String> productNoList, Date expiredAt) {
+
+        if (batchNoList == null || batchNoList.isEmpty()
+                || productNoList == null || productNoList.isEmpty()
+                || expiredAt == null) {
+            return null;
+        }
 
         List<VacDrugRecord> vacDrugRecordList = vacDrugRecordMapper.selectList(new LambdaQueryWrapper<VacDrugRecord>()
                 .in(VacDrugRecord::getBatchNo,batchNoList)
+                .in(VacDrugRecord::getProductNo, productNoList)
+                .eq(VacDrugRecord::getExpiredAt, expiredAt)
                 .eq(VacDrugRecord::getDeleted,0)
-                .orderByAsc(VacDrugRecord::getCreateTime));
+                .orderByAsc(VacDrugRecord::getCreateTime)
+                .orderByAsc(VacDrugRecord::getId));
 
         if(!vacDrugRecordList.isEmpty()){
 

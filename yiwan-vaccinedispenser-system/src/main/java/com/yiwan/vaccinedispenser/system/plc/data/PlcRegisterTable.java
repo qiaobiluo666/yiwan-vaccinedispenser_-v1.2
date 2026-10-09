@@ -36,6 +36,8 @@ public enum PlcRegisterTable {
     C_ALARM_5(224, "cAlarm5", "C柜报警字5", 1),
     C_ALARM_6(225, "cAlarm6", "C柜报警字6", 1),
     C_ALARM_7(226, "cAlarm7", "C柜报警字7", 1),
+    B_JUDGE_ALARM(229, "bJudgeAlarm", "B柜检测长宽厚报警字", 1,
+            "1=没有检测到药盒，2=距离传感器异常；上位机收到后写0"),
     B_JUDGE_LENGTH(230, "bJudgeLength", "B柜判断长", 1, "单位(0.1mm)"),
     B_JUDGE_WIDTH(231, "bJudgeWidth", "B柜判断宽", 1, "单位(0.1mm)"),
     B_JUDGE_HEIGHT(232, "bJudgeHeight", "B柜判断厚", 1, "单位(0.1mm)"),

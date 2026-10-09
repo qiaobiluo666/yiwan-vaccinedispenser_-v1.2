@@ -45,6 +45,8 @@ public class SettingConstants {
 
     public static final String SHOU_NAN_HOSPITAL_NAME = "宁波首南";
 
+    public static final String LIAN_SHI_HOSPITAL_NAME = "湖州练市医院";
+
     //底部蜂鸣器输出
     public static final int IS_SENSOR_OUTPUT_WARING_NUM = 14;
 

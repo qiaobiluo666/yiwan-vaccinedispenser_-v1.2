@@ -418,7 +418,11 @@ public class PlcClient {
     public void onDisconnected() {
         this.online = false;
         if (connectionManager != null) {
-            connectionManager.onDisconnected();
+            try {
+                connectionManager.onDisconnected();
+            } catch (Exception managerError) {
+                log.error("[PLC] 掉线处理异常，不影响自动重连", managerError);
+            }
         }
     }
 

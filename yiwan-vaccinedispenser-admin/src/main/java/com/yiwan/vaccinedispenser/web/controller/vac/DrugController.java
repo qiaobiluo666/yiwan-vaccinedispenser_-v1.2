@@ -84,6 +84,14 @@ public class DrugController {
         return vacDrugService.drugDistance(code);
     }
 
+    /**
+     * 获取疫苗尺寸测量状态，页面刷新后用于恢复执行中状态
+     */
+    @GetMapping("/distance/status")
+    public Result drugDistanceStatus() {
+        return vacDrugService.drugDistanceStatus();
+    }
+
 
 
     /**

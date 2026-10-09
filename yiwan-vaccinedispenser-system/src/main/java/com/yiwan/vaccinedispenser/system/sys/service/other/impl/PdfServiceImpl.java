@@ -1,7 +1,6 @@
 package com.yiwan.vaccinedispenser.system.sys.service.other.impl;
 
 import com.itextpdf.text.*;
-import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
@@ -18,10 +17,10 @@ import com.yiwan.vaccinedispenser.system.sys.service.vac.VacDrugRecordService;
 import com.yiwan.vaccinedispenser.system.sys.service.vac.VacDrugService;
 import com.yiwan.vaccinedispenser.system.sys.service.vac.VacMachineService;
 import com.yiwan.vaccinedispenser.system.sys.service.vac.VacSendDrugRecordService;
+import com.yiwan.vaccinedispenser.system.until.PdfFontLoader;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -505,9 +504,7 @@ public class PdfServiceImpl implements PdfService {
 
 
     private Font loadChineseFont(String path) throws IOException, DocumentException {
-        ClassPathResource fontResource = new ClassPathResource(path);
-        BaseFont baseFont = BaseFont.createFont(fontResource.getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-        return new Font(baseFont, 12);
+        return PdfFontLoader.load(path);
     }
 
     private PdfPCell createTableCell(String content, Font font) {

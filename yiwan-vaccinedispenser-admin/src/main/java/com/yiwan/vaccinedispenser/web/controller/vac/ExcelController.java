@@ -2,6 +2,7 @@ package com.yiwan.vaccinedispenser.web.controller.vac;
 
 
 import com.itextpdf.text.DocumentException;
+import com.yiwan.vaccinedispenser.core.web.Result;
 import com.yiwan.vaccinedispenser.system.sys.service.other.ExcelService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
@@ -11,10 +12,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -44,6 +43,22 @@ public class ExcelController {
     @GetMapping("/inventory")
     public ResponseEntity<byte[]> exportInventoryExcel( @RequestParam String productName) throws IOException, DocumentException {
        return excelService.getInventoryExcel(productName);
+    }
+
+    /**
+     * 导出货架总数Excel
+     */
+    @GetMapping("/shelfTotal")
+    public ResponseEntity<byte[]> exportShelfTotalExcel() throws IOException {
+        return excelService.getShelfTotalExcel();
+    }
+
+    /**
+     * 导入货架总数Excel
+     */
+    @PostMapping("/shelfTotal/import")
+    public Result<Integer> importShelfTotalExcel(@RequestParam("file") MultipartFile file) {
+        return excelService.importShelfTotalExcel(file);
     }
 
     /**

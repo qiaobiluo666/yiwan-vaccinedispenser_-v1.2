@@ -13,7 +13,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.core.annotation.Order;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
@@ -72,14 +75,23 @@ public class DispensingThreadManager {
     }
 
     private volatile boolean running = true;
+
     @PostConstruct
-    public void init() {
+    public void initRedisState() {
         redisInit();
+    }
+
+    @Order(100)
+    @EventListener(ApplicationReadyEvent.class)
+    public void init() {
         ConfigSetting configSetting = configFunction.getSettingConfigData();
         ConfigSendData configSendData = configFunction.getSendDrugConfigData();
 
         // 将业务逻辑移到异步线程执行
         CompletableFuture.runAsync(() -> {
+            if (!waitForDispensingCabinetsReady()) {
+                return;
+            }
             if("true".equals(configSetting.getIsIoDrop())){
                 log.info("电磁铁模式");
                 drop();
@@ -99,6 +111,34 @@ public class DispensingThreadManager {
 
             blankStatus();
         });
+    }
+
+    /** A、C柜真正连通后才启动发药后台线程，避免应用启动阶段提前下发硬件指令。 */
+    private boolean waitForDispensingCabinetsReady() {
+        int waitCount = 0;
+        while (running) {
+            try {
+                boolean cabinetAReady = "true".equals(
+                        valueOperations.get(RedisKeyConstant.controlStatus.CABINET_A));
+                boolean cabinetCReady = "true".equals(
+                        valueOperations.get(RedisKeyConstant.controlStatus.CABINET_C));
+                if (cabinetAReady && cabinetCReady) {
+                    log.info("A、C柜连接完成，开始启动发药后台线程");
+                    return true;
+                }
+                if (waitCount % 50 == 0) {
+                    log.warn("发药后台线程等待控制柜连接：A柜={}, C柜={}",
+                            cabinetAReady, cabinetCReady);
+                }
+            } catch (Exception redisError) {
+                if (waitCount % 50 == 0) {
+                    log.error("读取控制柜连接状态失败，发药后台线程继续等待", redisError);
+                }
+            }
+            waitCount++;
+            VacUntil.sleep(200);
+        }
+        return false;
     }
 
 

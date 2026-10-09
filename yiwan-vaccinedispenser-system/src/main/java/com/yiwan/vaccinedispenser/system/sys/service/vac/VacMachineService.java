@@ -66,13 +66,31 @@ public interface VacMachineService extends IService<VacMachine>{
     //自动上药查找 对应的仓位（测试模式）
     DrugRecordRequest findBoxTest(List<Long> boxSepcIds, Integer num, DrugRecordRequest request);
 
-    //自动上药查找 对应的仓位（排除指定machineId，用于PLC模式防止并发抢同一仓位）
+    DrugRecordRequest findBoxTestExcludeMachineIds(List<Long> boxSepcIds, Integer num,
+                                                   DrugRecordRequest request,
+                                                   Set<Long> excludeMachineIds);
+
+    //自动上药查找对应仓位；排除集合会应用于老仓位和新仓位。
     DrugRecordRequest findBoxExcludeMachineIds(List<Long> boxSepcIds, Integer num, DrugRecordRequest request, Set<Long> excludeMachineIds);
 
 
 
     //更新药仓 新增或者药品+1
     void updateBox( DrugRecordRequest request, int status);
+
+    /**
+     * 自动上药最终入库。仅当真实库存小于最大容量时原子加一。
+     *
+     * @return 数据库受影响行数，1 为成功，0 为仓位已满或仓位无效
+     */
+    int incrementInventoryIfBelowMax(DrugRecordRequest request, int status, int maxCapacity);
+
+    /**
+     * 发药预占时仅原子减少 vaccine_use_num，不覆盖 vaccine_num。
+     *
+     * @return 数据库受影响行数，1 为成功，0 为可用库存不足或仓位无效
+     */
+    int decrementVaccineUseNumById(Long machineId);
 
     //发药-1
     void decrementNumById(Long id);
@@ -199,6 +217,10 @@ public interface VacMachineService extends IService<VacMachine>{
 
 
     void test7();
+
+
+    //抬升挡板12/13输出与X1传感器循环测试
+    void test8();
 
 
 }

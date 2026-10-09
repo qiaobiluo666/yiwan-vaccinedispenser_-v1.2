@@ -27,6 +27,13 @@ public interface VacDrugRecordService extends IService<VacDrugRecord>{
     //自动上药添加上药记录
     void addDrugRecord(DrugRecordRequest request);
 
+    /**
+     * 自动上药确认落仓后的事务提交：原子增加仓位库存并写入上药记录。
+     *
+     * @return 1 表示仓位库存和上药记录均已提交
+     */
+    int addAutoDrugRecordAndInventory(DrugRecordRequest request, int status, int maxCapacity);
+
 
     //获取最早的入药记录
     VacDrugRecord getListByMachineIdAndProductNo(Long machineId,String productNo);
@@ -54,7 +61,10 @@ public interface VacDrugRecordService extends IService<VacDrugRecord>{
 
 
 
-    String getBatchNoEarly(List<String>  batchNoList);
+    /**
+     * 在同一有效期的候选批次中，返回第一次上药时间最早的批号。
+     */
+    String getBatchNoEarly(List<String> batchNoList, List<String> productNoList, Date expiredAt);
 
 
     DrugRecordRequest countTodayGroupedByProductId(String productNo);

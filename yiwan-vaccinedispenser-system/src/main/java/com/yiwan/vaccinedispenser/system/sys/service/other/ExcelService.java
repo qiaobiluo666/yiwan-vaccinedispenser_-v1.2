@@ -1,7 +1,9 @@
 package com.yiwan.vaccinedispenser.system.sys.service.other;
 
 import com.itextpdf.text.DocumentException;
+import com.yiwan.vaccinedispenser.core.web.Result;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Date;
@@ -14,6 +16,12 @@ public interface ExcelService {
 
     //库存管理导出Excel
     ResponseEntity<byte[]> getInventoryExcel(String productName) throws DocumentException, IOException;
+
+    //货架总数导出Excel
+    ResponseEntity<byte[]> getShelfTotalExcel() throws IOException;
+
+    //货架总数导入Excel
+    Result<Integer> importShelfTotalExcel(MultipartFile file);
 
 
 

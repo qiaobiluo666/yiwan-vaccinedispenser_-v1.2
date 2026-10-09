@@ -9,12 +9,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.EventListener;
+import org.springframework.core.annotation.Order;
 
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author 78671
@@ -24,8 +27,8 @@ import java.util.concurrent.Executors;
 @ConditionalOnExpression("${netty.enable:true}")
 public class CameraClientConfiguration {
 
-    // 用一个固定的线程池
-    ExecutorService threadPool = Executors.newFixedThreadPool(3);
+    /** 相机Bean先交给Spring完成依赖注入，应用完全启动后再建立TCP连接。 */
+    private final List<CameraClient> cameraClients = new CopyOnWriteArrayList<>();
 
 
     @Autowired
@@ -82,15 +85,22 @@ public class CameraClientConfiguration {
 
     public CameraClient getOneNetty(String host, int port, String name, NettyReceiveCameraService nettyReceiveCameraService) throws Exception {
         CameraClient cameraClient = new CameraClient(host, port, name, nettyReceiveCameraService);
-        cameraClient.start();
-        threadPool.submit(()->{
+        cameraClients.add(cameraClient);
+        return cameraClient;
+    }
+
+    @Order(0)
+    @EventListener(ApplicationReadyEvent.class)
+    public void connectCamerasAfterApplicationReady() {
+        log.info("程序已完全启动，开始初始化并连接{}台扫码相机", cameraClients.size());
+        for (CameraClient cameraClient : cameraClients) {
             try {
+                cameraClient.start();
                 cameraClient.connect();
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("扫码相机初始化连接失败", e);
             }
-        });
-        return cameraClient;
+        }
     }
 }
 

@@ -266,6 +266,30 @@ public class NettyUtils {
         return sb.toString();
     }
 
+    /**
+     * 拼接报警报文并去掉每次发送都会变化的字段，用于告警内容去重比较。
+     * <p>
+     * 帧号位于第4、5索引；完整控制板报文以55结尾，CRC为包尾前两个字节。
+     * 相同报警的帧号变化后CRC也会随之变化，因此二者必须同时排除。
+     */
+    public static String StringListToStringWithoutFrame(String[] array) {
+        if (array == null || array.length == 0) {
+            return "";
+        }
+        boolean hasProtocolSuffix = array.length >= 3
+                && "55".equalsIgnoreCase(array[array.length - 1]);
+        int crcFirstIndex = hasProtocolSuffix ? array.length - 3 : -1;
+        int crcSecondIndex = hasProtocolSuffix ? array.length - 2 : -1;
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < array.length; i++) {
+            if (i == 4 || i == 5 || i == crcFirstIndex || i == crcSecondIndex) {
+                continue;
+            }
+            sb.append(array[i]).append(" ");
+        }
+        return sb.toString().trim();
+    }
+
 
 
 

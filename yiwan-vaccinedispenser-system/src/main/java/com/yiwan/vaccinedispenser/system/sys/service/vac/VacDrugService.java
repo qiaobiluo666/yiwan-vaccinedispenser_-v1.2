@@ -36,7 +36,14 @@ public interface VacDrugService extends IService<VacDrug>{
 
 
 
+    /**
+     * 通用产品编码查询：用于判断药品是否存在和读取普通资料。
+     * 此方法故意不校验长宽高，未录入尺寸的药品也必须能被扫码识别。
+     */
     VacDrug vacDrugGetByproductNo(String productNo);
+
+    /** 上药、盘点专用：只返回长宽高均已录入且大于0的药品数据。 */
+    VacDrug vacDrugGetValidDimensionsByProductNo(String productNo);
 
     void vacSaveOrUpdateDrug(VacDrug vacDrug);
 
@@ -48,6 +55,8 @@ public interface VacDrugService extends IService<VacDrug>{
 
     //药盒测距
     Result drugDistance(String code) throws Exception;
+
+    Result drugDistanceStatus();
 
 
     Result getZycDrugDetail(String code) throws Exception;

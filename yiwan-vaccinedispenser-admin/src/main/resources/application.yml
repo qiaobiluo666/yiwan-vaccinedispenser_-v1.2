@@ -47,8 +47,12 @@ camera:
 
 
 logging:
+  file:
+    path: ./logs
+  retention:
+    days: 60
+    cleanup-cron: "0 10 8 * * ?"
+    cleanup-zone: Asia/Shanghai
   level:
     com.yiwan.vaccinedispenser.system.sys.dao: warn
     root: info
-
-

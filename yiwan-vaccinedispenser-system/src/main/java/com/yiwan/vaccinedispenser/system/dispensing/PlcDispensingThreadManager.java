@@ -1,12 +1,16 @@
 package com.yiwan.vaccinedispenser.system.dispensing;
 
 import com.yiwan.vaccinedispenser.core.common.emun.RedisKeyConstant;
+import com.yiwan.vaccinedispenser.system.plc.manager.PlcConnectionManager;
 import com.yiwan.vaccinedispenser.system.sys.service.vac.VacMachineService;
 import com.yiwan.vaccinedispenser.system.until.VacUntil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -38,6 +42,9 @@ public class PlcDispensingThreadManager {
     @Autowired
     private VacMachineService vacMachineService;
 
+    @Autowired
+    private PlcConnectionManager plcConnectionManager;
+
     private final TaskExecutor taskExecutor;
 
     private volatile boolean running = true;
@@ -48,11 +55,20 @@ public class PlcDispensingThreadManager {
     }
 
     @PostConstruct
-    public void init() {
+    public void initRedisState() {
         redisInit();
+    }
+
+    @Order(100)
+    @EventListener(ApplicationReadyEvent.class)
+    public void init() {
         taskExecutor.execute(() -> {
             log.info("[PLC] 发药线程启动");
             while (running) {
+                if (!plcConnectionManager.isConnected()) {
+                    VacUntil.sleep(200);
+                    continue;
+                }
                 boolean shouldDrop = checkPlcSendList();
                 if (shouldDrop) {
                     try {

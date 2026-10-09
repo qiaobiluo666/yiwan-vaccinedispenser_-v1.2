@@ -97,14 +97,19 @@ public class NettyClientHandler extends ChannelInboundHandlerAdapter {
             ? ctx.channel().remoteAddress().toString() : "unknown";
         log.warn("[{}] 连接断开 - 远程地址: {}", nettyClient.getName(), remoteAddress);
         
-        nettyClient.setOnline(false);
+        nettyClient.onDisconnected();
+
+        // 先保证重连已经安排，再执行自动上药停止和报警。
+        nettyClient.scheduleReconnect("连接断开");
 
         if("B".equals(nettyClient.getName()) || "A".equals(nettyClient.getName())){
-            sendDrugThreadManager.stop();
+            if (sendDrugThreadManager != null) {
+                sendDrugThreadManager.stopForRequiredDeviceDisconnect(
+                        nettyClient.getName() + "柜控制板");
+            } else {
+                log.error("[{}] 控制柜掉线时自动上药管理器尚未初始化", nettyClient.getName());
+            }
         }
-
-        // 使用统一的重连方法，确保不会重复重连
-        nettyClient.scheduleReconnect("连接断开");
     }
 
     // 处理空闲状态事件（心跳检测）

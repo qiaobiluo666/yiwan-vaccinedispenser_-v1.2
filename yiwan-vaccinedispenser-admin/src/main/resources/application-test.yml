@@ -4,7 +4,8 @@ spring:
     type: com.zaxxer.hikari.HikariDataSource
 #    url: jdbc:mysql://127.0.0.1:3306/vaccine_dispenser_qinggang?useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true&characterEncoding=utf8
 #    url: jdbc:mysql://127.0.0.1:3306/vaccine_dispenser_puyan?useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true&characterEncoding=utf8
-    url: jdbc:mysql://127.0.0.1:3306/vaccine_dispenser_shounan?useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true&characterEncoding=utf8
+#    url: jdbc:mysql://127.0.0.1:3306/vaccine_dispenser_shounan?useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true&characterEncoding=utf8
+    url: jdbc:mysql://127.0.0.1:3306/vaccine_dispenser_wangchun?useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true&characterEncoding=utf8
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: root
@@ -30,10 +31,10 @@ spring:
       max-file-size: 100MB
 
 netty:
-  enable: false
+  enable: true
 
 plc:
-  enable: true
+  enable: false
   auto-start: true
   host: 192.168.1.6
   port: 502

@@ -141,7 +141,7 @@ public interface RedisKeyConstant {
     String CABINET_B_INIT = "Machine:autoDrug:Status:cabinetInit";
 
 
-    //B柜错误计数
+    //扫码完成后的连续回退计数（正常上药一次即清零）
     String CABINET_B_ERROR_COUNT= "Machine:autoDrug:errorCount";
 
 
@@ -373,6 +373,9 @@ public interface RedisKeyConstant {
         String LENGTH = "Machine:bJudge:length";
         String WIDTH = "Machine:bJudge:width";
         String HEIGHT = "Machine:bJudge:height";
+        String ALARM = "Machine:bJudge:alarm";
+        String MANUAL_RUNNING = "Machine:bJudge:manualRunning";
+        String MANUAL_MESSAGE = "Machine:bJudge:manualMessage";
     }
 
     interface statusRequest{
@@ -422,4 +425,15 @@ public interface RedisKeyConstant {
      * PLC模式：findBox后尚未写入数据库的预留仓位信息（Hash：key=machineId，field=productNo/batchNo/expiredAt）
      */
     String PLC_RESERVED_MACHINES = "Machine:PLC:reservedMachines";
+
+    /**
+     * Java自动上药逐盒预留。以下Key只允许通过AutoDrugReservationManager操作，
+     * 数量字段由Redis脚本原子维护，不设置TTL，也不能在普通启动/停止时直接删除。
+     */
+    String JAVA_AUTO_DRUG_RESERVATION_ITEMS = "Machine:autoDrug:reservation:items";
+    String JAVA_AUTO_DRUG_RESERVATION_OWNERS = "Machine:autoDrug:reservation:owners";
+    String JAVA_AUTO_DRUG_RESERVATION_MACHINE_IDENTITIES = "Machine:autoDrug:reservation:machineIdentities";
+    String JAVA_AUTO_DRUG_RESERVATION_MACHINE_PENDING = "Machine:autoDrug:reservation:machinePending";
+    String JAVA_AUTO_DRUG_RESERVATION_MACHINE_CAPACITY = "Machine:autoDrug:reservation:machineCapacity";
+    String JAVA_AUTO_DRUG_RESERVATION_ACTIVE_SESSION = "Machine:autoDrug:reservation:activeSession";
 }

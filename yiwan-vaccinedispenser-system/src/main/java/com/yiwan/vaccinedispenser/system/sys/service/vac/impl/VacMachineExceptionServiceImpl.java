@@ -21,6 +21,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
@@ -110,21 +111,23 @@ public class VacMachineExceptionServiceImpl extends ServiceImpl<VacMachineExcept
     @Override
     public void dropException(Integer code, RedisDrugListData redisDrugListData, String desc) {
 
-        if(redisDrugListData==null){
-            LambdaQueryWrapper<VacMachineException> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-            lambdaQueryWrapper.eq(VacMachineException::getCode,code);
-            lambdaQueryWrapper.eq(VacMachineException::getDescription,desc);
-            lambdaQueryWrapper.eq(VacMachineException::getDeleted,0);
-            List<VacMachineException> vacMachineExceptionList = vacMachineExceptionMapper.selectList(lambdaQueryWrapper);
-            if(!vacMachineExceptionList.isEmpty()){
-             return;
-            }
+        LambdaQueryWrapper<VacMachineException> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(VacMachineException::getCode,code);
+        lambdaQueryWrapper.eq(VacMachineException::getDescription,desc);
+        lambdaQueryWrapper.eq(VacMachineException::getDeleted,0);
+        if (redisDrugListData != null && redisDrugListData.getBoxNo() != null) {
+            lambdaQueryWrapper.eq(VacMachineException::getBoxNo, redisDrugListData.getBoxNo());
+        }
+        List<VacMachineException> vacMachineExceptionList = vacMachineExceptionMapper.selectList(lambdaQueryWrapper);
+        if(!vacMachineExceptionList.isEmpty()){
+            return;
         }
 
 
         VacMachineException vacMachineException = new VacMachineException();
         if(redisDrugListData!=null){
             BeanUtils.copyProperties(redisDrugListData,vacMachineException);
+            vacMachineException.setDrugName(redisDrugListData.getProductName());
         }
 
         vacMachineException.setCode(code);
@@ -134,7 +137,7 @@ public class VacMachineExceptionServiceImpl extends ServiceImpl<VacMachineExcept
     }
 
     @Override
-    public void sendException(Integer code, String desc) {
+    public synchronized void sendException(Integer code, String desc) {
 
        List<VacMachineException> vacMachineExceptionList =  vacMachineExceptionMapper.selectList(new LambdaQueryWrapper<VacMachineException>()
                 .eq(VacMachineException::getDeleted,0)
@@ -153,9 +156,18 @@ public class VacMachineExceptionServiceImpl extends ServiceImpl<VacMachineExcept
     }
 
     @Override
-    public void sendException(Integer code, String productName, String desc) {
+    public synchronized void sendException(Integer code, String productName, String desc) {
         LambdaQueryWrapper<VacMachineException>  queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(VacMachineException::getDrugName,productName);
+        if (StringUtils.hasText(productName)) {
+            queryWrapper.eq(VacMachineException::getDrugName, productName);
+        } else {
+            // 历史通用报警的drug_name既有NULL也有空字符串，两者必须视为同一类报警。
+            // 不能使用“drug_name = NULL”，该条件在数据库中永远匹配不到旧记录。
+            queryWrapper.and(wrapper -> wrapper
+                    .isNull(VacMachineException::getDrugName)
+                    .or()
+                    .eq(VacMachineException::getDrugName, ""));
+        }
         queryWrapper.eq(VacMachineException::getCode,code);
         queryWrapper.eq(VacMachineException::getDescription,desc);
         queryWrapper.eq(VacMachineException::getDeleted,0);
@@ -163,7 +175,8 @@ public class VacMachineExceptionServiceImpl extends ServiceImpl<VacMachineExcept
 
         if(vacMachineExceptionList.isEmpty()){
             VacMachineException vacMachineException = new VacMachineException();
-            vacMachineException.setDrugName(productName);
+            // 新增通用报警统一存空字符串，后续查询同时兼容历史NULL记录。
+            vacMachineException.setDrugName(StringUtils.hasText(productName) ? productName : "");
             vacMachineException.setCode(code);
             vacMachineException.setDescription(desc);
             vacMachineExceptionMapper.insert(vacMachineException);

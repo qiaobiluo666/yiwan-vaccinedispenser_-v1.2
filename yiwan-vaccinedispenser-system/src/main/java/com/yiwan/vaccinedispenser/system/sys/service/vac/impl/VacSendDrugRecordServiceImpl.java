@@ -145,14 +145,14 @@ public class VacSendDrugRecordServiceImpl extends ServiceImpl<VacSendDrugRecordM
         VacWorkbench vacWorkbench =vacWorkbenchService.getByWorkbenchNum(drugListData.getWorkbenchNum());
         log.info(JSON.toJSONString(vacWorkbench));
         if(vacDrugRecord!=null&&vacWorkbench!=null){
+            VacSendDrugRecord vacSendDrugRecord = new VacSendDrugRecord();
+            BeanUtils.copyProperties(vacDrugRecord,vacSendDrugRecord);
+            fillMachineNo(vacSendDrugRecord, drugListData);
+            vacSendDrugRecord.setWorkbenchName(vacWorkbench.getWorkbenchName());
+            vacSendDrugRecord.setWorkbenchNo(vacWorkbench.getWorkbenchNo());
 
             //上药记录 药品的状态变成不在药仓里
             vacDrugRecordService.updateStatusById(vacDrugRecord.getId(),"1");
-
-            VacSendDrugRecord vacSendDrugRecord = new VacSendDrugRecord();
-            BeanUtils.copyProperties(vacDrugRecord,vacSendDrugRecord);
-            vacSendDrugRecord.setWorkbenchName(vacWorkbench.getWorkbenchName());
-            vacSendDrugRecord.setWorkbenchNo(vacWorkbench.getWorkbenchNo());
 
             //发药记录
             vacSendDrugRecord.setStatus(status);
@@ -168,7 +168,7 @@ public class VacSendDrugRecordServiceImpl extends ServiceImpl<VacSendDrugRecordM
             VacSendDrugRecord vacSendDrugRecord = new VacSendDrugRecord();
             BeanUtils.copyProperties(drugListData,vacSendDrugRecord);
             vacSendDrugRecord.setMachineId(drugListData.getMachineId());
-            vacSendDrugRecord.setMachineNo(drugListData.getMachineNo());
+            fillMachineNo(vacSendDrugRecord, drugListData);
             if(vacDrug!=null){
                 vacSendDrugRecord.setVaccineId(vacDrug.getId());
             }
@@ -190,6 +190,25 @@ public class VacSendDrugRecordServiceImpl extends ServiceImpl<VacSendDrugRecordM
 
 
 
+    }
+
+    /**
+     * 历史Redis任务只保存了boxNo，没有保存machineNo；两者在本项目中都表示仓位编号。
+     * 统一在写发药记录前补齐，避免machine_no非空约束导致已掉落的药被重复执行。
+     */
+    private void fillMachineNo(VacSendDrugRecord vacSendDrugRecord, RedisDrugListData drugListData) {
+        if (StringUtils.isBlank(vacSendDrugRecord.getMachineNo())) {
+            String machineNo = StringUtils.isNotBlank(drugListData.getMachineNo())
+                    ? drugListData.getMachineNo()
+                    : drugListData.getBoxNo();
+            vacSendDrugRecord.setMachineNo(machineNo);
+        }
+        if (StringUtils.isBlank(vacSendDrugRecord.getMachineNo())) {
+            throw new IllegalArgumentException(String.format(
+                    "发药记录缺少仓位编号：machineId=%s，productNo=%s，requestNo=%s，taskId=%s",
+                    drugListData.getMachineId(), drugListData.getProductNo(),
+                    drugListData.getRequestNo(), drugListData.getTaskId()));
+        }
     }
 
     @Override

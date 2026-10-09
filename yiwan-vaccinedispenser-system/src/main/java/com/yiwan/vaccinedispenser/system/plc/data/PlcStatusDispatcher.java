@@ -324,6 +324,9 @@ public class PlcStatusDispatcher {
             case C_ALARM_6: case C_ALARM_7:
                 processAlarmWord(info);
                 break;
+            case B_JUDGE_ALARM:
+                processBJudgeAlarm(info);
+                break;
             case B_JUDGE_LENGTH:
                 if (!"0".equals(info.getActualValue())) {
                     valueOperations.set(RedisKeyConstant.bJudge.LENGTH, String.valueOf(Math.round(Float.parseFloat(info.getActualValue()) / 10)));
@@ -760,6 +763,37 @@ public class PlcStatusDispatcher {
                 }
             }
         }
+    }
+
+    /**
+     * 处理地址229的B柜长宽厚检测报警。
+     * 1=没有检测到药盒，2=距离传感器异常；报警值锁存在Redis中，
+     * 由当前“获取疫苗尺寸”请求返回给疫苗尺寸管理弹窗，随后按协议向PLC写229=0确认。
+     */
+    private void processBJudgeAlarm(RegisterInfo info) {
+        int alarmValue = info.getRawValue();
+        String redisKey = "plc:alarm:B_JUDGE_ALARM";
+        String currentValue = String.valueOf(alarmValue);
+        String lastValue = valueOperations.get(redisKey);
+
+        if (alarmValue == 0) {
+            if (!"0".equals(lastValue)) {
+                valueOperations.set(redisKey, "0");
+                log.info("[PLC] B柜检测长宽厚报警恢复 | 地址229=0");
+            }
+            return;
+        }
+
+        //该值不能在PLC清零时一起清除，否则HTTP测距线程可能来不及读取；
+        //每次开始获取疫苗尺寸时会主动将它复位为0。
+        valueOperations.set(RedisKeyConstant.bJudge.ALARM, currentValue);
+
+        if (!currentValue.equals(lastValue)) {
+            valueOperations.set(redisKey, currentValue);
+            log.error("[PLC] B柜检测长宽厚报警 | 地址229={}", alarmValue);
+        }
+
+        plcSendService.sendBCabinetJudgeAlarmAck();
     }
 
     /**

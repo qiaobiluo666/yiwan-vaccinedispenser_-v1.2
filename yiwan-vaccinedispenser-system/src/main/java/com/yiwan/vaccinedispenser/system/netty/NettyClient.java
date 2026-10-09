@@ -51,7 +51,7 @@ public final class NettyClient {
     private String name;
     private Bootstrap bootstrap;
     private EventLoopGroup group;
-    private SocketChannel socketChannel;
+    private volatile SocketChannel socketChannel;
     private NettyReceiveCabinetService nettyReceiveService;
 
     @Resource(name = "redisTemplate")
@@ -66,6 +66,11 @@ public final class NettyClient {
     /** ================= 重连管理相关 ================ */
     // 重连状态标记，防止重复重连
     private final AtomicBoolean reconnecting = new AtomicBoolean(false);
+    /** B柜同一轮掉线只写一次自动上药异常，连接恢复后才允许下一轮重新报警。 */
+    private final AtomicBoolean bCabinetDisconnectAlarmReported = new AtomicBoolean(false);
+    /** B柜掉线时写入、重连后清除的自动上药报警固定文案。 */
+    private static final String B_CABINET_AUTO_DRUG_DISCONNECT_MESSAGE =
+            "自动上药异常：B柜控制板未连接或连接断开，无法继续自动上药";
     // 当前重连任务，用于取消重复的重连请求
     private volatile ScheduledFuture<?> reconnectTask = null;
     // 重连任务锁，确保重连逻辑的线程安全
@@ -120,6 +125,16 @@ public final class NettyClient {
             return;
         }
 
+        online = false;
+        try {
+            if (valueOperations != null) {
+                valueOperations.set(getStatusRedisKey(), "false");
+            }
+        } catch (Exception redisError) {
+            log.error("[{}] 连接前更新控制柜离线状态失败", name, redisError);
+        }
+        log.info("[{}] 开始连接 {}:{}", name, host, port);
+
         bootstrap.connect(host, port).addListener((ChannelFutureListener) future -> {
             Map<String, Object> commandData = new HashMap<>();
             String redisKey;
@@ -142,39 +157,76 @@ public final class NettyClient {
                 String errorType = cause != null ? cause.getClass().getSimpleName() : "Unknown";
                 
                 log.warn("[{}] 连接失败 {}:{} - {}: {}", name, host, port, errorType, errorDetail);
-                
+
                 String errorMsg = String.format("当前客户端：%s 连接失败 %s:%s - %s", name, host, port, errorDetail);
 
-                if (vacMachineExceptionService.getExceptionByName(name).isEmpty()) {
-
-                    vacMachineExceptionService.sendException(SettingConstants.MachineException.CONTROLLER.code, name, errorMsg);
-
-                }
-
-                valueOperations.set(redisKey, "false");
                 commandData.put("data", "fail");
 
-                // 连接失败后，使用统一的重连方法调度下一次重连
+                // 重连是主流程，必须先安排；报警、Redis 或前端通知失败都不能打断它。
                 scheduleReconnect("连接失败");
+
+                try {
+                    if (vacMachineExceptionService != null
+                            && vacMachineExceptionService.getExceptionByName(name).isEmpty()) {
+                        vacMachineExceptionService.sendException(
+                                SettingConstants.MachineException.CONTROLLER.code, name, errorMsg);
+                    }
+                } catch (Exception alarmError) {
+                    log.error("[{}] 连接失败报警写入异常，不影响自动重连", name, alarmError);
+                }
+
+                reportBCabinetAutoDrugDisconnect();
+
+                try {
+                    if (valueOperations != null) {
+                        valueOperations.set(redisKey, "false");
+                    }
+                } catch (Exception redisError) {
+                    log.error("[{}] 更新控制柜离线状态失败，不影响自动重连", name, redisError);
+                }
 
             } else {
                 socketChannel = (SocketChannel) future.channel();
                 online = true;
+                if ("B".equals(name)) {
+                    bCabinetDisconnectAlarmReported.set(false);
+                }
                 // 连接成功，重置重连标记
                 resetReconnectState();
                 log.info("[{}] 连接成功 {}:{}", name, host, port);
 
-                List<VacMachineException> exceptions = vacMachineExceptionService.getExceptionByName(name);
-                if (!exceptions.isEmpty()) {
-                    vacMachineExceptionService.delExceptionByName(exceptions);
+                try {
+                    if (valueOperations != null) {
+                        valueOperations.set(redisKey, "true");
+                    }
+                } catch (Exception redisError) {
+                    log.error("[{}] 更新控制柜在线状态失败，TCP连接已成功", name, redisError);
                 }
 
-                valueOperations.set(redisKey, "true");
+                try {
+                    if (vacMachineExceptionService != null) {
+                        List<VacMachineException> exceptions = vacMachineExceptionService.getExceptionByName(name);
+                        if (!exceptions.isEmpty()) {
+                            vacMachineExceptionService.delExceptionByName(exceptions);
+                        }
+                    }
+                } catch (Exception alarmError) {
+                    log.error("[{}] 清除控制柜掉线报警失败，TCP连接和在线状态不受影响", name, alarmError);
+                }
+
+                clearBCabinetAutoDrugDisconnectAlarm();
+
                 commandData.put("data", "success");
 
             }
 
-            websocketService.sendInfo(CommandEnums.SHOW_MSG_WEB.getCode(), commandData);
+            try {
+                if (websocketService != null) {
+                    websocketService.sendInfo(CommandEnums.SHOW_MSG_WEB.getCode(), commandData);
+                }
+            } catch (Exception websocketError) {
+                log.error("[{}] 推送控制柜连接状态失败，不影响连接和自动重连", name, websocketError);
+            }
         });
     }
 
@@ -291,7 +343,64 @@ public final class NettyClient {
     public void onDisconnected() {
         this.online = false;
         sendQueue.clear();
+        try {
+            if (valueOperations != null) {
+                valueOperations.set(getStatusRedisKey(), "false");
+            }
+        } catch (Exception redisError) {
+            log.error("[{}] 更新控制柜离线状态失败，不影响自动重连", name, redisError);
+        }
+        reportBCabinetAutoDrugDisconnect();
         // 注意：这里不触发重连，重连由 channelInactive 或 exceptionCaught 统一处理
+    }
+
+    private void reportBCabinetAutoDrugDisconnect() {
+        if (!"B".equals(name)
+                || !bCabinetDisconnectAlarmReported.compareAndSet(false, true)) {
+            return;
+        }
+        try {
+            // 使用固定编码和固定文案；异常服务会兼容历史NULL/空字符串并去重。
+            vacMachineExceptionService.sendException(
+                    SettingConstants.MachineException.SEND.code, "", B_CABINET_AUTO_DRUG_DISCONNECT_MESSAGE);
+            log.error(B_CABINET_AUTO_DRUG_DISCONNECT_MESSAGE);
+        } catch (Throwable alarmError) {
+            // 写库失败时允许下一次重连失败再次尝试，不能因报警失败中断Netty重连。
+            bCabinetDisconnectAlarmReported.set(false);
+            log.error("B柜掉线写入自动上药异常失败", alarmError);
+        }
+    }
+
+    /** B柜连接恢复后，只清除与本次掉线对应的自动上药报警。 */
+    void clearBCabinetAutoDrugDisconnectAlarm() {
+        if (!"B".equals(name) || vacMachineExceptionService == null) {
+            return;
+        }
+        try {
+            vacMachineExceptionService.delExceptionByCodeAndDesc(
+                    SettingConstants.MachineException.SEND.code,
+                    B_CABINET_AUTO_DRUG_DISCONNECT_MESSAGE);
+            log.info("B柜控制板已重新连接，自动清除B柜掉线导致的自动上药报警");
+        } catch (Throwable alarmError) {
+            // 报警清除属于附加动作，失败不能改变已经恢复的TCP连接和在线状态。
+            log.error("B柜控制板已重新连接，但清除自动上药掉线报警失败，不影响后续通信", alarmError);
+        }
+    }
+
+    /** 返回控制柜当前真实的 TCP 连接状态。 */
+    public boolean isActive() {
+        SocketChannel channel = socketChannel;
+        return online && channel != null && channel.isActive();
+    }
+
+    private String getStatusRedisKey() {
+        if ("A".equals(name)) {
+            return RedisKeyConstant.controlStatus.CABINET_A;
+        }
+        if ("B".equals(name)) {
+            return RedisKeyConstant.controlStatus.CABINET_B;
+        }
+        return RedisKeyConstant.controlStatus.CABINET_C;
     }
 
     /** 内部封装的命令对象 */

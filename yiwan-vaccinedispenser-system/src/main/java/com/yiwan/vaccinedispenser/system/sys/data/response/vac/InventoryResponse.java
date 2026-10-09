@@ -36,6 +36,9 @@ public class InventoryResponse {
     //药品总数量
     private Integer totalVaccineNum;
 
+    //货架总数
+    private Integer shelfTotalNum;
+
     //机器状态 1 正常 2 多人份
     private Integer status;
 

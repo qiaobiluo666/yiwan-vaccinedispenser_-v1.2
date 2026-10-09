@@ -323,21 +323,21 @@ public class CabinetAMsg {
         if (("03".equals(bytesStr[11])&&"03".equals(bytesStr[7])&&"0A".equals(bytesStr[6]))|| ("02".equals(bytesStr[11])&&"0D".equals(bytesStr[12]))){
             String msg;
             if(address>=1&&address<=5){
-                msg = "第"+address+"皮带报警,请联系售后人员！" +NettyUtils.StringListToString(bytesStr);
+                msg = "第"+address+"皮带报警,请联系售后人员！" +NettyUtils.StringListToStringWithoutFrame(bytesStr);
                 log.error(msg);
                 vacMachineExceptionService.sendException(SettingConstants.MachineException.BELT.code,null,msg);
             }else if(address==6||address==9){
-                msg = "第"+address+"伺服报警,无法自动发药，请联系售后人员！"+NettyUtils.StringListToString(bytesStr);
+                msg = "第"+address+"伺服报警,无法自动发药，请联系售后人员！"+NettyUtils.StringListToStringWithoutFrame(bytesStr);
                 log.error(msg);
                 vacMachineExceptionService.sendException(SettingConstants.MachineException.SENDDRUG.code,null,msg);
             }else if(address==7||address==8){
 
-                log.error("自动上药伺服报警，结束库存盘点"+NettyUtils.StringListToString(bytesStr));
+                log.error("自动上药伺服报警，结束库存盘点"+NettyUtils.StringListToStringWithoutFrame(bytesStr));
                 valueOperations.set(RedisKeyConstant.DRUG_INVENTORY_START,"false");
 
-                log.error("自动上药伺服报警，结束自动上药"+NettyUtils.StringListToString(bytesStr));
+                log.error("自动上药伺服报警，结束自动上药"+NettyUtils.StringListToStringWithoutFrame(bytesStr));
                 sendDrugThreadManager.stop();
-                msg = "第"+address+"伺服报警,无法自动上药，请联系售后人员！"+NettyUtils.StringListToString(bytesStr);
+                msg = "第"+address+"伺服报警,无法自动上药，请联系售后人员！"+NettyUtils.StringListToStringWithoutFrame(bytesStr);
                 log.error(msg);
                 vacMachineExceptionService.sendException(SettingConstants.MachineException.SEND.code,null,msg);
             }else {
@@ -539,6 +539,20 @@ public class CabinetAMsg {
                     } else {
                         valueOperations.set(RedisKeyConstant.sensor.SENSOR_CABINET_A, sensorList.toString());
                     }
+                }
+            }
+
+            //test8挡板原点传感器X1
+            case "01"-> {
+                switch (bytesStr[11]) {
+                    //触发
+                    case "01" -> valueOperations.set(
+                            String.format(RedisKeyConstant.sensor.SENSOR_CABINET_A_NUM, address),
+                            CabinetConstants.SensorStatus.NORMAL.code);
+                    //不触发
+                    case "02" -> valueOperations.set(
+                            String.format(RedisKeyConstant.sensor.SENSOR_CABINET_A_NUM, address),
+                            CabinetConstants.SensorStatus.RESET.code);
                 }
             }
 

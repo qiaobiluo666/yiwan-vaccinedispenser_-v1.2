@@ -6,10 +6,17 @@ import com.yiwan.vaccinedispenser.core.common.CommandEnums;
 import com.yiwan.vaccinedispenser.core.common.SettingConstants;
 import com.yiwan.vaccinedispenser.core.common.emun.CabinetConstants;
 import com.yiwan.vaccinedispenser.core.common.emun.RedisKeyConstant;
+import com.yiwan.vaccinedispenser.core.exception.ServiceException;
 import com.yiwan.vaccinedispenser.core.websocket.WebsocketService;
 import com.yiwan.vaccinedispenser.system.camera.CameraSendMsg;
+import com.yiwan.vaccinedispenser.system.dispensing.reservation.AutoDrugReleaseResult;
+import com.yiwan.vaccinedispenser.system.dispensing.reservation.AutoDrugReleaseOutcome;
+import com.yiwan.vaccinedispenser.system.dispensing.reservation.AutoDrugReservationManager;
+import com.yiwan.vaccinedispenser.system.dispensing.reservation.AutoDrugReservationRequest;
+import com.yiwan.vaccinedispenser.system.dispensing.reservation.AutoDrugReservationResult;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacBoxSpec;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacDrug;
+import com.yiwan.vaccinedispenser.system.domain.model.vac.VacMachine;
 import com.yiwan.vaccinedispenser.system.sys.dao.VacDrugMapper;
 import com.yiwan.vaccinedispenser.system.sys.data.*;
 import com.yiwan.vaccinedispenser.system.sys.data.request.netty.*;
@@ -31,6 +38,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author slh
@@ -41,6 +49,33 @@ import java.util.concurrent.ExecutionException;
 @Slf4j
 @Component
 public class SendDrugFunction {
+
+    /**
+     * 单Windows服务内协调“DB读取+Redis预留”和“DB提交+Redis释放”，
+     * 避免两个数据源之间用旧DB库存形成短暂错误空位。
+     */
+    private final Object autoDrugReservationInventoryLock = new Object();
+
+    /** 自动上药允许连续回退的最大次数（包含测距尺寸不合规）。 */
+    private static final int MAX_CONSECUTIVE_SCAN_RETURN_COUNT = 10;
+
+    /** 上药机械手X轴坐标单位为0.1mm，每次仅补偿1mm。 */
+    private static final int HAND_SERVO_X_COMPENSATION_STEP = 10;
+
+    /** 仓位X坐标有误时最多补偿5次，累计不超过5mm。 */
+    private static final int MAX_HAND_SERVO_X_COMPENSATION_STEPS = 5;
+
+    /** 每次1mm补偿到位后，等待药盒稳定再读取传感器。 */
+    private static final int HAND_SERVO_X_STABLE_WAIT_TIME = 2000;
+
+    /** 药盒开始落仓后先等待8秒，仍未离手才启动伺服7补偿。 */
+    private static final int HAND_SERVO_X_COMPENSATION_START_WAIT_TIME = 8000;
+
+    /** 1mm短行程必须在3秒内到位，超时立即停止补偿。 */
+    private static final int HAND_SERVO_X_MOVE_WAIT_TIME = 3000;
+
+    /** 覆盖首次判断、5次补偿稳定等待以及机械手回原，避免下一盒在20秒时误判超时。 */
+    private static final int HAND_DROP_PROCESS_WAIT_TIME = 45000;
 
     @Resource(name = "redisTemplate")
     private ValueOperations<String, String> valueOperations;
@@ -68,6 +103,9 @@ public class SendDrugFunction {
 
     @Autowired
     private VacMachineService vacMachineService;
+
+    @Autowired
+    private AutoDrugReservationManager autoDrugReservationManager;
 
 
     @Autowired
@@ -129,19 +167,25 @@ public class SendDrugFunction {
             //扫码不能先动 等待长宽高检测完毕
             valueOperations.set(RedisKeyConstant.CABINET_B_TEST_SCAN,"false");
 
-            aboveCamera();
+            if (!aboveCamera()) {
+                throw new ServiceException("上方扫码相机连接断开，自动上药已停止");
+            }
             //打开3个距离传感器 计算距离
             DistanceServoData distanceServoData =distanceServoAll(configData);
 
             //判断药盒形态
             if(distanceServoData.getIsReturn()) {
-                tableReturn();
+                // 测距阶段的尺寸不合规/传感器异常也是一次真实回退，
+                // 必须纳入连续10次保护。此时药盒仍在滑台，不需要先走伺服回退位。
+                returnAfterScan(configData, "测距阶段药盒尺寸不合规或传感器异常，退回", false);
                 return;
             }
 
             String result = valueOperations.get(RedisKeyConstant.scanCode.ABOVE);
             if("NoRead".equals(result)){
-                aboveCamera();
+                if (!aboveCamera()) {
+                    throw new ServiceException("上方扫码相机连接断开，自动上药已停止");
+                }
                 VacUntil.sleep(500);
                 result = valueOperations.get(RedisKeyConstant.scanCode.ABOVE);
             }
@@ -193,7 +237,7 @@ public class SendDrugFunction {
     /**
      * 自动上药总流程
      */
-    public void sendDrug( ConfigData configData,ConfigSetting configSetting) throws Exception {
+    public void sendDrug(ConfigData configData, ConfigSetting configSetting, String sessionId) throws Exception {
 
         //开始扫码
         if("true".equals(valueOperations.get(RedisKeyConstant.CABINET_B_TEST_SCAN))){
@@ -208,7 +252,7 @@ public class SendDrugFunction {
             assert distanceServoData != null;
             scanCodeData.setAboveCode(distanceServoData.getAboveCode());
             if(scanCodeData.getAboveCode().split(";").length>1){
-                tableReturn();
+                returnAfterScan(configData,"上方扫码识别到多个条码,退回", false);
                 return;
             }
 
@@ -268,7 +312,7 @@ public class SendDrugFunction {
             valueOperations.set(RedisKeyConstant.CABINET_B_TEST_DRUGS_RESULT_IS_END,"false");
             //如果确定滑台有药 回滚
             if( Objects.equals(valueOperations.get(RedisKeyConstant.CABINET_B_TEST_DRUGS_RESULT), "true")){
-                servoTableReturn(configData,"滑台有药 退回");
+                returnAfterScan(configData,"滑台有药 退回");
                 return;
             }
 
@@ -300,10 +344,13 @@ public class SendDrugFunction {
             // 没扫码到码 或者 滑台上还有药
             if(scanCodeData.getCode()==null||  scanCodeData.getCode().trim().isEmpty()) {
 //            if(("NoRead".equals(scanCodeData.getAboveCode())&&"NoRead".equals(scanCodeData.getSideCode())&&"NoRead".equals(scanCodeData.getBelowCode()))|| Objects.equals(valueOperations.get(RedisKeyConstant.CABINET_B_TEST_DRUGS_RESULT), "true")){
-                servoTableReturn(configData,"没扫码到码,退回");
+                returnAfterScan(configData,"没扫码到码,退回");
                 return;
 
             }
+
+            final String traceId = UUID.randomUUID().toString();
+            log.info("[自动上药追踪] traceId={}, 阶段=扫码完成, 监管码={}", traceId, scanCodeData.getCode());
 
 
             //TODO 根据政采云接口 拿到药盒的长宽高
@@ -341,7 +388,7 @@ public class SendDrugFunction {
                 //TODO 没有仓位可以装这个药
                 log.error("自动上药异常：电子监管码请求失败：{}",drugRecordData.getMsg());
                 vacMachineExceptionService.sendException(SettingConstants.MachineException.SEND.code,scanCodeData.getCode(),drugRecordData.getMsg());
-                servoTableReturn(configData,"电子监管码请求失败,退回");
+                returnAfterScan(configData,"电子监管码请求失败,退回");
                 return;
             }
 
@@ -352,13 +399,16 @@ public class SendDrugFunction {
                         ,drugFlag.getProductName(),distanceServoData.getVaccineLong(),distanceServoData.getVaccineWide(),distanceServoData.getVaccineHigh(),
                         drugFlag.getDrugLong(),drugFlag.getDrugWide(),drugFlag.getDrugHigh());
 //                vacMachineExceptionService.sendException(SettingConstants.MachineException.SEND.code,drugRecordData.getProductName(),msg);
-                servoTableReturn(configData,"药品尺寸不合规，退回");
+                returnAfterScan(configData,"药品尺寸不合规，退回");
                 return;
             }
 
 
-            //查看有没有仓位
-            DrugRecordRequest drugRecordRequest = findBox(distanceServoData,drugRecordData);
+            //选仓成功的同时在Redis逐盒预留容量，防止上一盒尚未写库时再次选择最后一个空位。
+            ReservedDrugBox reservedBox = findAndReserveBox(
+                    distanceServoData, drugRecordData, sessionId, traceId);
+            DrugRecordRequest drugRecordRequest = reservedBox == null
+                    ? null : reservedBox.drugRecordRequest();
 
             //如果为null 没有这个药的规格或者仓位满了
             if(drugRecordRequest==null){
@@ -366,9 +416,16 @@ public class SendDrugFunction {
                 String msg = "自动上药异常：没有仓位可以装:"+drugRecordData.getProductName();
                 log.error(msg);
                 vacMachineExceptionService.sendException(SettingConstants.MachineException.SEND.code,drugRecordData.getProductName(),msg);
-                servoTableReturn(configData,"没有仓位能装退回");
+                returnAfterScan(configData,"没有仓位能装退回");
                 return;
             }
+
+            drugRecordRequest.setUuid(traceId);
+            AtomicReference<ReservationCustody> reservationCustody =
+                    new AtomicReference<>(ReservationCustody.RESERVED_ON_B_CABINET);
+            boolean aHandTaskRegisteredByMain = false;
+
+            try {
 
             //检测Redis 里面有没有这个批次的list 没有按照顺序添加
 
@@ -386,7 +443,11 @@ public class SendDrugFunction {
             //等机械手回原以后才能开始掉药
             boolean flag = false;
             timeout = System.currentTimeMillis();
-            while ((System.currentTimeMillis() - timeout) < SettingConstants.DRUG_DROP_HAND_WAIT_TIME){
+            while ((System.currentTimeMillis() - timeout) < HAND_DROP_PROCESS_WAIT_TIME){
+                // 自动上药已经停止时立即退出，避免仍在途的药盒继续等待状态位直至超时。
+                if(!"true".equals(valueOperations.get(RedisKeyConstant.autoDrug.AUTO_DRUG_START))){
+                    return;
+                }
                 VacUntil.sleep(200);
                 if("true".equals(valueOperations.get(RedisKeyConstant.HANDLE_IS_DROP))){
                     flag = true;
@@ -395,7 +456,7 @@ public class SendDrugFunction {
             }
 
             if(!flag){
-                log.error("机械手20秒还没回原！机器异常，停止上药！");
+                log.error("机械手45秒还没回原！机器异常，停止上药！");
                 log.error("自动上药异常：传感器损坏或机械手上还有药，请人工拿掉药后再开始自动上药");
                 vacMachineExceptionService.sendException(SettingConstants.MachineException.SEND.code, "传感器损坏或机械手上还有药，请人工拿掉药后再开始自动上药");
                 servoTableReturn(configData,"自动上药异常：传感器损坏或机械手上还有药，请人工拿掉药后再开始自动上药");
@@ -445,78 +506,64 @@ public class SendDrugFunction {
                 commandData.put("code", CommandEnums.DEVICE_STATUS_SEND_DRUG_LIST_ERROR.getCode());
                 commandData.put("data", msg);
                 websocketService.sendInfo(CommandEnums.MACHINE_STATUS_COMMAND.getCode(),commandData);
-                servoTableReturn(configData,"伺服报警,退回");
+                returnAfterScan(configData,"伺服报警,退回");
                 return;
             }
 
+            //从释放吸盘开始，药盒可能已经进入A柜机械手；后续任何异常都不能再安全释放预留。
+            reservationCustody.set(ReservationCustody.TRANSFER_TO_A_UNCERTAIN);
+            log.info("[自动上药追踪] traceId={}, 阶段=释放吸盘到A柜机械手, 仓位={}({}), 监管码={}",
+                    traceId, drugRecordRequest.getMachineNo(), drugRecordRequest.getMachineId(),
+                    drugRecordRequest.getSupervisedCode());
             //吸盘放下
             xiPangEnd();
             //等待1S后 伺服回到初始位置
             VacUntil.sleep(200);
 
-
-            if("false".equals(valueOperations.get(RedisKeyConstant.autoDrug.AUTO_DRUG_START))){
-                return;
-            }
-
-
             //先回扫码位置 不然要撞到
-            Thread threadInit = new Thread(() -> {
-                try {
-                    valueOperations.set(RedisKeyConstant.CABINET_B_SERVO_IS_RETURN,"false");
-                    cabinetBServoInit();
-                    valueOperations.set(RedisKeyConstant.CABINET_B_SERVO_IS_RETURN,"true");
-                } catch (IOException e) {
-                    // 处理异常，例如记录日志
-                    e.printStackTrace();
-                }
-            });
-            threadInit.start();
+            startBServoReturnThread(reservedBox.sessionId(), reservedBox.reservationId());
 
             //查看机械手上是否有药 有药继续
             boolean  dropDrugFlag= dropHasDrug(configData,longs);
-            int errorCount;
             //机械手没药！重新开始上药
             if (!dropDrugFlag) {
                 //传感器一直不触发 检查机械手是否有药、或者传感器损坏
-                String errorMsg = String.format("自动上药异常：药物异常报警,%s 药没掉入药仓 停止自动上药",drugRecordRequest.getProductName());
-                log.error(errorMsg);
-                vacMachineExceptionService.sendException(SettingConstants.MachineException.SEND.code,drugRecordData.getProductName(),errorMsg);
+                String errorMsg = String.format("药盒释放后A柜机械手传感器未确认接药，物理位置不确定");
+                markReservationUncertain(reservedBox, errorMsg, null);
+                reservationCustody.set(ReservationCustody.CLOSED);
                 servoTableReturn(configData,errorMsg);
 
                 sendDrugThreadManager.stop();
-
-//                String errorCountStr = valueOperations.get(RedisKeyConstant.CABINET_B_ERROR_COUNT);
-//
-//                if(errorCountStr==null){
-//                    errorCount = 1;
-//                }else {
-//                    errorCount = Integer.parseInt(errorCountStr);
-//                }
-//                log.info("当前错误计数: {}, 错误计数字符串: {}", errorCount, errorCountStr);
-//                if(errorCount<=0){
-//                    valueOperations.set(RedisKeyConstant.CABINET_B_ERROR_COUNT,String.valueOf(errorCount+1));
-//                }else {
-//                    String msg = "药没掉入机械手2次！自动上药停止";
-//                    log.error(msg);
-//                    vacMachineExceptionService.sendException(SettingConstants.MachineException.SEND.code,null,msg);
-//                    sendDrugThreadManager.stop();
-//                }
-
-
                 return;
             }
-            if("false".equals(valueOperations.get(RedisKeyConstant.autoDrug.AUTO_DRUG_START))){
-                return;
-            }
+
+            autoDrugReservationManager.markInTransit(reservedBox.reservationId())
+                    .orElseThrow(() -> new IllegalStateException(
+                            "已确认药盒进入A柜机械手，但Redis逐盒预留不存在：" + reservedBox.reservationId()));
+            reservationCustody.set(ReservationCustody.IN_TRANSIT);
+            log.info("[自动上药追踪] traceId={}, 阶段=A柜机械手接药确认, 仓位={}({}), DB库存={}, pending={}, 最大容量={}, AUTO_DRUG_START={}",
+                    traceId, drugRecordRequest.getMachineNo(), drugRecordRequest.getMachineId(),
+                    reservedBox.databaseCountAtReserve(), reservedBox.pendingCountAfterReserve(),
+                    reservedBox.maxCapacity(),
+                    valueOperations.get(RedisKeyConstant.autoDrug.AUTO_DRUG_START));
+
+            // 本次扫码后的上药流程没有发生回退，连续回退次数立即清零。
+            resetConsecutiveScanReturnCount();
 
             //掉药到机械手 重新开一个线程
+            // 必须在线程启动前登记。stop后只有等这个原始A柜子线程的finally完成，
+            // 才允许下一轮自动上药启动。
+            sendDrugThreadManager.onAHandFlowStarted(
+                    reservedBox.sessionId(), reservedBox.reservationId());
+            aHandTaskRegisteredByMain = true;
             Thread thread = new Thread(() -> {
-                // 最外层兜底try-catch：捕获线程内所有异常，彻底杜绝线程静默死亡
                 try {
                     valueOperations.set(RedisKeyConstant.CABINET_A_HANDLE_IS_MOVE_END,"false");
                     valueOperations.set(RedisKeyConstant.HANDLE_IS_DROP,"false");
-                    log.info("================================开始机械手程序===============================");
+                    log.info("[自动上药追踪] traceId={}, 阶段=机械手送仓开始, 仓位={}({}), 监管码={}, AUTO_DRUG_START={}",
+                            traceId, drugRecordRequest.getMachineNo(), drugRecordRequest.getMachineId(),
+                            drugRecordRequest.getSupervisedCode(),
+                            valueOperations.get(RedisKeyConstant.autoDrug.AUTO_DRUG_START));
                     valueOperations.set(RedisKeyConstant.CABINET_A_HANDLE_IS_MOVE_END,"true");
 
                     //夹紧
@@ -525,55 +572,93 @@ public class SendDrugFunction {
                     int dropDis = configData.getHandLen()-longs+200;
 
                     if(!dropDrugHandleAuto(clampDis,dropDis,drugRecordRequest)){
-                        String errorMsg = String.format("自动上药异常：药物异常报警,%s 药没掉入药仓",drugRecordRequest.getProductName());
-                        log.error(errorMsg);
-                        vacMachineExceptionService.sendException(SettingConstants.MachineException.SEND.code,null,errorMsg);
-                        sendDrugThreadManager.stop();
+                        String errorMsg = "机械手送仓后底部传感器未确认药盒离手，物理位置不确定";
+                        markReservationUncertain(reservedBox, errorMsg, null);
+                        reservationCustody.set(ReservationCustody.CLOSED);
+                        try {
+                            sendDrugThreadManager.stop();
+                        } finally {
+                            valueOperations.set(RedisKeyConstant.HANDLE_IS_DROP,"true");
+                            valueOperations.set(RedisKeyConstant.CABINET_A_HANDLE_IS_MOVE_END,"true");
+                        }
                         return;
                     }
 
-                    if("true".equals(valueOperations.get(RedisKeyConstant.autoDrug.AUTO_DRUG_START))){
-                        log.info("上药信息：{}",JSON.toJSONString(drugRecordRequest));
-                        //机械手上有药，仓位药品数量+1，新增上药记录
-                        addDrugRecord(drugRecordRequest,1);
-                        //A柜 步进电机 回原
-                        cabinetAStepInit(CabinetConstants.CabinetAStepMode.BLOCK);
-                        //机械手回原
-                        moveHandServoInit(configData);
+                    // HAND_SENSOR=RESET 是真实库存入库的唯一物理依据。
+                    // 从确认离手到数据库提交之间不得读取Redis、回原或执行其他可能失败的动作。
+                    log.info("[自动上药追踪] traceId={}, 阶段=机械手底部传感器灭-物理离手确认, 仓位={}({})；立即提交真实库存",
+                            traceId, drugRecordRequest.getMachineNo(), drugRecordRequest.getMachineId());
+
+                    synchronized (autoDrugReservationInventoryLock) {
+                        try {
+                            commitReservedDrug(reservedBox);
+                        } catch (Throwable commitError) {
+                            markReservationCommitFailed(reservedBox, commitError);
+                            reservationCustody.set(ReservationCustody.CLOSED);
+                            sendDrugThreadManager.stop();
+                            return;
+                        }
+
+                        try {
+                            releaseReservationAfterCommit(reservedBox);
+                        } catch (Throwable releaseError) {
+                            autoDrugReservationManager.tripSafetyInterlock(
+                                    "数据库已记账但Redis逐盒预留未能确认释放，traceId="
+                                            + reservedBox.reservationId(), releaseError);
+                            reservationCustody.set(ReservationCustody.CLOSED);
+                            notifyReservationAlarm(reservedBox,
+                                    "数据库已成功记账，但Redis预留释放失败；已停止自动上药并保留安全占位",
+                                    releaseError);
+                            sendDrugThreadManager.stop();
+                            return;
+                        }
                     }
+                    reservationCustody.set(ReservationCustody.CLOSED);
+
+                    // 数据库真实库存和Redis预留都处理完后再执行设备回原。
+                    // 回原失败只能触发收尾报警，不能影响已经确认离手的真实库存。
+                    cabinetAStepInit(CabinetConstants.CabinetAStepMode.CLAMP);
+                    waitCabinetAStepEnd(1);
+                    cabinetAStepInit(CabinetConstants.CabinetAStepMode.BLOCK);
+                    moveHandServoInit(configData);
 
                     //可以进入掉药区域
                     valueOperations.set(RedisKeyConstant.HANDLE_IS_DROP,"true");
-                    log.info("=================================上药结束==========================");
+                    log.info("[自动上药追踪] traceId={}, 阶段=完成, 仓位={}({}), 监管码={}",
+                            traceId, drugRecordRequest.getMachineNo(), drugRecordRequest.getMachineId(),
+                            drugRecordRequest.getSupervisedCode());
 
                 } catch (Throwable t) {
-                    // 捕获所有异常+错误，必须打印完整异常对象t，才能看到行号和堆栈
-                    String errorMsg = "机械手线程执行发生未捕获异常，流程强制终止";
-                    log.error(errorMsg, t);
-
-                    // 异常场景做故障闭环：和业务失败逻辑保持一致
+                    if (reservationCustody.get() != ReservationCustody.CLOSED) {
+                        markReservationUncertain(reservedBox,
+                                "机械手线程发生未捕获异常，药盒物理状态不确定", t);
+                        reservationCustody.set(ReservationCustody.CLOSED);
+                    } else {
+                        notifyReservationAlarm(reservedBox,
+                                "本盒已完成库存处理，但机械手收尾发生异常", t);
+                    }
                     try {
-                        vacMachineExceptionService.sendException(
-                                SettingConstants.MachineException.SEND.code,
-                                null,
-                                errorMsg + "：" + t.getMessage()
-                        );
                         sendDrugThreadManager.stop();
                     } catch (Exception e) {
-                        log.error("异常通知发送失败", e);
+                        log.error("[自动上药追踪] traceId={}, 停止自动上药失败", traceId, e);
                     }
-
-                    // 可选：异常时强制复位Redis标志位，避免状态卡死导致后续流程永远等待
                     try {
                         valueOperations.set(RedisKeyConstant.HANDLE_IS_DROP,"true");
                         valueOperations.set(RedisKeyConstant.CABINET_A_HANDLE_IS_MOVE_END,"true");
                     } catch (Exception e) {
-                        log.error("Redis标志位复位失败", e);
+                        log.error("[自动上药追踪] traceId={}, Redis流程标志复位失败", traceId, e);
                     }
+                } finally {
+                    sendDrugThreadManager.onAHandFlowFinished(
+                            reservedBox.sessionId(), reservedBox.reservationId());
                 }
-            });
+            }, "auto-drug-hand-" + traceId.substring(0, 8));
 
             thread.start();
+            // Thread.start()成功后，活动任务的结束责任已交给子线程finally。
+            aHandTaskRegisteredByMain = false;
+            reservationCustody.compareAndSet(
+                    ReservationCustody.IN_TRANSIT, ReservationCustody.CHILD_THREAD_OWNED);
 
             long timeoutInit = System.currentTimeMillis();
             while ((System.currentTimeMillis() - timeoutInit) < SettingConstants.CABINET_INIT_WAIT_TIME) {
@@ -586,10 +671,53 @@ public class SendDrugFunction {
             //重新开始走发药皮带
             autoInit();
 
+            } finally {
+                if (aHandTaskRegisteredByMain) {
+                    // Thread构造/start失败时没有子线程替我们完成计数，主线程必须归还登记。
+                    sendDrugThreadManager.onAHandFlowFinished(
+                            reservedBox.sessionId(), reservedBox.reservationId());
+                }
+                finishMainThreadReservationCustody(reservedBox, reservationCustody);
+            }
+
         }
         else {
             log.info("还未开始上药");
         }
+    }
+
+    /**
+     * 启动B柜伺服回扫码位线程。登记必须先于Thread.start；start失败时由当前线程归还，
+     * start成功后则只能由子线程的finally归还。
+     */
+    private void startBServoReturnThread(String sessionId, String traceId) {
+        sendDrugThreadManager.onBServoReturnFlowStarted(sessionId, traceId);
+        boolean started = false;
+        try {
+            Thread thread = createBServoReturnThread(() -> {
+                try {
+                    valueOperations.set(RedisKeyConstant.CABINET_B_SERVO_IS_RETURN,"false");
+                    cabinetBServoInit();
+                    valueOperations.set(RedisKeyConstant.CABINET_B_SERVO_IS_RETURN,"true");
+                } catch (Throwable returnError) {
+                    log.error("[自动上药追踪] traceId={}, B柜伺服回扫码位线程异常",
+                            traceId, returnError);
+                } finally {
+                    sendDrugThreadManager.onBServoReturnFlowFinished(sessionId, traceId);
+                }
+            }, "auto-drug-b-servo-return-" + traceId.substring(0, Math.min(8, traceId.length())));
+            thread.start();
+            started = true;
+        } finally {
+            if (!started) {
+                sendDrugThreadManager.onBServoReturnFlowFinished(sessionId, traceId);
+            }
+        }
+    }
+
+    /** 仅作为线程构造点，便于验证Thread.start失败的计数补偿。 */
+    Thread createBServoReturnThread(Runnable task, String name) {
+        return new Thread(task, name);
     }
 
 
@@ -599,41 +727,29 @@ public class SendDrugFunction {
         cabinetAStepPosition(CabinetConstants.CabinetAStepMode.CLAMP,clampDis);
         //等待夹爪步进电机运动完成
         waitCabinetAStepEnd(1);
-        log.info("检测B柜伺服电机是否异常");
+        log.info("检测B柜伺服电机是否异常；当前药盒已在A柜机械手，停止按钮不再中断本盒");
         long timeouts ;
-        if("true".equals(valueOperations.get(RedisKeyConstant.autoDrug.AUTO_DRUG_START))){
-            boolean flag = false;
-            timeouts = System.currentTimeMillis();
-            while ((System.currentTimeMillis() - timeouts) < SettingConstants.DRUG_HAVE_HAND_WAIT_TIME){
-                if("true".equals(valueOperations.get(RedisKeyConstant.CABINET_B_SERVO_IS_RETURN))){
-                    flag =true;
-                    break;
-                }
-                VacUntil.sleep(200);
+        boolean flag = false;
+        timeouts = System.currentTimeMillis();
+        while ((System.currentTimeMillis() - timeouts) < SettingConstants.DRUG_HAVE_HAND_WAIT_TIME){
+            if("true".equals(valueOperations.get(RedisKeyConstant.CABINET_B_SERVO_IS_RETURN))){
+                flag =true;
+                break;
             }
-            if(!flag){
-                String msg = "B柜伺服电机运动异常 停止上药";
-                log.error(msg);
-                vacMachineExceptionService.sendException(SettingConstants.MachineException.SEND.code,null,msg);
-                sendDrugThreadManager.stop();
-                return false;
-            }
+            VacUntil.sleep(200);
         }
-        log.info("夹爪步进完成，开始等待B柜伺服回原");
-        // 新增开始
-        log.info("开始查询AUTO_DRUG_START状态");
-        String autoStartFlag = valueOperations.get(RedisKeyConstant.autoDrug.AUTO_DRUG_START);
-        log.info("AUTO_DRUG_START查询完成，结果:{}", autoStartFlag);
-        // 新增结束
-
-        if("true".equals(autoStartFlag)) {
-            log.info("进入伺服运动分支，开始执行moveHandServo"); // 新增
-            moveHandServo(drugRecordRequest.getAutoX(),drugRecordRequest.getAutoZ());
-            log.info("moveHandServo执行完成"); // 新增
-        }else {
-            log.info("已经停止上药！");
+        if(!flag){
+            String msg = "B柜伺服电机运动异常 停止上药";
+            log.error(msg);
+            vacMachineExceptionService.sendException(SettingConstants.MachineException.SEND.code,null,msg);
+            sendDrugThreadManager.stop();
             return false;
         }
+        log.info("夹爪步进完成，开始等待B柜伺服回原");
+        String autoStartFlag = valueOperations.get(RedisKeyConstant.autoDrug.AUTO_DRUG_START);
+        log.info("本盒继续送仓，AUTO_DRUG_START={}，仓位={}({})",
+                autoStartFlag, drugRecordRequest.getMachineNo(), drugRecordRequest.getMachineId());
+        moveHandServo(drugRecordRequest.getAutoX(),drugRecordRequest.getAutoZ());
 
         //挡片步进电机旋转90
         cabinetAStepPosition(CabinetConstants.CabinetAStepMode.BLOCK,900);
@@ -645,8 +761,10 @@ public class SendDrugFunction {
 
 
         String sensorIsPuts= null;
-        boolean drugHand = false;
         boolean inputFlag = false;
+        List<Integer> servoXMoveTargets = null;
+        int servoXMoveIndex = 0;
+        boolean servoXCompensationUnavailable = false;
          timeouts = System.currentTimeMillis();
         while ((System.currentTimeMillis() - timeouts) < SettingConstants.WAIT_DROP_TIME){
             //查询 机械手底部传感器信号
@@ -657,12 +775,50 @@ public class SendDrugFunction {
             assert sensorIsPuts != null;
             //如果传感器触发 一直等待 不触发结束
             if(sensorIsPuts.equals(CabinetConstants.SensorStatus.RESET.code)){
-                drugHand =true;
+                // 传感器灭即确认这一盒已经离开机械手。立即把控制权交给调用方提交数据库，
+                // 此处不能再做回原或Redis读取，避免“实物已入仓但库存未记账”。
+                return true;
 //                suckerOutput(CabinetConstants.Cabinet.CAB_A,SettingConstants.CABINET_A_SUCKER_NUM,CabinetConstants.OutPutCommand.NOT_OUTPUT);
-                break;
             }
 
-            if((System.currentTimeMillis() - timeouts)>3000&&(System.currentTimeMillis() - timeouts)<20000){
+            if((System.currentTimeMillis() - timeouts)>HAND_SERVO_X_COMPENSATION_START_WAIT_TIME
+                    && (System.currentTimeMillis() - timeouts)<SettingConstants.WAIT_DROP_TIME){
+                if (servoXMoveTargets == null && !servoXCompensationUnavailable) {
+                    Integer direction = getHandServoXMoveDirection(drugRecordRequest);
+                    if (direction == null) {
+                        servoXCompensationUnavailable = true;
+                    } else {
+                        servoXMoveTargets = buildHandServoXMoveTargets(
+                                drugRecordRequest.getAutoX(), direction);
+                    }
+                }
+
+                if (servoXMoveTargets != null && servoXMoveIndex < servoXMoveTargets.size()) {
+                    int moveTargetX = servoXMoveTargets.get(servoXMoveIndex);
+                    int currentStep = servoXMoveIndex + 1;
+                    log.info("药盒未落入仓位，仓位:{}，上药X轴伺服7执行第{}/{}次补偿，目标坐标:{}（本次1mm）",
+                            drugRecordRequest.getMachineNo(), currentStep,
+                            MAX_HAND_SERVO_X_COMPENSATION_STEPS, moveTargetX);
+                    if (!moveHandServoX(moveTargetX)) {
+                        log.error("上药X轴伺服7补偿失败，仓位:{}，第{}次目标坐标:{}，未收到到位信号",
+                                drugRecordRequest.getMachineNo(), currentStep, moveTargetX);
+                        return false;
+                    }
+                    servoXMoveIndex++;
+                    log.info("上药X轴伺服7第{}次1mm补偿已到位，等待{}ms后重新检测药盒传感器",
+                            currentStep, HAND_SERVO_X_STABLE_WAIT_TIME);
+                    VacUntil.sleep(HAND_SERVO_X_STABLE_WAIT_TIME);
+                    // 回到循环顶部先读传感器；确认药盒离手就立即结束补偿，否则再走1mm。
+                    continue;
+                }
+
+                if (servoXMoveTargets != null
+                        && servoXMoveIndex >= MAX_HAND_SERVO_X_COMPENSATION_STEPS) {
+                    log.error("仓位:{}的上药X轴伺服7已分5次累计补偿5mm，药盒仍未落入仓位，停止自动上药",
+                            drugRecordRequest.getMachineNo());
+                    return false;
+                }
+
                 //A柜 步进电机 回原
                 cabinetAStepInit(CabinetConstants.CabinetAStepMode.CLAMP);
                 waitCabinetAStepEnd(1);
@@ -692,17 +848,7 @@ public class SendDrugFunction {
 
         }
 
-        if(!drugHand){
-            log.error("自动上药异常：药物异常报警,药没掉入药仓");
-            return false;
-        }
-
-        //回原
-        //A柜步进电机回原
-        cabinetAStepInit(CabinetConstants.CabinetAStepMode.CLAMP);
-//        cabinetAStepPosition(CabinetConstants.CabinetAStepMode.CLAMP,0);
-        waitCabinetAStepEnd(1);
-        return  true;
+        return false;
 
     }
 
@@ -830,6 +976,8 @@ public class SendDrugFunction {
         stepRequests.setMode(mode);
         stepRequests.setDistance(distance);
         stepRequests.setStatus(CabinetConstants.CabinetBStepStatus.ZERO);
+        // 必须在发送前清零。若控制板快速回包后再清零，会覆盖已经收到的成功状态并误报超时。
+        valueOperations.set(RedisKeyConstant.CABINET_B_SCAN_STEP_STATUS,"false");
         cabinetBService.step(stepRequests);
         //等待B柜步进电机运动结束
         return waitCabinetBStepEnd();
@@ -891,6 +1039,95 @@ public class SendDrugFunction {
             }
             VacUntil.sleep(200);
         }
+    }
+
+    //移动A柜上药伺服X
+    private boolean moveHandServoX(int x){
+        valueOperations.set(RedisKeyConstant.handServo.X,"false");
+
+        CabinetAServoRequest request = new CabinetAServoRequest();
+        request.setWorkMode(CabinetConstants.Cabinet.CAB_A);
+        request.setCommand(CabinetConstants.CabinetAServoCommand.POSITION);
+        request.setMode(CabinetConstants.CabinetAServoMode.APPLY_SERVO_X.num);
+        request.setStatus(CabinetConstants.CabinetAServoStatus.ZERO);
+        request.setDistance(x);
+        cabinetAService.servo(request);
+
+        long timeout = System.currentTimeMillis();
+        while ((System.currentTimeMillis() - timeout) < HAND_SERVO_X_MOVE_WAIT_TIME) {
+            if("true".equals(valueOperations.get(RedisKeyConstant.handServo.X))){
+                return true;
+            }
+            VacUntil.sleep(200);
+        }
+        return false;
+    }
+
+    //根据同层仓位的boxNo顺序，判断上药X轴伺服7的补偿方向
+    private Integer getHandServoXMoveDirection(DrugRecordRequest request){
+        if (request.getAutoX() == null) {
+            log.warn("仓位:{}的autoX为空，无法执行上药X轴补偿", request.getMachineNo());
+            return null;
+        }
+
+        List<VacMachine> machineList = vacMachineService.list(
+                new LambdaQueryWrapper<VacMachine>()
+                        .eq(VacMachine::getDeleted,0)
+                        .eq(VacMachine::getLineNum,request.getLineNum())
+                        .orderByAsc(VacMachine::getBoxNo));
+
+        int currentIndex = -1;
+        for (int i = 0; i < machineList.size(); i++) {
+            if (Objects.equals(machineList.get(i).getBoxNo(), request.getMachineNo())) {
+                currentIndex = i;
+                break;
+            }
+        }
+
+        if (currentIndex < 0 || machineList.size() < 2) {
+            log.warn("仓位:{}无法根据同层仓位判断X轴移动方向", request.getMachineNo());
+            return null;
+        }
+
+        int targetX = request.getAutoX();
+        VacMachine referenceMachine;
+        if (currentIndex < machineList.size() - 1) {
+            referenceMachine = machineList.get(currentIndex + 1);
+        } else {
+            referenceMachine = machineList.get(currentIndex - 1);
+        }
+
+        if (referenceMachine.getAutoX() == null) {
+            log.warn("参照仓位:{}的autoX为空，跳过X轴移动", referenceMachine.getBoxNo());
+            return null;
+        }
+
+        int direction;
+        if (currentIndex < machineList.size() - 1) {
+            direction = Integer.compare(referenceMachine.getAutoX(), targetX);
+        } else {
+            direction = Integer.compare(targetX, referenceMachine.getAutoX());
+        }
+
+        if (direction == 0) {
+            log.warn("仓位:{}与参照仓位:{}的autoX相同，跳过X轴移动", request.getMachineNo(), referenceMachine.getBoxNo());
+            return null;
+        }
+
+        log.info("仓位:{}上药X轴补偿方向已确定，参照仓位:{}，起始坐标:{}，方向:{}",
+                request.getMachineNo(), referenceMachine.getBoxNo(), targetX, direction);
+        return direction;
+    }
+
+    static List<Integer> buildHandServoXMoveTargets(int startX, int direction){
+        if (direction != -1 && direction != 1) {
+            throw new IllegalArgumentException("上药X轴补偿方向只能为-1或1");
+        }
+        List<Integer> targets = new ArrayList<>(MAX_HAND_SERVO_X_COMPENSATION_STEPS);
+        for (int step = 1; step <= MAX_HAND_SERVO_X_COMPENSATION_STEPS; step++) {
+            targets.add(startX + direction * HAND_SERVO_X_COMPENSATION_STEP * step);
+        }
+        return targets;
     }
 
     //A柜机械手回零
@@ -1592,10 +1829,10 @@ public class SendDrugFunction {
      * @return
      * 上方扫码器
      */
-    public  void aboveCamera(){
+    public boolean aboveCamera(){
         //运动到上方扫码伺服
         valueOperations.set(RedisKeyConstant.scanCode.ABOVE,"NoRead");
-        cameraSendMsg.sendCommandToAboveCamera();
+        return cameraSendMsg.sendCommandToAboveCamera();
     }
 
 
@@ -1656,34 +1893,61 @@ public class SendDrugFunction {
         valueOperations.set(RedisKeyConstant.scanCode.BELOW, "NoRead");
 
         //旋转前先扫一下码
-        cameraSendMsg.sendCommandToSideCamera();
+        if (!cameraSendMsg.sendCommandToSideCamera()) {
+            throw new ServiceException("侧方扫码相机连接断开，自动上药已停止");
+        }
         scanCodeData = getSideCamera(scanCodeData);
 
 
         //下方扫码线程
+        AtomicReference<Throwable> belowScanError = new AtomicReference<>();
         Thread belowScan = new Thread(() -> {
-            long timeout = System.currentTimeMillis();
-            while ((System.currentTimeMillis() - timeout) < SettingConstants.SCAN_STEP_BELOW_WAIT_TIME) {
-                cameraSendMsg.sendCommandToBelowCamera();
-                VacUntil.sleep(50);
+            try {
+                long timeout = System.currentTimeMillis();
+                while ((System.currentTimeMillis() - timeout) < SettingConstants.SCAN_STEP_BELOW_WAIT_TIME) {
+                    if (!cameraSendMsg.sendCommandToBelowCamera()) {
+                        throw new ServiceException("下方扫码相机连接断开，自动上药已停止");
+                    }
+                    VacUntil.sleep(50);
+                }
+            } catch (Throwable scanError) {
+                belowScanError.compareAndSet(null, scanError);
+                log.error("自动上药下方相机扫码线程异常", scanError);
             }
-        });
+        }, "auto-drug-below-scan");
 
 
         if("NoRead".equals(scanCodeData.getSideCode())){
 
             //下方扫码、侧方扫码开始
-            belowScan.start();
-            boolean flag = false;
-            long timeout = System.currentTimeMillis();
-            while ((System.currentTimeMillis() - timeout) < SettingConstants.SCAN_STEP_SIDE_WAIT_TIME) {
-                if (!flag){
-                    request.setDistance(SettingConstants.AngleDistance.ALL);
-                    cabinetBService.step(request);
-                    flag = true;
+            boolean belowScanStarted = false;
+            try {
+                belowScan.start();
+                belowScanStarted = true;
+                boolean flag = false;
+                long timeout = System.currentTimeMillis();
+                while ((System.currentTimeMillis() - timeout) < SettingConstants.SCAN_STEP_SIDE_WAIT_TIME) {
+                    if (!flag){
+                        request.setDistance(SettingConstants.AngleDistance.ALL);
+                        cabinetBService.step(request);
+                        flag = true;
+                    }
+                    if (!cameraSendMsg.sendCommandToSideCamera()) {
+                        throw new ServiceException("侧方扫码相机连接断开，自动上药已停止");
+                    }
+                    VacUntil.sleep(50);
                 }
-                cameraSendMsg.sendCommandToSideCamera();
-                VacUntil.sleep(50);
+            } finally {
+                if (belowScanStarted) {
+                    waitForThreadToFinishUninterruptibly(belowScan, "下方相机扫码线程");
+                }
+            }
+            Throwable scanError = belowScanError.get();
+            if (scanError != null) {
+                if (scanError instanceof RuntimeException runtimeException) {
+                    throw runtimeException;
+                }
+                throw new ServiceException("下方扫码相机扫码线程异常，自动上药已停止", scanError);
             }
             scanCodeData = getSideCamera(scanCodeData);
             scanCodeData =  getBelowCamera(scanCodeData);
@@ -1700,6 +1964,25 @@ public class SendDrugFunction {
         }
 
         return scanCodeData;
+    }
+
+    /**
+     * 保证短时扫码子线程不会逃逸出rotateAngle方法。等待期间如收到中断，
+     * 仍先等子线程结束，然后恢复主线程的中断标记。
+     */
+    private void waitForThreadToFinishUninterruptibly(Thread thread, String taskName) {
+        boolean interrupted = false;
+        while (thread.isAlive()) {
+            try {
+                thread.join();
+            } catch (InterruptedException waitInterrupted) {
+                interrupted = true;
+            }
+        }
+        if (interrupted) {
+            Thread.currentThread().interrupt();
+            log.warn("等待{}期间收到中断；已在子线程结束后恢复中断标记", taskName);
+        }
     }
 
     //控制吸盘的输出
@@ -1748,6 +2031,8 @@ public class SendDrugFunction {
         request.setMode(CabinetConstants.CabinetBStepMode.ROTATE);
         request.setCommand(CabinetConstants.CabinetBStepCommand.ZERO);
         request.setStatus(CabinetConstants.CabinetBStepStatus.ZERO);
+        // 与位置模式相同，先清状态再发指令，避免快速成功回包被等待方法覆盖。
+        valueOperations.set(RedisKeyConstant.CABINET_B_SCAN_STEP_STATUS,"false");
         cabinetBService.step(request);
         waitCabinetBStepEnd();
     }
@@ -1785,11 +2070,15 @@ public class SendDrugFunction {
     public boolean waitCabinetBStepEnd() throws IOException {
 
         boolean stepErrorFlag = true;
-        valueOperations.set(RedisKeyConstant.CABINET_B_SCAN_STEP_STATUS,"false");
         long timeout = System.currentTimeMillis();
         while ((System.currentTimeMillis() - timeout) < SettingConstants.SCAN_STEP_WAIT_TIME) {
-            if("true".equals(valueOperations.get(RedisKeyConstant.CABINET_B_SCAN_STEP_STATUS))){
+            String stepStatus = valueOperations.get(RedisKeyConstant.CABINET_B_SCAN_STEP_STATUS);
+            if("true".equals(stepStatus)){
                 stepErrorFlag = false;
+                break;
+            }
+            if ("error".equals(stepStatus)) {
+                log.error("B柜步进电机已返回执行异常，立即停止等待");
                 break;
             }
             VacUntil.sleep(200);
@@ -1798,7 +2087,8 @@ public class SendDrugFunction {
         if(stepErrorFlag){
             String msg = "B柜步进电机运动异常 停止上药";
             log.error(msg);
-            vacMachineExceptionService.sendException(SettingConstants.MachineException.SEND.code,null,msg);
+            // 通用设备报警不带药品名，使用二参数接口按“编码+文案”直接去重。
+            vacMachineExceptionService.sendException(SettingConstants.MachineException.SEND.code,msg);
             sendDrugThreadManager.stop();
         }else {
             log.info("===========================B柜步进电机运动结束==========================");
@@ -1868,6 +2158,23 @@ public class SendDrugFunction {
     public void  tableReturn() throws IOException {
 
         log.info("回滚，重新上苗");
+        reverseTable();
+        autoInit();
+        autoDrug(CabinetConstants.CabinetBApplyCommand.AUTO, CabinetConstants.CabinetBApplyMode.START, CabinetConstants.CabinetBApplyStatus.ZERO);
+
+    }
+
+    /**
+     * 停止自动上药时使用的滑台退回。
+     * 只完成退回动作，不再执行autoInit，也不重新启动自动上药，避免停止流程再次进入
+     * B柜步进等待并递归调用stop。
+     */
+    public void tableReturnForStop() throws IOException {
+        log.info("停止自动上药，滑台退回后不再重新初始化");
+        reverseTable();
+    }
+
+    private void reverseTable() {
         //暂停自动上药流程
         autoDrug(CabinetConstants.CabinetBApplyCommand.AUTO, CabinetConstants.CabinetBApplyMode.STOP, CabinetConstants.CabinetBApplyStatus.ZERO);
         VacUntil.sleep(500);
@@ -1877,9 +2184,6 @@ public class SendDrugFunction {
         VacUntil.sleep(SettingConstants.RETURN_DRUG_TABLE_WAIT_TIME);
         //反转停止
         autoDrug(CabinetConstants.CabinetBApplyCommand.TABLE, CabinetConstants.CabinetBApplyMode.STOP, CabinetConstants.CabinetBApplyStatus.ZERO);
-        autoInit();
-        autoDrug(CabinetConstants.CabinetBApplyCommand.AUTO, CabinetConstants.CabinetBApplyMode.START, CabinetConstants.CabinetBApplyStatus.ZERO);
-
     }
 
 
@@ -1889,6 +2193,15 @@ public class SendDrugFunction {
      */
 
     public void  servoTableReturn(ConfigData configData,String msg) throws IOException {
+        servoTableReturn(configData, msg, true);
+    }
+
+    /** 停止/异常关闭专用：完成退回后不执行autoInit，不重新启动自动上药。 */
+    public void servoTableReturnForStop(ConfigData configData, String msg) throws IOException {
+        servoTableReturn(configData, msg, false);
+    }
+
+    private void servoTableReturn(ConfigData configData, String msg, boolean restartAutoDrug) throws IOException {
         long timeout = System.currentTimeMillis();
         while ((System.currentTimeMillis() - timeout) < SettingConstants.SCAN_SERVO_WAIT_TIME) {
             if( "false".equals(valueOperations.get(RedisKeyConstant.scanServo.X)) &&  "false".equals(valueOperations.get(RedisKeyConstant.scanServo.Y)) && "false".equals(valueOperations.get(RedisKeyConstant.scanServo.Z)) ){
@@ -1920,7 +2233,90 @@ public class SendDrugFunction {
         }
 
         xiPangEnd();
-        tableReturn();
+        if (restartAutoDrug) {
+            tableReturn();
+        } else {
+            tableReturnForStop();
+        }
+    }
+
+    /**
+     * 记录一次自动上药的真实回退。连续达到上限时，当前药盒完成回退后停止自动上药并报警。
+     */
+    private void returnAfterScan(ConfigData configData, String reason) throws IOException {
+        returnAfterScan(configData, reason, true);
+    }
+
+    private void returnAfterScan(ConfigData configData, String reason, boolean moveServoToReturnArea) throws IOException {
+        if (moveServoToReturnArea) {
+            servoTableReturn(configData, reason);
+        } else {
+            log.warn(reason);
+            tableReturn();
+        }
+
+        long count = incrementConsecutiveScanReturnCount();
+        log.warn("自动上药连续回退计数：{}/{}，Redis键={}，本次原因：{}",
+                count, MAX_CONSECUTIVE_SCAN_RETURN_COUNT,
+                RedisKeyConstant.CABINET_B_ERROR_COUNT, reason);
+
+        if (count < MAX_CONSECUTIVE_SCAN_RETURN_COUNT) {
+            return;
+        }
+
+        String alarmMsg = String.format(
+                "自动上药连续%d次回退，已自动停止，请检查扫码相机、距离传感器、药盒尺寸及上药配置。本次原因：%s",
+                MAX_CONSECUTIVE_SCAN_RETURN_COUNT, reason);
+        log.error(alarmMsg);
+
+        try {
+            // 当前药盒已经退回，停止时不再执行第二次滑台回退。
+            sendDrugThreadManager.stopAfterScanReturn();
+        } finally {
+            vacMachineExceptionService.sendException(
+                    SettingConstants.MachineException.SEND.code, "", alarmMsg);
+            Map<String, Object> commandData = new HashMap<>();
+            commandData.put("code", CommandEnums.MACHINE_STATUS_COMMAND.getCode());
+            commandData.put("data", alarmMsg);
+            websocketService.sendInfo(CommandEnums.ON_CABINET_WEB.getCode(), commandData);
+        }
+    }
+
+    /**
+     * 当前项目的通用RedisTemplate会把字符串按JSON保存，逻辑值"0"在Redis底层并不是
+     * INCR可识别的原生整数。连续回退只由自动上药主线程更新，因此在Java侧完成兼容
+     * 读取、校验和写回，避免历史false/JSON数字导致主线程在第一次回退时直接异常退出。
+     */
+    private synchronized long incrementConsecutiveScanReturnCount() {
+        String storedValue = valueOperations.get(RedisKeyConstant.CABINET_B_ERROR_COUNT);
+        long currentCount = 0L;
+        if (storedValue != null && !storedValue.trim().isEmpty()) {
+            try {
+                currentCount = Long.parseLong(storedValue.trim());
+                if (currentCount < 0L) {
+                    log.warn("连续回退计数Redis值小于0，已按0修复：key={}, oldValue={}",
+                            RedisKeyConstant.CABINET_B_ERROR_COUNT, storedValue);
+                    currentCount = 0L;
+                }
+            } catch (NumberFormatException invalidCount) {
+                log.warn("连续回退计数Redis值不是数字，已按0修复：key={}, oldValue={}",
+                        RedisKeyConstant.CABINET_B_ERROR_COUNT, storedValue);
+                currentCount = 0L;
+            }
+        }
+
+        long nextCount = currentCount >= MAX_CONSECUTIVE_SCAN_RETURN_COUNT
+                ? MAX_CONSECUTIVE_SCAN_RETURN_COUNT : currentCount + 1L;
+        valueOperations.set(RedisKeyConstant.CABINET_B_ERROR_COUNT, String.valueOf(nextCount));
+        return nextCount;
+    }
+
+    private void resetConsecutiveScanReturnCount() {
+        String count = valueOperations.get(RedisKeyConstant.CABINET_B_ERROR_COUNT);
+        if (!"0".equals(count)) {
+            valueOperations.set(RedisKeyConstant.CABINET_B_ERROR_COUNT, "0");
+            log.info("本次扫码上药正常，连续回退计数清零，清零前计数：{}", count);
+        }
     }
 
     /**
@@ -1951,7 +2347,10 @@ public class SendDrugFunction {
         int num = getDrugNum(distanceServoData.getVaccineLong(), request);
 
         //根据初始位置拿到仓位的长宽高
-        VacDrug vacDrug = vacDrugService.vacDrugGetByproductNo(request.getProductNo());
+        VacDrug vacDrug = getValidDrugForAutoLoading(request);
+        if (vacDrug == null) {
+            return null;
+        }
 
         //确定是什么型号的仓柜
         List<VacBoxSpec> vacBoxSpecList = vacBoxSpecService.findVacBoxSpec(vacDrug.getVaccineWide());
@@ -1978,6 +2377,341 @@ public class SendDrugFunction {
     }
 
     /**
+     * 选择仓位并立即逐盒预留。候选仓位如果已被在途药盒占满或身份冲突，
+     * 会排除后继续寻找下一个仓位；Redis异常则直接失败关闭，绝不退化成只查数据库。
+     */
+    private ReservedDrugBox findAndReserveBox(DistanceServoData distanceServoData,
+                                               DrugRecordRequest source,
+                                               String sessionId,
+                                               String traceId) {
+        int maxCapacity = getDrugNum(distanceServoData.getVaccineLong(), source);
+        if (maxCapacity <= 0) {
+            log.error("[自动上药追踪] traceId={}, 阶段=选仓失败, 产品编码={}, 最大容量={}",
+                    traceId, source.getProductNo(), maxCapacity);
+            return null;
+        }
+
+        Set<Long> excludedMachineIds = new HashSet<>();
+        while (true) {
+            autoDrugReservationManager.assertSession(sessionId);
+            DrugRecordRequest candidate;
+            int databaseCount;
+            AutoDrugReservationResult reservationResult;
+            synchronized (autoDrugReservationInventoryLock) {
+                candidate = findBoxExcludeMachineIds(
+                        distanceServoData, source, excludedMachineIds);
+                if (candidate == null || candidate.getMachineId() == null) {
+                    log.warn("[自动上药追踪] traceId={}, 阶段=无可用仓位, 产品编码={}, 批号={}, 有效期={}, 已排除仓位={}",
+                            traceId, source.getProductNo(), source.getBatchNo(),
+                            source.getExpiredAt(), excludedMachineIds);
+                    return null;
+                }
+                if (candidate.getAutoX() == null || candidate.getAutoZ() == null) {
+                    log.warn("[自动上药追踪] traceId={}, 阶段=过滤空坐标仓位, 仓位={}({}), autoX={}, autoZ={}",
+                            traceId, candidate.getMachineNo(), candidate.getMachineId(),
+                            candidate.getAutoX(), candidate.getAutoZ());
+                    excludedMachineIds.add(candidate.getMachineId());
+                    continue;
+                }
+
+                VacMachine currentMachine = vacMachineService.getById(candidate.getMachineId());
+                if (currentMachine == null || currentMachine.getDeleted() != 0) {
+                    log.warn("[自动上药追踪] traceId={}, 候选仓位不存在或已删除, machineId={}",
+                            traceId, candidate.getMachineId());
+                    excludedMachineIds.add(candidate.getMachineId());
+                    continue;
+                }
+
+                databaseCount = Optional.ofNullable(currentMachine.getVaccineNum()).orElse(0);
+                reservationResult = autoDrugReservationManager.reserve(
+                        AutoDrugReservationRequest.builder()
+                                .reservationId(traceId)
+                                .sessionId(sessionId)
+                                .machineId(candidate.getMachineId())
+                                .boxNo(candidate.getMachineNo())
+                                .productNo(candidate.getProductNo())
+                                .productName(candidate.getProductName())
+                                .batchNo(candidate.getBatchNo())
+                                .expiredAt(candidate.getExpiredAt())
+                                .supervisedCode(candidate.getSupervisedCode())
+                                .databaseCount(databaseCount)
+                                .maxCapacity(maxCapacity)
+                                .build());
+
+                if (reservationResult.isReserved()) {
+                    // 预留后再次读取DB，防御其他进程在“首次读取→Redis预留”之间改变仓位。
+                    VacMachine latestMachine = vacMachineService.getById(candidate.getMachineId());
+                    int latestDatabaseCount = latestMachine == null
+                            ? Integer.MAX_VALUE
+                            : Optional.ofNullable(latestMachine.getVaccineNum()).orElse(0);
+                    boolean capacityStillValid = latestMachine != null
+                            && latestMachine.getDeleted() == 0
+                            && (long) latestDatabaseCount + reservationResult.getPendingCount()
+                            <= maxCapacity;
+                    boolean identityStillValid = latestMachine != null
+                            && isMachineIdentityCompatibleForReservation(latestMachine, candidate);
+                    boolean coordinatesStillValid = latestMachine != null
+                            && latestMachine.getAutoX() != null
+                            && latestMachine.getAutoZ() != null;
+                    if (!capacityStillValid || !identityStillValid || !coordinatesStillValid) {
+                        AutoDrugReleaseResult rollback =
+                                autoDrugReservationManager.release(traceId);
+                        if (rollback.getOutcome() != AutoDrugReleaseOutcome.RELEASED) {
+                            IllegalStateException rollbackError = new IllegalStateException(
+                                    "预留后二次校验失败，但Redis回滚未得到RELEASED结果：traceId="
+                                            + traceId + "，outcome=" + rollback.getOutcome());
+                            autoDrugReservationManager.tripSafetyInterlock(
+                                    "预留后二次校验回滚结果异常，traceId=" + traceId,
+                                    rollbackError);
+                            throw rollbackError;
+                        }
+                        log.warn("[自动上药追踪] traceId={}, 阶段=预留后二次校验失败并回滚, 仓位={}({}), 最新DB库存={}, pending={}, 最大容量={}, 身份一致={}, 坐标完整={}, autoX={}, autoZ={}, releaseOutcome={}",
+                                traceId, candidate.getMachineNo(), candidate.getMachineId(),
+                                latestDatabaseCount, reservationResult.getPendingCount(),
+                                maxCapacity, identityStillValid, coordinatesStillValid,
+                                latestMachine == null ? null : latestMachine.getAutoX(),
+                                latestMachine == null ? null : latestMachine.getAutoZ(),
+                                rollback.getOutcome());
+                        excludedMachineIds.add(candidate.getMachineId());
+                        continue;
+                    }
+                    databaseCount = latestDatabaseCount;
+                }
+            }
+
+            log.info("[自动上药追踪] traceId={}, 阶段=Redis预留结果, outcome={}, 仓位={}({}), 产品编码={}, 批号={}, 有效期={}, DB库存={}, 预留后pending={}, 最大容量={}",
+                    traceId, reservationResult.getOutcome(), candidate.getMachineNo(),
+                    candidate.getMachineId(), candidate.getProductNo(), candidate.getBatchNo(),
+                    candidate.getExpiredAt(), databaseCount,
+                    reservationResult.getPendingCount(), maxCapacity);
+
+            if (reservationResult.isReserved()) {
+                return new ReservedDrugBox(candidate, traceId, sessionId, databaseCount,
+                        reservationResult.getPendingCount(), maxCapacity);
+            }
+
+            switch (reservationResult.getOutcome()) {
+                case CAPACITY_FULL, MACHINE_PRODUCT_CONFLICT ->
+                        excludedMachineIds.add(candidate.getMachineId());
+                case RESERVATION_ID_CONFLICT -> throw new IllegalStateException(
+                        "自动上药traceId发生Redis预留冲突：" + traceId);
+                default -> throw new IllegalStateException(
+                        "自动上药未知预留结果：" + reservationResult.getOutcome());
+            }
+        }
+    }
+
+    private boolean isMachineIdentityCompatibleForReservation(
+            VacMachine machine, DrugRecordRequest candidate) {
+        int databaseCount = Optional.ofNullable(machine.getVaccineNum()).orElse(0);
+        if (databaseCount == 0 || machine.getProductNo() == null) {
+            return true;
+        }
+        boolean batchCompatible = machine.getBatchNo() == null
+                || Objects.equals(machine.getBatchNo(), candidate.getBatchNo());
+        return Objects.equals(machine.getProductNo(), candidate.getProductNo())
+                && batchCompatible
+                && Objects.equals(machine.getExpiredAt(), candidate.getExpiredAt());
+    }
+
+    private void finishMainThreadReservationCustody(
+            ReservedDrugBox reservedBox,
+            AtomicReference<ReservationCustody> custody) {
+        ReservationCustody current = custody.get();
+        if (current == ReservationCustody.CHILD_THREAD_OWNED
+                || current == ReservationCustody.CLOSED) {
+            return;
+        }
+
+        if (current == ReservationCustody.RESERVED_ON_B_CABINET) {
+            try {
+                releaseReservationSafely(reservedBox,
+                        "主流程在药盒进入A柜机械手前结束，预留已安全释放");
+            } catch (Throwable releaseError) {
+                autoDrugReservationManager.tripSafetyInterlock(
+                        "药盒退回后Redis逐盒预留未能确认释放，traceId="
+                                + reservedBox.reservationId(), releaseError);
+                notifyReservationAlarm(reservedBox,
+                        "药盒尚未进入A柜机械手，但Redis预留安全释放失败", releaseError);
+                stopAutoDrugAfterReservationFailure();
+            } finally {
+                custody.set(ReservationCustody.CLOSED);
+            }
+            sendDrugThreadManager.onReservationFlowFinished(reservedBox.sessionId());
+            return;
+        }
+
+        markReservationUncertain(reservedBox,
+                "主流程在药盒释放到A柜机械手后异常结束，物理位置不确定", null);
+        custody.set(ReservationCustody.CLOSED);
+        stopAutoDrugAfterReservationFailure();
+        sendDrugThreadManager.onReservationFlowFinished(reservedBox.sessionId());
+    }
+
+    private void releaseReservationSafely(ReservedDrugBox reservedBox, String reason) {
+        AutoDrugReleaseResult releaseResult =
+                autoDrugReservationManager.release(reservedBox.reservationId());
+        if (releaseResult.getOutcome() != AutoDrugReleaseOutcome.RELEASED) {
+            throw new IllegalStateException("安全释放预留未得到RELEASED结果：traceId="
+                    + reservedBox.reservationId() + "，outcome="
+                    + releaseResult.getOutcome());
+        }
+        log.info("[自动上药追踪] traceId={}, 阶段=安全释放预留, 仓位={}({}), 原因={}, outcome={}, 剩余pending={}",
+                reservedBox.reservationId(), reservedBox.drugRecordRequest().getMachineNo(),
+                reservedBox.drugRecordRequest().getMachineId(), reason,
+                releaseResult.getOutcome(), releaseResult.getPendingCount());
+    }
+
+    private void commitReservedDrug(ReservedDrugBox reservedBox) {
+        DrugRecordRequest request = reservedBox.drugRecordRequest();
+        // 药盒已经确认离开机械手。此处先做唯一关键动作：事务写入真实库存和上药记录。
+        // 任何Redis读取都只能用于提交后的诊断，不能让Redis瞬断阻断已离手药盒的记账。
+        log.info("[自动上药追踪] traceId={}, 阶段=数据库提交开始, 仓位={}({}), 预留时DB库存={}, 预留后pending={}, 最大容量={}",
+                reservedBox.reservationId(), request.getMachineNo(), request.getMachineId(),
+                reservedBox.databaseCountAtReserve(),
+                reservedBox.pendingCountAfterReserve(), reservedBox.maxCapacity());
+
+        vacDrugRecordService.addAutoDrugRecordAndInventory(request, 1, reservedBox.maxCapacity());
+
+        try {
+            VacMachine after = vacMachineService.getById(request.getMachineId());
+            long pending = autoDrugReservationManager.getPendingCount(request.getMachineId());
+            String autoDrugStart = valueOperations.get(
+                    RedisKeyConstant.autoDrug.AUTO_DRUG_START);
+            log.info("[自动上药追踪] traceId={}, 阶段=数据库提交成功, 仓位={}({}), 入库后真实库存={}, 入库后可用库存={}, 当前pending={}, AUTO_DRUG_START={}, 产品编码={}, 批号={}, 有效期={}",
+                    reservedBox.reservationId(), request.getMachineNo(), request.getMachineId(),
+                    after == null ? null : after.getVaccineNum(),
+                    after == null ? null : after.getVaccineUseNum(), pending, autoDrugStart,
+                    request.getProductNo(), request.getBatchNo(), request.getExpiredAt());
+        } catch (Throwable diagnosticError) {
+            log.warn("[自动上药追踪] traceId={}, 仓位={}({})数据库已提交成功，但提交后诊断信息读取失败；不回滚已离手药盒记账",
+                    reservedBox.reservationId(), request.getMachineNo(),
+                    request.getMachineId(), diagnosticError);
+        }
+    }
+
+    private void releaseReservationAfterCommit(ReservedDrugBox reservedBox) {
+        AutoDrugReleaseResult result =
+                autoDrugReservationManager.release(reservedBox.reservationId());
+        if (result.getOutcome() != AutoDrugReleaseOutcome.RELEASED) {
+            throw new IllegalStateException("数据库提交成功但预留未得到RELEASED结果：traceId="
+                    + reservedBox.reservationId() + "，outcome=" + result.getOutcome());
+        }
+        log.info("[自动上药追踪] traceId={}, 阶段=数据库提交后释放预留, 仓位={}({}), outcome={}, 剩余pending={}",
+                reservedBox.reservationId(), reservedBox.drugRecordRequest().getMachineNo(),
+                reservedBox.drugRecordRequest().getMachineId(), result.getOutcome(),
+                result.getPendingCount());
+    }
+
+    private void markReservationUncertain(
+            ReservedDrugBox reservedBox, String reason, Throwable cause) {
+        try {
+            autoDrugReservationManager.markUncertain(reservedBox.reservationId(), reason)
+                    .orElseThrow(() -> new IllegalStateException(
+                            "需要标记UNCERTAIN时预留已不存在"));
+        } catch (Throwable redisError) {
+            autoDrugReservationManager.tripSafetyInterlock(
+                    "UNCERTAIN预留状态无法写入Redis，traceId="
+                            + reservedBox.reservationId(), redisError);
+            if (cause == null) {
+                cause = redisError;
+            } else {
+                cause.addSuppressed(redisError);
+            }
+        }
+        notifyReservationAlarm(reservedBox,
+                reason + "；Redis预留保留并阻止再次启动", cause);
+    }
+
+    private void markReservationCommitFailed(
+            ReservedDrugBox reservedBox, Throwable commitError) {
+        String reason = "机械手底部传感器已确认药盒离手，但数据库库存/上药记录事务提交失败";
+        try {
+            autoDrugReservationManager.markCommitFailed(reservedBox.reservationId(), reason)
+                    .orElseThrow(() -> new IllegalStateException(
+                            "需要标记COMMIT_FAILED时预留已不存在"));
+        } catch (Throwable redisError) {
+            autoDrugReservationManager.tripSafetyInterlock(
+                    "COMMIT_FAILED预留状态无法写入Redis，traceId="
+                            + reservedBox.reservationId(), redisError);
+            commitError.addSuppressed(redisError);
+        }
+        notifyReservationAlarm(reservedBox,
+                reason + "；Redis预留保留并阻止再次启动", commitError);
+    }
+
+    private void notifyReservationAlarm(
+            ReservedDrugBox reservedBox, String reason, Throwable cause) {
+        DrugRecordRequest request = reservedBox.drugRecordRequest();
+        long pending;
+        try {
+            pending = autoDrugReservationManager.getPendingCount(request.getMachineId());
+        } catch (Throwable ignored) {
+            pending = -1L;
+        }
+        String message = String.format(
+                "自动上药保护报警：traceId=%s，仓位=%s(%s)，药品=%s，产品编码=%s，批号=%s，有效期=%s，监管码=%s，预留时DB库存=%d，当前pending=%d，最大容量=%d，原因=%s",
+                reservedBox.reservationId(), request.getMachineNo(), request.getMachineId(),
+                request.getProductName(), request.getProductNo(), request.getBatchNo(),
+                request.getExpiredAt(), request.getSupervisedCode(),
+                reservedBox.databaseCountAtReserve(), pending,
+                reservedBox.maxCapacity(), reason);
+        if (cause == null) {
+            log.error(message);
+        } else {
+            log.error(message, cause);
+        }
+
+        try {
+            RedisDrugListData exceptionData = new RedisDrugListData();
+            exceptionData.setMachineId(request.getMachineId());
+            exceptionData.setBoxNo(request.getMachineNo());
+            exceptionData.setLineNum(request.getLineNum());
+            exceptionData.setProductName(request.getProductName());
+            vacMachineExceptionService.dropException(
+                    SettingConstants.MachineException.SEND.code, exceptionData, message);
+        } catch (Throwable alarmError) {
+            log.error("[自动上药追踪] traceId={}, 写入异常管理失败",
+                    reservedBox.reservationId(), alarmError);
+        }
+
+        try {
+            Map<String, Object> commandData = new HashMap<>();
+            commandData.put("code", CommandEnums.MACHINE_STATUS_COMMAND.getCode());
+            commandData.put("data", message);
+            websocketService.sendInfo(CommandEnums.ON_CABINET_WEB.getCode(), commandData);
+        } catch (Throwable websocketError) {
+            log.error("[自动上药追踪] traceId={}, 前端报警推送失败",
+                    reservedBox.reservationId(), websocketError);
+        }
+    }
+
+    private void stopAutoDrugAfterReservationFailure() {
+        try {
+            sendDrugThreadManager.stop();
+        } catch (Throwable stopError) {
+            log.error("自动上药预留异常后停止流程失败", stopError);
+        }
+    }
+
+    private enum ReservationCustody {
+        RESERVED_ON_B_CABINET,
+        TRANSFER_TO_A_UNCERTAIN,
+        IN_TRANSIT,
+        CHILD_THREAD_OWNED,
+        CLOSED
+    }
+
+    private record ReservedDrugBox(
+            DrugRecordRequest drugRecordRequest,
+            String reservationId,
+            String sessionId,
+            int databaseCountAtReserve,
+            long pendingCountAfterReserve,
+            int maxCapacity) {
+    }
+
+    /**
      *
      * 如果机械手检测到传感器 默认已经送到仓位
      * @param request  status 1 正常上药 2 多人份上药
@@ -1997,7 +2731,10 @@ public class SendDrugFunction {
         ConfigData configData = configFunction.getAutoDrugConfigData();
         int num = getDrugNum(distanceServoData.getVaccineLong(), request);
         //根据初始位置拿到仓位的长宽高
-        VacDrug vacDrug = vacDrugService.vacDrugGetByproductNo(request.getProductNo());
+        VacDrug vacDrug = getValidDrugForAutoLoading(request);
+        if (vacDrug == null) {
+            return null;
+        }
 
         List<VacBoxSpec> vacBoxSpecList = vacBoxSpecService.findVacBoxSpec(vacDrug.getVaccineWide());
         List<Long> boxSpecIds = new ArrayList<>();
@@ -2008,7 +2745,8 @@ public class SendDrugFunction {
         log.info("符合的仓位规格id(排除预留):{}", JSON.toJSONString(boxSpecIds));
         if (!boxSpecIds.isEmpty()) {
             if ("true".equals(configData.getSendDrugTest())) {
-                return vacMachineService.findBoxTest(boxSpecIds, num, request);
+                return vacMachineService.findBoxTestExcludeMachineIds(
+                        boxSpecIds, num, request, excludeMachineIds);
             } else {
                 return vacMachineService.findBoxExcludeMachineIds(boxSpecIds, num, request, excludeMachineIds);
             }
@@ -2026,8 +2764,9 @@ public class SendDrugFunction {
         }
 
         //查询疫苗最大存储数量
+        //这里只读取最大存储数量，不参与尺寸校验；尺寸由后续选仓专用查询校验。
         VacDrug vacDrug = vacDrugService.vacDrugGetByproductNo(request.getProductNo());
-        Integer maxNum = vacDrug.getMaxNum();
+        Integer maxNum = vacDrug == null ? null : vacDrug.getMaxNum();
 
         //取最小值
         if(maxNum!=null){
@@ -2039,6 +2778,31 @@ public class SendDrugFunction {
 
         return num;
 
+    }
+
+    private VacDrug getValidDrugForAutoLoading(DrugRecordRequest request) {
+        VacDrug vacDrug = vacDrugService.vacDrugGetValidDimensionsByProductNo(request.getProductNo());
+        if (vacDrug != null
+                && vacDrug.getVaccineLong() != null && vacDrug.getVaccineLong() > 0
+                && vacDrug.getVaccineWide() != null && vacDrug.getVaccineWide() > 0
+                && vacDrug.getVaccineHigh() != null && vacDrug.getVaccineHigh() > 0) {
+            return vacDrug;
+        }
+
+        String msg = String.format(
+                "自动上药药品尺寸异常：产品编码=%s，药品名称=%s，vaccineId=%s，长=%s，宽=%s，高=%s，已停止为该药品分配仓位。",
+                request.getProductNo(),
+                request.getProductName(),
+                vacDrug == null ? null : vacDrug.getId(),
+                vacDrug == null ? null : vacDrug.getVaccineLong(),
+                vacDrug == null ? null : vacDrug.getVaccineWide(),
+                vacDrug == null ? null : vacDrug.getVaccineHigh());
+        log.error(msg);
+        vacMachineExceptionService.sendException(
+                SettingConstants.MachineException.SEND.code,
+                request.getProductName() == null ? "" : request.getProductName(),
+                msg);
+        return null;
     }
 
 

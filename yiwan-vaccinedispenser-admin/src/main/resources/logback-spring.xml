@@ -2,14 +2,17 @@
 
 <configuration>
 
+    <springProperty scope="context" name="LOG_PATH" source="logging.file.path" defaultValue="./logs"/>
+
     <springProfile name="dev">
         <logger name="com.yiwan.vaccinedispenser.system.sys.dao" level="WARN"/>
         <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
         <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
 
             <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-                <fileNamePattern>./logs/%d{yyyyMMdd}.log</fileNamePattern>
-                <maxHistory>30</maxHistory>
+                <fileNamePattern>${LOG_PATH}/%d{yyyyMMdd}.log</fileNamePattern>
+                <maxHistory>60</maxHistory>
+                <cleanHistoryOnStart>true</cleanHistoryOnStart>
             </rollingPolicy>
 
             <encoder>
@@ -37,8 +40,9 @@
         <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
 
             <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-                <fileNamePattern>./logs/%d{yyyyMMdd}.log</fileNamePattern>
-                <maxHistory>30</maxHistory>
+                <fileNamePattern>${LOG_PATH}/%d{yyyyMMdd}.log</fileNamePattern>
+                <maxHistory>60</maxHistory>
+                <cleanHistoryOnStart>true</cleanHistoryOnStart>
             </rollingPolicy>
 
             <encoder>

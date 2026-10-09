@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.yiwan.vaccinedispenser.core.common.emun.RedisKeyConstant;
 import com.yiwan.vaccinedispenser.core.web.Result;
 import com.yiwan.vaccinedispenser.system.dispensing.SendDrugThreadManager;
+import com.yiwan.vaccinedispenser.system.plc.data.AlarmBitTable;
 import com.yiwan.vaccinedispenser.system.plc.manager.PlcSendService;
 import com.yiwan.vaccinedispenser.system.sys.data.request.vac.VacMachineRequest;
 import com.yiwan.vaccinedispenser.system.sys.service.vac.VacMachineService;
@@ -60,7 +61,11 @@ public class DispensingController {
         //开始上药前清理上药信息队列和预留仓位
         redisTemplate.delete(RedisKeyConstant.PLC_SEND_DRUG_MSG);
         redisTemplate.delete(RedisKeyConstant.PLC_RESERVED_MACHINES);
+        // 允许PLC在本次启动时重新上报“机械手有药”。否则上一轮保留的上升沿状态为1，
+        // 相同报警再次发生时会被误认为已经处理，异常管理看不到本次报警。
+        redisTemplate.delete("plc:alarm:" + AlarmBitTable.B_ALARM1_START_SIGNAL.name());
         if (plcSendService != null) {
+            // PLC模式的具体上药流程和传感器闭环由PLC负责，Java只下发启动指令。
             plcSendService.sendBCabinetFeedStart();
         }else {
             sendDrugThreadManager.sendDrug();

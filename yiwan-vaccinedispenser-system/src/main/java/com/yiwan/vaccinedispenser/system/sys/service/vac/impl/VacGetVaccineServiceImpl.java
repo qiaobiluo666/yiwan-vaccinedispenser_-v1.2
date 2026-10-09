@@ -78,7 +78,9 @@ public class VacGetVaccineServiceImpl extends ServiceImpl<VacGetVaccineMapper, V
                 //机器没有库存 查看药品名称 厂家
                 VacDrug vacDrug = vacDrugService.vacDrugGetByproductNo(productNoList.get(0));
                 RedisDrugListData redisDrugListData = new RedisDrugListData();
-                redisDrugListData.setProductName(vacDrug.getProductName());
+                String productName = vacDrug == null ? vacGetVaccine.getProductName() : vacDrug.getProductName();
+                String manufacturerName = vacDrug == null ? "未知" : vacDrug.getManufacturerName();
+                redisDrugListData.setProductName(productName);
                 //返回没有药品
 //                zcyFunction.sendResult(vacGetVaccine);
                 Map<String, Object> commandData = new HashMap<>();
@@ -87,7 +89,8 @@ public class VacGetVaccineServiceImpl extends ServiceImpl<VacGetVaccineMapper, V
                 websocketService.sendInfo(CommandEnums.DEVICE_STATUS_SEND_DRUG_LIST_START.getCode(),commandData);
 
                 String msg;
-                msg = String.format("机器没有库存：药品：%s 厂家：%s   药品编号：%s", vacDrug.getProductName(), vacDrug.getManufacturerName(), vacDrug.getProductNo());
+                msg = String.format("机器没有库存：药品：%s 厂家：%s   药品编号：%s",
+                        productName, manufacturerName, productNoList.get(0));
 
                 //如果机器上没有药 直接返回机器上无药
                 log.error(msg);

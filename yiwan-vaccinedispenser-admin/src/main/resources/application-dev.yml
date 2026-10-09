@@ -27,6 +27,10 @@ spring:
       max-request-size: 100MB
       max-file-size: 100MB
 
+logging:
+  file:
+    path: D:/yiwan/backend/logs
+
 netty:
   enable: true
 

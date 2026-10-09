@@ -229,19 +229,22 @@ public class DispensingFunction {
             throw new ServiceException(msg);
         }else {
             //获取发苗仓位
-            VacMachine vacMachine = getDrugVacMachineMsg(drugList);
+            VacMachine vacMachine;
+            try {
+                vacMachine = getDrugVacMachineMsg(drugList);
+            } catch (ServiceException exception) {
+                notifyDrugSelectionError(vacGetVaccine,
+                        "true".equals(configSetting.getZcySend()), exception.getMessage());
+                throw exception;
+            }
 
             int realBeltLine = (vacMachine.getLineNum() + 1) / 2;
-
-            //药品可使用量-1
-            vacMachine.setVaccineUseNum(vacMachine.getVaccineUseNum()-1);
-            //可用数量-1
-            vacMachineMapper.updateById(vacMachine);
 
             RedisDrugListData redisDrugListData = new RedisDrugListData();
             BeanUtils.copyProperties(vacMachine,redisDrugListData);
             redisDrugListData.setMachineStatus(vacMachine.getStatus());
             redisDrugListData.setBoxNo(vacMachine.getBoxNo());
+            redisDrugListData.setMachineNo(vacMachine.getBoxNo());
             redisDrugListData.setProductName(vacMachine.getProductName());
             redisDrugListData.setMachineId(vacMachine.getId());
             //将发药工作台存入
@@ -255,13 +258,13 @@ public class DispensingFunction {
             redisDrugListData.setUuid(UUID.randomUUID());
 
             redisDrugListData.setVaccineNum(vacMachine.getVaccineNum());
-            redisDrugListData.setVaccineUseNum(vacMachine.getVaccineUseNum());
-            //将发药数据存入数据库
-            listOps.rightPush(String.format(RedisKeyConstant.DROP_LIST,realBeltLine),JSON.toJSONString(redisDrugListData));
-            listOps.rightPush(RedisKeyConstant.BELT_LIST,JSON.toJSONString(redisDrugListData));
-
-            //发药处方加入redis
-            listOps.rightPush(RedisKeyConstant.SEND_LIST,JSON.toJSONString(redisDrugListData));
+            reserveAvailableInventoryAndEnqueue(
+                    "发药",
+                    vacMachine,
+                    redisDrugListData,
+                    String.format(RedisKeyConstant.DROP_LIST, realBeltLine),
+                    RedisKeyConstant.BELT_LIST,
+                    RedisKeyConstant.SEND_LIST);
 
             List<String> dropList = listOps.range(String.format(RedisKeyConstant.DROP_LIST,realBeltLine), 0, -1);
             List<String> beltList = listOps.range(RedisKeyConstant.BELT_LIST, 0, -1);
@@ -292,9 +295,108 @@ public class DispensingFunction {
     }
 
     /**
+     * 原子预占一盒可用库存，并把同一个 UUID 的任务依次写入本次发药所需队列。
+     * Redis 写入异常时无法可靠区分“服务端未执行”和“服务端已执行但客户端未收到响应”，
+     * 因此必须保留数据库预占，禁止删除在途队列或恢复可用库存，避免同一盒药被再次选择。
+     */
+    public void reserveAvailableInventoryAndEnqueue(
+            String flowName,
+            VacMachine vacMachine,
+            RedisDrugListData redisDrugListData,
+            String... queueKeys) {
+        if (vacMachine == null || vacMachine.getId() == null) {
+            throw new IllegalArgumentException("发药预占必须指定仓位");
+        }
+        if (redisDrugListData == null) {
+            throw new IllegalArgumentException("发药预占必须提供队列数据");
+        }
+        if (queueKeys == null || queueKeys.length == 0
+                || Arrays.stream(queueKeys).anyMatch(key -> key == null || key.isBlank())) {
+            throw new IllegalArgumentException("发药预占必须提供完整的Redis队列key");
+        }
+        Integer useNumBeforeReservation = vacMachine.getVaccineUseNum();
+        if (useNumBeforeReservation == null || useNumBeforeReservation <= 0) {
+            throw new ServiceException(String.format(
+                    "%s库存快照异常：仓位%s(%s)的可用库存为%s，请重新发药",
+                    flowName, vacMachine.getBoxNo(), vacMachine.getId(), useNumBeforeReservation));
+        }
+
+        int reservedUseNum = useNumBeforeReservation - 1;
+        vacMachine.setVaccineUseNum(reservedUseNum);
+        redisDrugListData.setVaccineNum(vacMachine.getVaccineNum());
+        redisDrugListData.setVaccineUseNum(reservedUseNum);
+        if (redisDrugListData.getUuid() == null) {
+            redisDrugListData.setUuid(UUID.randomUUID());
+        }
+
+        //序列化本身不应占用库存；先完成序列化，失败时数据库保持不变。
+        final String payload;
+        try {
+            payload = JSON.toJSONString(redisDrugListData);
+        } catch (RuntimeException serializationError) {
+            String message = String.format(
+                    "%s任务序列化失败：仓位%s(%s)，uuid=%s，尚未预占可用库存",
+                    flowName, vacMachine.getBoxNo(), vacMachine.getId(), redisDrugListData.getUuid());
+            log.error(message, serializationError);
+            throw new ServiceException(message, serializationError);
+        }
+
+        //只原子减少可用库存，不能整行回写后覆盖自动上药刚增加的真实库存。
+        int affectedRows = vacMachineMapper.decrementVaccineUseNumById(vacMachine.getId());
+        if (affectedRows != 1) {
+            String message = String.format(
+                    "%s库存并发变化：仓位%s(%s)的可用库存已被其他任务占用，请重新发药",
+                    flowName, vacMachine.getBoxNo(), vacMachine.getId());
+            log.warn("{}，选择时useNum={}", message, useNumBeforeReservation);
+            throw new ServiceException(message);
+        }
+
+        log.info("{}原子预占成功：仓位={}({}), uuid={}, 产品编码={}, 预占前useNum={}, 预占后useNum={}, 真实库存vaccineNum={}（未修改）",
+                flowName, vacMachine.getBoxNo(), vacMachine.getId(), redisDrugListData.getUuid(),
+                vacMachine.getProductNo(), useNumBeforeReservation, reservedUseNum,
+                vacMachine.getVaccineNum());
+
+        List<String> successfulQueueKeys = new ArrayList<>();
+        String currentQueueKey = null;
+        try {
+            for (String queueKey : queueKeys) {
+                currentQueueKey = queueKey;
+                Long queueSize = listOps.rightPush(queueKey, payload);
+                if (queueSize == null || queueSize <= 0) {
+                    throw new IllegalStateException("Redis RPUSH未返回有效队列长度");
+                }
+                successfulQueueKeys.add(queueKey);
+                log.info("{}任务入队成功：仓位={}({}), uuid={}, queue={}, queueSize={}",
+                        flowName, vacMachine.getBoxNo(), vacMachine.getId(),
+                        redisDrugListData.getUuid(), queueKey, queueSize);
+            }
+        } catch (RuntimeException enqueueError) {
+            String message = String.format(
+                    "%sRedis入队结果不确定：仓位%s(%s)，uuid=%s，当前队列=%s，已确认队列=%s；已保留数据库可用库存预占，禁止自动恢复，请核查Redis任务",
+                    flowName, vacMachine.getBoxNo(), vacMachine.getId(),
+                    redisDrugListData.getUuid(), currentQueueKey, successfulQueueKeys);
+            log.error(message, enqueueError);
+            try {
+                vacMachineExceptionService.dropException(
+                        SettingConstants.MachineException.SENDWARING.code, redisDrugListData, message);
+            } catch (RuntimeException alarmError) {
+                enqueueError.addSuppressed(alarmError);
+                log.error("{}；写入异常管理失败", message, alarmError);
+            }
+            throw new ServiceException(message, enqueueError);
+        }
+    }
+
+    /**
      * 根据redis 判断是否掉药  掉药--药品停在皮带边缘
      */
     public VacMachine getDrugVacMachineMsg(List<VacMachine> drugList){
+
+        if (drugList == null || drugList.isEmpty()) {
+            throw new ServiceException("未找到可用库存仓位！");
+        }
+
+        drugList = filterDrugListWithValidExpiry(drugList);
 
         // 获取五个发药队列的大小
         Map<Integer, Long> beltQueueSizeMap = new HashMap<>();
@@ -344,14 +446,16 @@ public class DispensingFunction {
                         .toList();
 
             }else {
-                //找到同效期 数量最小的批号列表
-                List<String> machineBatchNo = vacMachineService.getBatchListNum(distinctBatchNos);
-                if(machineBatchNo!=null && !machineBatchNo.isEmpty()){
-                    distinctBatchNos = machineBatchNo;
-                }
-                log.info("同批次的最小数量批号：{}", machineBatchNo);
-                //通过疫苗列表 找最早的记录
-                String batchNo = vacDrugRecordService.getBatchNoEarly(distinctBatchNos);
+                //同一有效期按批次最早上药时间执行FIFO，不能按当前库存数量切换批次。
+                List<String> productNos = nearestExpiryDrugList.stream()
+                        .filter(drug -> drug.getExpiredAt().equals(nearestExpiryDate))
+                        .map(VacMachine::getProductNo)
+                        .filter(Objects::nonNull)
+                        .distinct()
+                        .toList();
+                String batchNo = vacDrugRecordService.getBatchNoEarly(
+                        distinctBatchNos, productNos, nearestExpiryDate);
+                log.info("[发药] 同有效期按最早上药记录选择批号：{}", batchNo);
 
                 if(batchNo!=null){
                     drugsWithNearestExpiry = nearestExpiryDrugList.stream()
@@ -400,6 +504,90 @@ public class DispensingFunction {
 
 
         return vacMachine;
+    }
+
+    /**
+     * 有库存但没有有效期的仓位不能参与发药。异常仓位逐仓写入异常管理，
+     * 有正常仓位时跳过异常仓位；全部异常时阻止本次发药。
+     */
+    public List<VacMachine> filterDrugListWithValidExpiry(List<VacMachine> drugList) {
+        if (drugList == null || drugList.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<VacMachine> invalidDrugList = drugList.stream()
+                .filter(Objects::nonNull)
+                .filter(drug -> drug.getExpiredAt() == null)
+                .toList();
+        if (invalidDrugList.isEmpty()) {
+            return drugList;
+        }
+
+        for (VacMachine invalidDrug : invalidDrugList) {
+            recordMissingExpiryException(invalidDrug);
+        }
+
+        List<VacMachine> validDrugList = drugList.stream()
+                .filter(Objects::nonNull)
+                .filter(drug -> drug.getExpiredAt() != null)
+                .toList();
+        String boxNos = invalidDrugList.stream()
+                .map(VacMachine::getBoxNo)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.joining("、"));
+        String alarmMsg;
+        if (validDrugList.isEmpty()) {
+            alarmMsg = String.format("库存数据异常：仓位%s有效期为空，没有有效期正常的可用仓位，本次发药已停止！", boxNos);
+        } else {
+            alarmMsg = String.format("库存数据异常：仓位%s有效期为空，已跳过异常仓位并继续使用正常仓位发药！", boxNos);
+        }
+        log.error(alarmMsg);
+        sendInventoryDataAlarm(alarmMsg);
+
+        if (validDrugList.isEmpty()) {
+            throw new ServiceException(alarmMsg);
+        }
+        return validDrugList;
+    }
+
+    private void recordMissingExpiryException(VacMachine invalidDrug) {
+        RedisDrugListData errorData = new RedisDrugListData();
+        BeanUtils.copyProperties(invalidDrug, errorData);
+        errorData.setMachineId(invalidDrug.getId());
+        errorData.setProductName(invalidDrug.getProductName());
+        String desc = String.format(
+                "库存数据异常：有效期为空；产品编码=%s；批号=%s；库存=%s；可用=%s；状态=%s；记录ID=%s",
+                Objects.toString(invalidDrug.getProductNo(), "空"),
+                Objects.toString(invalidDrug.getBatchNo(), "空"),
+                Objects.toString(invalidDrug.getVaccineNum(), "空"),
+                Objects.toString(invalidDrug.getVaccineUseNum(), "空"),
+                Objects.toString(invalidDrug.getStatus(), "空"),
+                Objects.toString(invalidDrug.getId(), "空"));
+        vacMachineExceptionService.dropException(
+                SettingConstants.MachineException.SENDWARING.code, errorData, desc);
+    }
+
+    private void sendInventoryDataAlarm(String msg) {
+        Map<String, Object> commandData = new HashMap<>();
+        commandData.put("code", CommandEnums.MACHINE_STATUS_COMMAND.getCode());
+        commandData.put("data", msg);
+        try {
+            websocketService.sendInfo(CommandEnums.ON_CABINET_WEB.getCode(), commandData);
+        } catch (Exception exception) {
+            log.error("库存数据异常WebSocket报警发送失败：{}", msg, exception);
+        }
+    }
+
+    public void notifyDrugSelectionError(VacGetVaccine vacGetVaccine, boolean sendZcyResult, String msg)
+            throws Exception {
+        if (sendZcyResult) {
+            zcyFunction.sendResult(vacGetVaccine, msg);
+        }
+        Map<String, Object> commandData = new HashMap<>();
+        commandData.put("code", CommandEnums.DEVICE_STATUS_SEND_DRUG_LIST_ERROR.getCode());
+        commandData.put("data", vacGetVaccine);
+        websocketService.sendInfo(CommandEnums.SHOW_MSG_WEB.getCode(), commandData);
     }
 
 
@@ -995,11 +1183,33 @@ public class DispensingFunction {
     //发药记录 以及 仓柜减少药品 -1 如果为0 为null
     public void  dropRecordAndMachine(RedisDrugListData drugListData,Integer status,String desc){
         log.info("开始减库存==================");
-        //出药
-        vacSendDrugRecordService.sendDrugRecordAdd(drugListData,status , desc);
+        //药品已经由传感器确认掉落。台账保存失败只能报警，不能中断库存扣减和后续队列消费，
+        //否则同一个Redis任务会再次驱动电磁铁，造成连续发出多只药。
+        try {
+            vacSendDrugRecordService.sendDrugRecordAdd(drugListData,status , desc);
+        } catch (Exception recordError) {
+            String errorMsg = String.format(
+                    "发药记录保存失败（药品已确认掉落，继续扣减库存并完成当前任务）：仓位=%s，machineId=%s，产品=%s(%s)，requestNo=%s，taskId=%s，uuid=%s，原因=%s",
+                    drugListData.getBoxNo(), drugListData.getMachineId(),
+                    drugListData.getProductName(), drugListData.getProductNo(),
+                    drugListData.getRequestNo(), drugListData.getTaskId(), drugListData.getUuid(),
+                    recordError.getMessage());
+            log.error(errorMsg, recordError);
+            try {
+                vacMachineExceptionService.dropException(
+                        SettingConstants.MachineException.SENDDRUG.code, drugListData, errorMsg);
+            } catch (Exception alarmError) {
+                log.error("发药记录保存失败后写入异常管理也失败，但继续完成当前发药任务：仓位={}，uuid={}",
+                        drugListData.getBoxNo(), drugListData.getUuid(), alarmError);
+            }
+        }
 
         //该药仓库存-1
         vacMachineService.decrementNumById(drugListData.getMachineId());
+        log.info("已确认掉药并完成真实库存扣减：仓位={}，machineId={}，产品={}({})，requestNo={}，taskId={}，uuid={}",
+                drugListData.getBoxNo(), drugListData.getMachineId(),
+                drugListData.getProductName(), drugListData.getProductNo(),
+                drugListData.getRequestNo(), drugListData.getTaskId(), drugListData.getUuid());
 
         //多人份
         if(drugListData.getMachineStatus()==2){
@@ -1412,7 +1622,11 @@ public class DispensingFunction {
 
         // 如果最终还是没有确认信号（超时），直接关闭挡板并退出
         if (openTimeStr == null || openTimeStr.isEmpty()) {
-            log.error("未收到下位机开启确认，强制关闭挡板");
+            String errorMsg = String.format(
+                    "抬升小挡板开启回包超时：A柜输出口%d，等待%dms未收到控制板执行成功回包",
+                    SettingConstants.CABINET_A_LIFT_BLANK_OPEN_NUM, ACK_TIMEOUT);
+            log.error(errorMsg);
+            vacMachineExceptionService.sendException(SettingConstants.MachineException.IO.code, errorMsg);
             outPutRequest.setCommand(CabinetConstants.OutPutCommand.NOT_OUTPUT);
             cabinetAService.outPut(outPutRequest);
             valueOperations.set(RedisKeyConstant.CABINET_A_LIFT_BLANK_IS_OPEN,"true");
@@ -1497,7 +1711,10 @@ public class DispensingFunction {
 
         // 如果最终还是没有确认信号（超时），直接关闭输出并退出
         if (closeTimeStr == null || closeTimeStr.isEmpty()) {
-            log.error("未收到下位机关闭确认");
+            String errorMsg = String.format(
+                    "抬升小挡板关闭回包超时：A柜输出口%d，等待%dms未收到控制板执行成功回包",
+                    SettingConstants.CABINET_A_LIFT_BLANK_CLOSE_NUM, ACK_TIMEOUT);
+            log.error(errorMsg);
             outPutRequest.setCommand(CabinetConstants.OutPutCommand.NOT_OUTPUT);
             cabinetAService.outPut(outPutRequest);
             return;

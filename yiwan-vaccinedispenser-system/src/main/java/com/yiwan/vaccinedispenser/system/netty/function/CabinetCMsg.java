@@ -325,22 +325,10 @@ public class CabinetCMsg {
             }
 
 
-//            //伺服电机
-//            case "03"->{
-//                //B柜伺服报警 自动上药停止
-//                if ("03".equals(bytesStr[11]) && "0C".equals(bytesStr[6]) || "02".equals(bytesStr[11]) && "0D".equals(bytesStr[12])){
-//                    valueOperations.set(RedisKeyConstant.CABINET_C_SERVO_ERROR,"true");
-//                    String msg = "C柜第"+address+"伺服报警，结束自动上药 ";
-//                    log.error(msg+ NettyUtils.StringListToString(bytesStr));
-//                    sendDrugThreadManager.stop();
-//                    vacMachineExceptionService.sendException(SettingConstants.MachineException.SENDWARING.code, msg);
-//                    Map<String, Object> commandData = new HashMap<>();
-//                    commandData.put("code", CommandEnums.DEVICE_STATUS_SEND_DRUG_LIST_ERROR.getCode());
-//                    commandData.put("data", msg);
-//                    websocketService.sendInfo(CommandEnums.MACHINE_STATUS_COMMAND.getCode(),commandData);
-//
-//                }
-//            }
+            //伺服电机
+            case "03" -> {
+                receiveServo(bytesStr, configSetting);
+            }
 
 
             //输入检测
@@ -410,6 +398,42 @@ public class CabinetCMsg {
             default -> {
                 log.info("收到C柜其他指令:{}",NettyUtils.StringListToString(bytesStr));
             }
+        }
+    }
+
+    /**
+     *
+     * @param bytesStr
+     * C柜伺服信息处理（含伺服报警，帧号隔离后相同告警只刷新不重复插入）
+     */
+    public void receiveServo(String[] bytesStr) throws Exception {
+        receiveServo(bytesStr, configFunction.getSettingConfigData());
+    }
+
+    void receiveServo(String[] bytesStr, ConfigSetting configSetting) throws Exception {
+        //第几个伺服
+        int address = Integer.parseInt(bytesStr[9], 16);
+        log.info("收:C柜{}:第{}伺服指令：{}", CabinetConstants.CabinetCType.SERVO.desc, address, NettyUtils.StringListToString(bytesStr));
+
+
+        //C柜伺服报警 （description 不拼接帧号，重复上报走更新）
+        if (("03".equals(bytesStr[11]) && "03".equals(bytesStr[7]) && "0C".equals(bytesStr[6])) || ("02".equals(bytesStr[11]) && "0D".equals(bytesStr[12]))) {
+            if (address == 4
+                    && configSetting != null
+                    && SettingConstants.LIAN_SHI_HOSPITAL_NAME.equals(configSetting.getHospitalName())) {
+                log.warn("[医院定制] {}已屏蔽C柜第4伺服报警，原始报文：{}",
+                        SettingConstants.LIAN_SHI_HOSPITAL_NAME,
+                        NettyUtils.StringListToString(bytesStr));
+                return;
+            }
+            valueOperations.set(RedisKeyConstant.CABINET_C_SERVO_ERROR, "true");
+            String msg = "C柜第" + address + "伺服报警，发药异常，请联系售后人员！"+NettyUtils.StringListToStringWithoutFrame(bytesStr);
+            log.error(msg + NettyUtils.StringListToStringWithoutFrame(bytesStr));
+            vacMachineExceptionService.sendException(SettingConstants.MachineException.SENDWARING.code, msg);
+            Map<String, Object> commandData = new HashMap<>();
+            commandData.put("code", CommandEnums.DEVICE_STATUS_SEND_DRUG_LIST_ERROR.getCode());
+            commandData.put("data", msg);
+            websocketService.sendInfo(CommandEnums.MACHINE_STATUS_COMMAND.getCode(), commandData);
         }
     }
 

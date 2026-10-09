@@ -1,5 +1,9 @@
 package com.yiwan.vaccinedispenser.system.sys.service.other.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.yiwan.vaccinedispenser.core.exception.ServiceException;
+import com.yiwan.vaccinedispenser.core.web.Result;
+import com.yiwan.vaccinedispenser.system.domain.model.vac.VacDrug;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacMachine;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacDrugRecord;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacSendDrugRecord;
@@ -7,6 +11,7 @@ import com.yiwan.vaccinedispenser.system.sys.data.request.vac.DrugRecordRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.request.vac.SendDrugRecordRequest;
 import com.yiwan.vaccinedispenser.system.sys.data.response.vac.InventoryResponse;
 import com.yiwan.vaccinedispenser.system.sys.service.other.ExcelService;
+import com.yiwan.vaccinedispenser.system.sys.service.vac.VacDrugService;
 import com.yiwan.vaccinedispenser.system.sys.service.vac.VacDrugRecordService;
 import com.yiwan.vaccinedispenser.system.sys.service.vac.VacMachineService;
 import com.yiwan.vaccinedispenser.system.sys.service.vac.VacSendDrugRecordService;
@@ -19,14 +24,17 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
+import java.text.Collator;
+import java.util.*;
 
 /**
  * @author 78671
@@ -44,6 +52,9 @@ public class ExcelServiceImpl implements ExcelService {
     @Autowired
     private VacDrugRecordService vacDrugRecordService;
 
+    @Autowired
+    private VacDrugService vacDrugService;
+
     @Override
     public ResponseEntity<byte[]> getInventoryExcel(String productName) throws  IOException {
         Workbook workbook = new XSSFWorkbook();
@@ -53,13 +64,13 @@ public class ExcelServiceImpl implements ExcelService {
         Row titleRow = sheet.createRow(0);
         titleRow.setHeightInPoints(35);
 
-        // 主标题（合并前5列）
+        // 主标题
         Cell titleCell = titleRow.createCell(0);
         String mainTitle = "发苗机库存管理";
         titleCell.setCellValue(mainTitle);
 
-        // 导出时间（第6列）
-        Cell dateCell = titleRow.createCell(5);
+        // 导出时间
+        Cell dateCell = titleRow.createCell(8);
         String exportTime = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date());
         dateCell.setCellValue(exportTime);
 
@@ -89,9 +100,8 @@ public class ExcelServiceImpl implements ExcelService {
         dateStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         dateCell.setCellStyle(dateStyle);
 
-        // 合并单元格：主标题合并前5列（A1到E1）
-        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 4));
-        // 导出时间单元格不合并，单独在第6列（F1）
+        // 合并单元格：主标题合并A1到H1，导出时间在I1
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 7));
         // 表头样式 - 灰色系，左对齐
         CellStyle headerStyle = workbook.createCellStyle();
         Font headerFont = workbook.createFont();
@@ -111,7 +121,7 @@ public class ExcelServiceImpl implements ExcelService {
         // 表头
         Row headerRow = sheet.createRow(1);
         headerRow.setHeightInPoints(25);
-        String[] tableHeaders = {"疫苗种类","疫苗名称","生产企业", "疫苗总数量(支)","今日发苗(支)","今日上苗(支)"};
+        String[] tableHeaders = {"疫苗种类", "疫苗名称", "产品编码", "生产企业", "机内库存(支)", "货架总数", "疫苗总数量(支)", "今日发苗(支)", "今日上苗(支)"};
         for (int i = 0; i < tableHeaders.length; i++) {
             Cell cell = headerRow.createCell(i);
             cell.setCellValue(tableHeaders[i]);
@@ -149,29 +159,46 @@ public class ExcelServiceImpl implements ExcelService {
             cell1.setCellValue(record.getProductName() != null ? record.getProductName() : "");
             cell1.setCellStyle(dataStyle);
 
-            // 生产企业 - 左对齐
+            // 产品编码 - 左对齐
             Cell cell2 = row.createCell(2);
-            cell2.setCellValue(record.getManufacturerName() != null ? record.getManufacturerName() : "");
+            cell2.setCellValue(record.getProductNo() != null ? record.getProductNo() : "");
             cell2.setCellStyle(dataStyle);
 
-            // 疫苗总数量(支) - 数字右对齐
+            // 生产企业 - 左对齐
             Cell cell3 = row.createCell(3);
-            cell3.setCellValue(record.getTotalVaccineNum() != null ? record.getTotalVaccineNum() : 0);
-            cell3.setCellStyle(numberStyle);
+            cell3.setCellValue(record.getManufacturerName() != null ? record.getManufacturerName() : "");
+            cell3.setCellStyle(dataStyle);
 
-            // 今日发苗(支) - 数字右对齐
+            // 机内库存(支) - 数字右对齐
             Cell cell4 = row.createCell(4);
-            cell4.setCellValue(record.getUseDrugNum() != null ? record.getUseDrugNum() : 0);
+            cell4.setCellValue(record.getTotalVaccineNum() != null ? record.getTotalVaccineNum() : 0);
             cell4.setCellStyle(numberStyle);
 
-            // 今日上苗(支) - 数字右对齐
+            // 货架总数 - 数字右对齐
             Cell cell5 = row.createCell(5);
-            cell5.setCellValue(record.getSendDrugNum() != null ? record.getSendDrugNum() : 0);
+            cell5.setCellValue(record.getShelfTotalNum() != null ? record.getShelfTotalNum() : 0);
             cell5.setCellStyle(numberStyle);
+
+            // 疫苗总数量(支) = 机内库存 + 货架总数
+            Cell cell6 = row.createCell(6);
+            int machineTotal = record.getTotalVaccineNum() != null ? record.getTotalVaccineNum() : 0;
+            int shelfTotal = record.getShelfTotalNum() != null ? record.getShelfTotalNum() : 0;
+            cell6.setCellValue(machineTotal + shelfTotal);
+            cell6.setCellStyle(numberStyle);
+
+            // 今日发苗(支) - 数字右对齐
+            Cell cell7 = row.createCell(7);
+            cell7.setCellValue(record.getUseDrugNum() != null ? record.getUseDrugNum() : 0);
+            cell7.setCellStyle(numberStyle);
+
+            // 今日上苗(支) - 数字右对齐
+            Cell cell8 = row.createCell(8);
+            cell8.setCellValue(record.getSendDrugNum() != null ? record.getSendDrugNum() : 0);
+            cell8.setCellStyle(numberStyle);
         }
 
         // 设置列宽
-        int[] columnWidths = {20, 35, 15, 15, 15, 16};
+        int[] columnWidths = {20, 35, 20, 20, 15, 15, 18, 15, 16};
         for (int i = 0; i < columnWidths.length; i++) {
             sheet.setColumnWidth(i, columnWidths[i] * 256);
         }
@@ -192,6 +219,212 @@ public class ExcelServiceImpl implements ExcelService {
         return ResponseEntity.ok()
                 .headers(headers)
                 .body(bytes);
+    }
+
+    @Override
+    public ResponseEntity<byte[]> getShelfTotalExcel() throws IOException {
+        LambdaQueryWrapper<VacDrug> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(VacDrug::getDeleted, 0);
+        List<VacDrug> queriedDrugList = new ArrayList<>(vacDrugService.list(wrapper));
+        queriedDrugList.sort(Comparator
+                .comparing(VacDrug::getUpdateTime, Comparator.nullsLast(Comparator.reverseOrder()))
+                .thenComparing(VacDrug::getId, Comparator.nullsLast(Comparator.reverseOrder())));
+        Map<String, VacDrug> uniqueDrugMap = new LinkedHashMap<>();
+        for (VacDrug vacDrug : queriedDrugList) {
+            if (vacDrug.getProductNo() != null && !vacDrug.getProductNo().trim().isEmpty()) {
+                uniqueDrugMap.putIfAbsent(vacDrug.getProductNo(), vacDrug);
+            }
+        }
+        List<VacDrug> vacDrugList = uniqueDrugMap.values().stream()
+                .filter(drug -> drug.getVaccineLong() != null && drug.getVaccineLong() > 0)
+                .filter(drug -> drug.getVaccineWide() != null && drug.getVaccineWide() > 0)
+                .filter(drug -> drug.getVaccineHigh() != null && drug.getVaccineHigh() > 0)
+                .collect(java.util.stream.Collectors.toList());
+        Collator collator = Collator.getInstance(Locale.CHINA);
+        vacDrugList.sort((left, right) -> {
+            String leftName = left.getProductName();
+            String rightName = right.getProductName();
+            if (leftName == null) {
+                return rightName == null ? 0 : 1;
+            }
+            if (rightName == null) {
+                return -1;
+            }
+            return collator.compare(leftName, rightName);
+        });
+
+        try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            Sheet sheet = workbook.createSheet("货架总数");
+            CellStyle headerStyle = workbook.createCellStyle();
+            Font headerFont = workbook.createFont();
+            headerFont.setBold(true);
+            headerStyle.setFont(headerFont);
+            headerStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+            headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            headerStyle.setBorderTop(BorderStyle.THIN);
+            headerStyle.setBorderBottom(BorderStyle.THIN);
+            headerStyle.setBorderLeft(BorderStyle.THIN);
+            headerStyle.setBorderRight(BorderStyle.THIN);
+
+            CellStyle dataStyle = workbook.createCellStyle();
+            dataStyle.setBorderTop(BorderStyle.THIN);
+            dataStyle.setBorderBottom(BorderStyle.THIN);
+            dataStyle.setBorderLeft(BorderStyle.THIN);
+            dataStyle.setBorderRight(BorderStyle.THIN);
+
+            String[] headers = {"疫苗种类", "疫苗名称", "产品编码", "货架总数"};
+            Row headerRow = sheet.createRow(0);
+            for (int i = 0; i < headers.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(headers[i]);
+                cell.setCellStyle(headerStyle);
+            }
+
+            int rowIndex = 1;
+            for (VacDrug vacDrug : vacDrugList) {
+                Row row = sheet.createRow(rowIndex++);
+                Cell vaccineTypeCell = row.createCell(0);
+                vaccineTypeCell.setCellValue(vacDrug.getVaccineMinorName() != null ? vacDrug.getVaccineMinorName() : "");
+                vaccineTypeCell.setCellStyle(dataStyle);
+
+                Cell productNameCell = row.createCell(1);
+                productNameCell.setCellValue(vacDrug.getProductName() != null ? vacDrug.getProductName() : "");
+                productNameCell.setCellStyle(dataStyle);
+
+                Cell productNoCell = row.createCell(2);
+                productNoCell.setCellValue(vacDrug.getProductNo() != null ? vacDrug.getProductNo() : "");
+                productNoCell.setCellStyle(dataStyle);
+
+                Cell shelfTotalCell = row.createCell(3);
+                shelfTotalCell.setCellValue(vacDrug.getShelfTotalNum() != null ? vacDrug.getShelfTotalNum() : 0);
+                shelfTotalCell.setCellStyle(dataStyle);
+            }
+
+            int[] columnWidths = {20, 40, 22, 15};
+            for (int i = 0; i < columnWidths.length; i++) {
+                sheet.setColumnWidth(i, columnWidths[i] * 256);
+            }
+
+            workbook.write(out);
+            String fileName = URLEncoder.encode("货架总数_" + new SimpleDateFormat("yyyyMMdd_HHmm").format(new Date()) + ".xlsx", StandardCharsets.UTF_8);
+            HttpHeaders headersResponse = new HttpHeaders();
+            headersResponse.setContentDispositionFormData("attachment", fileName);
+            headersResponse.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            return ResponseEntity.ok().headers(headersResponse).body(out.toByteArray());
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result<Integer> importShelfTotalExcel(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            return Result.fail("请选择要导入的Excel文件");
+        }
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null
+                || (!originalFilename.toLowerCase(Locale.ROOT).endsWith(".xls")
+                && !originalFilename.toLowerCase(Locale.ROOT).endsWith(".xlsx"))) {
+            return Result.fail("仅支持.xls或.xlsx格式的Excel文件");
+        }
+
+        List<VacDrug> updateList = new ArrayList<>();
+        try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
+            if (workbook.getNumberOfSheets() == 0) {
+                return Result.fail("Excel文件中没有工作表");
+            }
+            Sheet sheet = workbook.getSheetAt(0);
+            DataFormatter formatter = new DataFormatter(Locale.CHINA);
+            int headerRowIndex = -1;
+            int productNoColumn = -1;
+            int shelfTotalColumn = -1;
+            int scanLastRow = Math.min(sheet.getLastRowNum(), 20);
+            for (int rowIndex = 0; rowIndex <= scanLastRow; rowIndex++) {
+                Row row = sheet.getRow(rowIndex);
+                if (row == null) {
+                    continue;
+                }
+                int currentProductNoColumn = -1;
+                int currentShelfTotalColumn = -1;
+                for (int columnIndex = 0; columnIndex < row.getLastCellNum(); columnIndex++) {
+                    String header = getCellText(row.getCell(columnIndex), formatter);
+                    if ("产品编码".equals(header)) {
+                        currentProductNoColumn = columnIndex;
+                    } else if ("货架总数".equals(header)) {
+                        currentShelfTotalColumn = columnIndex;
+                    }
+                }
+                if (currentProductNoColumn >= 0 && currentShelfTotalColumn >= 0) {
+                    headerRowIndex = rowIndex;
+                    productNoColumn = currentProductNoColumn;
+                    shelfTotalColumn = currentShelfTotalColumn;
+                    break;
+                }
+            }
+            if (headerRowIndex < 0) {
+                return Result.fail("未找到“产品编码”和“货架总数”表头");
+            }
+
+            List<String> errors = new ArrayList<>();
+            Set<String> productNoSet = new HashSet<>();
+            for (int rowIndex = headerRowIndex + 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
+                Row row = sheet.getRow(rowIndex);
+                if (row == null) {
+                    continue;
+                }
+                String shelfTotalText = getCellText(row.getCell(shelfTotalColumn), formatter);
+                if (shelfTotalText.isEmpty()) {
+                    continue;
+                }
+                String productNo = getCellText(row.getCell(productNoColumn), formatter);
+                int displayRowNumber = rowIndex + 1;
+                if (productNo.isEmpty()) {
+                    errors.add("第" + displayRowNumber + "行产品编码为空");
+                    continue;
+                }
+                if (!productNoSet.add(productNo)) {
+                    errors.add("第" + displayRowNumber + "行产品编码重复：" + productNo);
+                    continue;
+                }
+
+                Integer shelfTotalNum;
+                try {
+                    BigDecimal number = new BigDecimal(shelfTotalText.replace(",", ""));
+                    BigDecimal normalized = number.stripTrailingZeros();
+                    if (normalized.scale() > 0 || number.signum() < 0) {
+                        throw new NumberFormatException();
+                    }
+                    shelfTotalNum = number.intValueExact();
+                } catch (ArithmeticException | NumberFormatException exception) {
+                    errors.add("第" + displayRowNumber + "行货架总数必须是大于等于0的整数");
+                    continue;
+                }
+
+                VacDrug vacDrug = vacDrugService.vacDrugGetByproductNo(productNo);
+                if (vacDrug == null) {
+                    errors.add("第" + displayRowNumber + "行产品编码不存在：" + productNo);
+                    continue;
+                }
+                VacDrug updateDrug = new VacDrug();
+                updateDrug.setId(vacDrug.getId());
+                updateDrug.setShelfTotalNum(shelfTotalNum);
+                updateList.add(updateDrug);
+            }
+
+            if (!errors.isEmpty()) {
+                return Result.fail(String.join("；", errors));
+            }
+        } catch (Exception exception) {
+            log.error("导入货架总数Excel失败", exception);
+            return Result.fail("Excel导入失败：" + exception.getMessage());
+        }
+        if (!updateList.isEmpty() && !vacDrugService.updateBatchById(updateList)) {
+            throw new ServiceException("货架总数更新失败");
+        }
+        return Result.success(updateList.size());
+    }
+
+    private String getCellText(Cell cell, DataFormatter formatter) {
+        return cell == null ? "" : formatter.formatCellValue(cell).trim();
     }
 
     @Override

@@ -88,6 +88,9 @@ public class TestController {
     @Value("${upload.password}")
     private  String password;
 
+    @Value("${logging.file.path:./logs}")
+    private String logPath;
+
 
     /**
      * 疫苗列表
@@ -308,8 +311,7 @@ public class TestController {
     public Result uploadFile() throws Exception {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
         String logFileName = LocalDateTime.now().format(formatter) + ".log";
-        String path = "D:\\yiwan\\backend\\logs\\"+logFileName;
-//        String path = "D:\\work\\yiwan\\疫苗发药机\\yiwan-vaccinedispenser_-v1.2\\logs\\"+logFileName;
+        String path = new File(logPath, logFileName).getAbsolutePath();
         uploadController.exportAndUpload(hospitalName,"log", null, null, null, path, true);
         uploadController.exportAndUpload(hospitalName,"db", databaseName, "root", password, null, true);
         return Result.success();
@@ -341,7 +343,7 @@ public class TestController {
 
     @PostMapping("/test")
     public Result test02(){
-        vacMachineService.test7();
+        vacMachineService.test8();
         return Result.success();
     }
     

@@ -226,17 +226,21 @@ public class PlcDispensingFunction {
             throw new ServiceException(msg);
         }else {
             //获取发苗仓位
-            VacMachine vacMachine = dispensingFunction.getDrugVacMachineMsg(drugList);
+            VacMachine vacMachine;
+            try {
+                vacMachine = dispensingFunction.getDrugVacMachineMsg(drugList);
+            } catch (ServiceException exception) {
+                dispensingFunction.notifyDrugSelectionError(vacGetVaccine,
+                        "true".equals(configSetting.getZcySend()), exception.getMessage());
+                throw exception;
+            }
 
             int realBeltLine = (vacMachine.getLineNum() + 1) / 2;
-            //药品可使用量-1
-            vacMachine.setVaccineUseNum(vacMachine.getVaccineUseNum()-1);
-            //可用数量-1
-            vacMachineMapper.updateById(vacMachine);
             RedisDrugListData redisDrugListData = new RedisDrugListData();
             BeanUtils.copyProperties(vacMachine,redisDrugListData);
             redisDrugListData.setMachineStatus(vacMachine.getStatus());
             redisDrugListData.setBoxNo(vacMachine.getBoxNo());
+            redisDrugListData.setMachineNo(vacMachine.getBoxNo());
             redisDrugListData.setProductName(vacMachine.getProductName());
             redisDrugListData.setMachineId(vacMachine.getId());
             //将发药工作台存入
@@ -250,13 +254,13 @@ public class PlcDispensingFunction {
             redisDrugListData.setUuid(UUID.randomUUID());
 
             redisDrugListData.setVaccineNum(vacMachine.getVaccineNum());
-            redisDrugListData.setVaccineUseNum(vacMachine.getVaccineUseNum());
-            //将发药数据存入数据库
-            listOps.rightPush(RedisKeyConstant.PLC_SEND_LIST,JSON.toJSONString(redisDrugListData));
-            listOps.rightPush(RedisKeyConstant.BELT_LIST,JSON.toJSONString(redisDrugListData));
-
-            //发药处方加入redis
-            listOps.rightPush(RedisKeyConstant.SEND_LIST,JSON.toJSONString(redisDrugListData));
+            dispensingFunction.reserveAvailableInventoryAndEnqueue(
+                    "PLC发药",
+                    vacMachine,
+                    redisDrugListData,
+                    RedisKeyConstant.PLC_SEND_LIST,
+                    RedisKeyConstant.BELT_LIST,
+                    RedisKeyConstant.SEND_LIST);
 
             List<String> dropList = listOps.range(RedisKeyConstant.PLC_SEND_LIST, 0, -1);
             List<String> sendList = listOps.range(RedisKeyConstant.SEND_LIST, 0, -1);

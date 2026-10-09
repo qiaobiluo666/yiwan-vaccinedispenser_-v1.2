@@ -8,11 +8,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.EventListener;
+import org.springframework.core.annotation.Order;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author 78671
@@ -22,8 +25,8 @@ import java.util.concurrent.Executors;
 @ConditionalOnExpression("${netty.enable:true}")
 public class NettyClientConfiguration {
 
-    // 用一个固定的线程池
-    ExecutorService threadPool = Executors.newFixedThreadPool(3);
+    /** 控制柜Bean先完成Spring依赖注入，应用完全启动后再统一连接。 */
+    private final List<NettyClient> cabinetClients = new CopyOnWriteArrayList<>();
 
     @Autowired
     @Qualifier("nettyReceiveCabinetAService")
@@ -109,15 +112,22 @@ public class NettyClientConfiguration {
      */
     public NettyClient getOneNetty(String host, int port, String name, NettyReceiveCabinetService nettyReceiveService) {
         NettyClient nettyClient = new NettyClient(host, port, name, nettyReceiveService);
-        nettyClient.init();
-        threadPool.submit(()->{
+        cabinetClients.add(nettyClient);
+        return nettyClient;
+    }
+
+    @Order(0)
+    @EventListener(ApplicationReadyEvent.class)
+    public void connectCabinetsAfterApplicationReady() {
+        log.info("程序已完全启动，开始初始化并连接{}台控制柜", cabinetClients.size());
+        for (NettyClient nettyClient : cabinetClients) {
             try {
+                nettyClient.init();
                 nettyClient.connect();
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("控制柜初始化连接失败：{}", nettyClient.getName(), e);
             }
-        });
-        return nettyClient;
+        }
     }
 
 }

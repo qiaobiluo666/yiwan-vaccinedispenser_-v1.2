@@ -19,6 +19,42 @@
         WHERE id = #{id}
     </update>
 
+    <!--
+        自动上药最终入库。一个 UPDATE 同时完成容量校验和数量递增，避免并发线程
+        都读到旧库存后分别整行回写。新空仓的药品字段也在同一语句中落库。
+    -->
+    <update id="incrementInventoryIfBelowMax">
+        UPDATE vac_machine
+        SET vaccine_id = #{request.vaccineId},
+            product_name = #{request.productName},
+            product_no = #{request.productNo},
+            expired_at = #{request.expiredAt},
+            batch_no = #{request.batchNo},
+            status = #{status},
+            vaccine_num = COALESCE(vaccine_num, 0) + 1,
+            vaccine_use_num = COALESCE(vaccine_use_num, 0) + 1,
+            update_time = NOW()
+        WHERE id = #{request.machineId}
+          AND deleted = 0
+          AND COALESCE(vaccine_num, 0) &lt; #{maxCapacity}
+          AND (
+              COALESCE(vaccine_num, 0) = 0
+              OR (
+                  product_no = #{request.productNo}
+                  AND (batch_no IS NULL OR batch_no &lt;=&gt; #{request.batchNo})
+                  AND expired_at &lt;=&gt; #{request.expiredAt}
+              )
+          )
+    </update>
+
+    <!-- 发药预占只修改可用库存，绝不通过旧实体覆盖真实库存。 -->
+    <update id="decrementVaccineUseNumById">
+        UPDATE vac_machine
+        SET vaccine_use_num = vaccine_use_num - 1
+        WHERE id = #{machineId}
+          AND deleted = 0
+          AND vaccine_use_num &gt; 0
+    </update>
 
     <select id="inventoryList" resultType="com.yiwan.vaccinedispenser.system.sys.data.response.vac.InventoryResponse">
         SELECT

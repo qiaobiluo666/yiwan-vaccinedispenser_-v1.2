@@ -68,6 +68,9 @@ public class VacTimer {
     private static final String SEND_LIST_STALE_SINCE = "Machine:sendList:staleSince";
     private static final String SEND_LIST_STALE_CONTENT = "Machine:sendList:staleContent";
     private static final long STALE_TIMEOUT_MS = 5 * 60 * 1000;
+    /** 外部监管码缓存服务断开时最多每分钟提示一次，避免2秒定时任务刷满日志。 */
+    private static final long UPLOAD_SERVER_WARNING_INTERVAL_MS = 60 * 1000;
+    private volatile long lastUploadServerWarningAt;
 
     /**
      * 每分钟检查 SEND_LIST，如果只有1条且5分钟内数量、内容不变则清除
@@ -218,10 +221,22 @@ public class VacTimer {
 
 
     @Scheduled(fixedDelay = 2000)
-    public void getVaccineMsg() throws Exception {
+    public void getVaccineMsg() {
         ConfigSetting configSetting = configFunction.getSettingConfigData();
-        if("true".equals(configSetting.getZcySend()) && "true".equals(configSetting.getIsWarn())){
-            uploadController.getZycVaccineMsg();
+        try {
+            if("true".equals(configSetting.getZcySend()) && "true".equals(configSetting.getIsWarn())){
+                uploadController.getZycVaccineMsg();
+            }
+        } catch (java.net.ConnectException connectError) {
+            long now = System.currentTimeMillis();
+            if (now - lastUploadServerWarningAt >= UPLOAD_SERVER_WARNING_INTERVAL_MS) {
+                lastUploadServerWarningAt = now;
+                log.warn("远程监管码缓存服务连接失败，本轮同步已跳过，定时任务会继续重试：{}",
+                        connectError.getMessage());
+            }
+        } catch (Exception unexpectedError) {
+            // 非连接拒绝仍保留完整堆栈，避免真正的业务错误被屏蔽。
+            log.error("同步远程监管码信息异常", unexpectedError);
         }
     }
 

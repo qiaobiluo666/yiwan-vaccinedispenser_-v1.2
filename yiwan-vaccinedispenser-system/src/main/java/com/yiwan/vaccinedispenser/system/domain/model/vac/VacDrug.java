@@ -160,6 +160,18 @@ public class VacDrug extends Model<VacDrug> {
 
     private Integer maxNum;
 
+    /**
+     * 货架上的总数量
+     */
+
+    private Integer shelfTotalNum;
+
+    /**
+     * 指定可上药仓位规格ids（逗号分隔）
+     */
+
+    private String boxSpecIds;
+
     private LocalDateTime createTime;
 
     private String createBy;

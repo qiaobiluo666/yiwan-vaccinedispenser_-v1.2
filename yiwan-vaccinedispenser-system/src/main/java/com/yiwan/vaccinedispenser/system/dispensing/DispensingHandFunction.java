@@ -12,7 +12,6 @@ import com.yiwan.vaccinedispenser.core.common.emun.RedisKeyConstant;
 import com.yiwan.vaccinedispenser.core.exception.ServiceException;
 import com.yiwan.vaccinedispenser.core.websocket.WebsocketService;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacGetVaccine;
-import com.yiwan.vaccinedispenser.system.domain.model.vac.VacDrugRecord;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacMachine;
 import com.yiwan.vaccinedispenser.system.domain.model.vac.VacMachineException;
 import com.yiwan.vaccinedispenser.system.sys.dao.VacMachineExceptionMapper;
@@ -204,6 +203,14 @@ public class DispensingHandFunction {
 
             //多人份疫苗先发--->近效期--->先上药的批次--->数量最少的仓--->层数最低的
 
+            try {
+                drugList = dispensingFunction.filterDrugListWithValidExpiry(drugList);
+            } catch (ServiceException exception) {
+                dispensingFunction.notifyDrugSelectionError(vacGetVaccine,
+                        "true".equals(configSetting.getZcySend()), exception.getMessage());
+                throw exception;
+            }
+
             // 多人份疫苗先发  选取有效期最早的
             Optional<VacMachine> priorityVacMachine = drugList.stream()
                     .filter(drug -> drug.getStatus() == 2)
@@ -220,31 +227,6 @@ public class DispensingHandFunction {
                         .filter(drug -> drug.getExpiredAt() != null)
                         .sorted(Comparator.comparing(VacMachine::getExpiredAt))
                         .toList();
-
-                // 如果size>=2，取上药记录最早的那一个
-                if (nearestExpiryDrugList.size() >= 2) {
-                    VacMachine earliestRecordDrug = null;
-                    LocalDateTime earliestTime = null;
-                    for (VacMachine drug : nearestExpiryDrugList) {
-                        VacDrugRecord record = vacDrugRecordService.getListByMachineIdAndProductNo(drug.getId(), drug.getProductNo());
-                        if (record != null && record.getCreateTime() != null) {
-                            if (earliestTime == null || record.getCreateTime().isBefore(earliestTime)) {
-                                earliestTime = record.getCreateTime();
-                                earliestRecordDrug = drug;
-                            }
-                        }
-                    }
-                    if (earliestRecordDrug != null) {
-                        List<VacMachine> reorderedList = new ArrayList<>();
-                        reorderedList.add(earliestRecordDrug);
-                        for (VacMachine drug : nearestExpiryDrugList) {
-                            if (!drug.getId().equals(earliestRecordDrug.getId())) {
-                                reorderedList.add(drug);
-                            }
-                        }
-                        nearestExpiryDrugList = reorderedList;
-                    }
-                }
 
                 // 获取最近的有效期
                 Date nearestExpiryDate = nearestExpiryDrugList.get(0).getExpiredAt();
@@ -267,8 +249,16 @@ public class DispensingHandFunction {
                             .toList();
 
                 }else {
-                    //通过疫苗列表 查早 最早的记录
-                    String batchNo = vacDrugRecordService.getBatchNoEarly(distinctBatchNos);
+                    //同一有效期按批次最早上药时间执行FIFO，不能按仓位数量切换批次。
+                    List<String> productNos = nearestExpiryDrugList.stream()
+                            .filter(drug -> drug.getExpiredAt().equals(nearestExpiryDate))
+                            .map(VacMachine::getProductNo)
+                            .filter(Objects::nonNull)
+                            .distinct()
+                            .toList();
+                    String batchNo = vacDrugRecordService.getBatchNoEarly(
+                            distinctBatchNos, productNos, nearestExpiryDate);
+                    log.info("[手动发药] 同有效期按最早上药记录选择批号：{}", batchNo);
                     if(batchNo!=null){
                         drugsWithNearestExpiry = nearestExpiryDrugList.stream()
                                 .filter(drug -> drug.getExpiredAt().equals(nearestExpiryDate))
@@ -296,15 +286,11 @@ public class DispensingHandFunction {
 
             }
 
-            //药品可使用量-1
-            vacMachine.setVaccineUseNum(vacMachine.getVaccineUseNum()-1);
-            //可用数量-1
-            vacMachineMapper.updateById(vacMachine);
-
             RedisDrugListData redisDrugListData = new RedisDrugListData();
             BeanUtils.copyProperties(vacMachine,redisDrugListData);
             redisDrugListData.setMachineStatus(vacMachine.getStatus());
             redisDrugListData.setBoxNo(vacMachine.getBoxNo());
+            redisDrugListData.setMachineNo(vacMachine.getBoxNo());
             redisDrugListData.setProductName(vacMachine.getProductName());
             redisDrugListData.setMachineId(vacMachine.getId());
             //将发药工作台存入
@@ -316,11 +302,12 @@ public class DispensingHandFunction {
 
 
             redisDrugListData.setUuid(UUID.randomUUID());
-            //将发药数据存入数据库
-            listOps.rightPush(RedisKeyConstant.DROP_HAND_LIST, JSON.toJSONString(redisDrugListData));
-
-            //发药处方加入redis
-            listOps.rightPush(RedisKeyConstant.SEND_LIST,JSON.toJSONString(redisDrugListData));
+            dispensingFunction.reserveAvailableInventoryAndEnqueue(
+                    "手动发药",
+                    vacMachine,
+                    redisDrugListData,
+                    RedisKeyConstant.DROP_HAND_LIST,
+                    RedisKeyConstant.SEND_LIST);
 
 
             Map<String, Object> commandData = new HashMap<>();

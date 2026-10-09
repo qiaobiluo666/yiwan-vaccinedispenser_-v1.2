@@ -44,9 +44,9 @@ public class CameraSendMsg {
 //        this.sideCamera = sideCamera;
 //    }
 
-    public void sendCommandToAboveCamera() {
-        if(aboveCamera!=null){
-            aboveCamera.sendCommand();
+    public boolean sendCommandToAboveCamera() {
+        if(aboveCamera != null){
+            return aboveCamera.sendCommand();
 
         }else {
             log.warn("上方相机没连接");
@@ -55,9 +55,9 @@ public class CameraSendMsg {
 
     }
 
-    public void sendCommandToBelowCamera() {
-        if(belowCamera!=null){
-            belowCamera.sendCommand();
+    public boolean sendCommandToBelowCamera() {
+        if(belowCamera != null){
+            return belowCamera.sendCommand();
         }else {
             log.warn("下方相机没连接");
             throw new ServiceException("下方相机没连接");
@@ -65,9 +65,9 @@ public class CameraSendMsg {
 
     }
 
-    public void sendCommandToSideCamera() {
-        if(sideCamera!=null){
-            sideCamera.sendCommand();
+    public boolean sendCommandToSideCamera() {
+        if(sideCamera != null){
+            return sideCamera.sendCommand();
         }else {
             log.warn("侧方相机没连接");
             throw new ServiceException("侧方相机没连接");
